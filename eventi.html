@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eventi e corsi — ProgettoTrame</title>
+  <meta name="description" content="Yoga, fotografia, pasticceria, canto, trekking urbano e viaggi: scopri tutti gli eventi e i corsi organizzati da ProgettoTrame.">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo.svg" alt="" class="logo__icon">
+        <span class="logo__text">
+          <span class="logo__word">Trame</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="chi-siamo.html" class="nav__link">Chi siamo</a></li>
+          <li><a href="eventi.html" class="nav__link" aria-current="page">Eventi</a></li>
+          <li><a href="contatti.html" class="nav__link">Contatti</a></li>
+        </ul>
+        <a href="contatti.html" class="btn btn--primary">Contattaci</a>
+      </nav>
+      <button class="nav__toggle" aria-label="Apri il menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Eventi e corsi</span>
+        <h1>Sei categorie, un filo comune</h1>
+        <p class="page-hero__subtitle">La voglia di fare qualcosa insieme, con cura. Filtra per categoria oppure
+          scorri tutti gli appuntamenti in programma.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+
+        <div class="filters" role="group" aria-label="Filtra per categoria">
+          <button class="filter-btn is-active" data-filter="tutti">Tutti</button>
+          <button class="filter-btn" data-filter="yoga">Yoga</button>
+          <button class="filter-btn" data-filter="fotografia">Fotografia</button>
+          <button class="filter-btn" data-filter="pasticceria">Pasticceria</button>
+          <button class="filter-btn" data-filter="canto">Canto</button>
+          <button class="filter-btn" data-filter="trekking-urbano">Trekking urbano</button>
+          <button class="filter-btn" data-filter="viaggi">Viaggi</button>
+        </div>
+
+        <!-- Eventi di esempio: titoli, date e luoghi sono segnaposto da sostituire con i contenuti reali -->
+        <div class="events-grid">
+
+          <article class="event-card" id="yoga" data-category="yoga">
+            <div class="event-card__top">
+              <span class="event-card__tag">Yoga</span>
+              <h3 class="event-card__title">Yoga al tramonto</h3>
+              <p class="event-card__meta">
+                <span>Livello: tutti i livelli</span>
+                <span>📍 Parco Sempione, Milano</span>
+                <span>🗓️ Sab 22 agosto 2026, ore 18:30</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Una pratica dolce all'aperto, per chiudere la giornata respirando.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" data-category="yoga">
+            <div class="event-card__top">
+              <span class="event-card__tag">Yoga</span>
+              <h3 class="event-card__title">Hatha Yoga — corso base</h3>
+              <p class="event-card__meta">
+                <span>8 incontri, tutti i livelli</span>
+                <span>📍 Sede ProgettoTrame, Milano</span>
+                <span>🗓️ Da settembre 2026, ogni martedì</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Le basi della pratica, con calma, senza fretta di "essere bravi".</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" id="fotografia" data-category="fotografia">
+            <div class="event-card__top">
+              <span class="event-card__tag">Fotografia</span>
+              <h3 class="event-card__title">Fotografia di strada</h3>
+              <p class="event-card__meta">
+                <span>Corso, 4 incontri</span>
+                <span>📍 Centro Milano</span>
+                <span>🗓️ Da settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Impariamo a guardare la città con occhi diversi, macchina alla mano.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" data-category="fotografia">
+            <div class="event-card__top">
+              <span class="event-card__tag">Fotografia</span>
+              <h3 class="event-card__title">Ritratti in bianco e nero</h3>
+              <p class="event-card__meta">
+                <span>Workshop, 1 giornata</span>
+                <span>📍 Milano, sede da definire</span>
+                <span>🗓️ Sab 5 settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Luce, sguardo, pazienza: un giorno intero dedicato al ritratto.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" id="pasticceria" data-category="pasticceria">
+            <div class="event-card__top">
+              <span class="event-card__tag">Pasticceria</span>
+              <h3 class="event-card__title">Impasto madre</h3>
+              <p class="event-card__meta">
+                <span>Laboratorio, 1 giornata</span>
+                <span>📍 Cucina condivisa, Milano</span>
+                <span>🗓️ Sab 12 settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Dal rinfresco alla cottura: tutti i segreti del lievito madre.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" data-category="pasticceria">
+            <div class="event-card__top">
+              <span class="event-card__tag">Pasticceria</span>
+              <h3 class="event-card__title">Dolci della domenica</h3>
+              <p class="event-card__meta">
+                <span>Incontro mensile</span>
+                <span>📍 Cucina condivisa, Milano</span>
+                <span>🗓️ Ogni prima domenica del mese</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Ricette semplici da portare a casa, e condividere a tavola.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" id="canto" data-category="canto">
+            <div class="event-card__top">
+              <span class="event-card__tag">Canto</span>
+              <h3 class="event-card__title">Coro Trame</h3>
+              <p class="event-card__meta">
+                <span>Corso corale, incontri settimanali</span>
+                <span>📍 Sede ProgettoTrame, Milano</span>
+                <span>🗓️ Da ottobre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Non serve saper leggere la musica: serve voglia di cantare insieme.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" data-category="canto">
+            <div class="event-card__top">
+              <span class="event-card__tag">Canto</span>
+              <h3 class="event-card__title">La tua voce</h3>
+              <p class="event-card__meta">
+                <span>Percorso individuale, 5 incontri</span>
+                <span>📍 Sede ProgettoTrame, Milano</span>
+                <span>🗓️ Su richiesta</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Un percorso guidato per ritrovare fiducia nella propria voce.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" id="trekking-urbano" data-category="trekking-urbano">
+            <div class="event-card__top">
+              <span class="event-card__tag">Trekking urbano</span>
+              <h3 class="event-card__title">Milano, dai Navigli ai Bastioni</h3>
+              <p class="event-card__meta">
+                <span>Cammino urbano, mezza giornata</span>
+                <span>📍 Ritrovo: Darsena, Milano</span>
+                <span>🗓️ Dom 6 settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Un itinerario a piedi tra storia, canali e quartieri che cambiano.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" data-category="trekking-urbano">
+            <div class="event-card__top">
+              <span class="event-card__tag">Trekking urbano</span>
+              <h3 class="event-card__title">Milano vista dall'alto</h3>
+              <p class="event-card__meta">
+                <span>Cammino urbano, mezza giornata</span>
+                <span>📍 Ritrovo: Duomo, Milano</span>
+                <span>🗓️ Dom 27 settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Terrazze, cortili nascosti e belvedere poco conosciuti.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" id="viaggi" data-category="viaggi">
+            <div class="event-card__top">
+              <span class="event-card__tag">Viaggi</span>
+              <h3 class="event-card__title">Weekend tra le Cinque Terre</h3>
+              <p class="event-card__meta">
+                <span>Viaggio di gruppo, 3 giorni</span>
+                <span>📍 Partenza da Milano</span>
+                <span>🗓️ Ottobre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Un piccolo gruppo, sentieri sul mare, tempo per stare insieme.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+          <article class="event-card" data-category="viaggi">
+            <div class="event-card__top">
+              <span class="event-card__tag">Viaggi</span>
+              <h3 class="event-card__title">Ritiro in Val d'Orcia</h3>
+              <p class="event-card__meta">
+                <span>Viaggio + yoga, 4 giorni</span>
+                <span>📍 Partenza da Milano</span>
+                <span>🗓️ Novembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Camminate lente, pratica yoga e cucina toscana, per rallentare davvero.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per iscriverti</a>
+            </div>
+          </article>
+
+        </div>
+
+        <p class="example-note">Le date, i luoghi e i corsi mostrati sono contenuti di esempio: verranno aggiornati con il calendario reale degli eventi.</p>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="container">
+        <h2>Non trovi quello che cerchi?</h2>
+        <p>Raccontaci cosa vorresti fare o proponi un nuovo corso: ogni trama comincia da un'idea condivisa.</p>
+        <a href="contatti.html" class="btn btn--primary">Scrivici</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__about">
+          <a href="index.html" class="logo">
+            <img src="assets/img/logo.svg" alt="" class="logo__icon">
+            <span class="logo__text">
+              <span class="logo__word">Trame</span>
+              <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+            </span>
+          </a>
+          <p>Un'associazione che crea eventi e corsi per ritrovare se stessi, insieme agli altri.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Esplora</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chi-siamo.html">Chi siamo</a></li>
+            <li><a href="eventi.html">Eventi</a></li>
+            <li><a href="contatti.html">Contatti</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Le trame</h4>
+          <ul>
+            <li><a href="eventi.html#yoga">Yoga</a></li>
+            <li><a href="eventi.html#fotografia">Fotografia</a></li>
+            <li><a href="eventi.html#pasticceria">Pasticceria</a></li>
+            <li><a href="eventi.html#canto">Canto</a></li>
+            <li><a href="eventi.html#trekking-urbano">Trekking urbano</a></li>
+            <li><a href="eventi.html#viaggi">Viaggi</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Contatti</h4>
+          <ul>
+            <li><a href="mailto:info@progettotrame.it">info@progettotrame.it</a></li>
+            <li>Milano</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> ProgettoTrame — Associazione culturale</span>
+        <span>Tra me, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

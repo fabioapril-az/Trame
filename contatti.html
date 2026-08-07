@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contatti — ProgettoTrame</title>
+  <meta name="description" content="Hai un'idea per un corso, vuoi partecipare a un evento o saperne di più su ProgettoTrame? Scrivici.">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo.svg" alt="" class="logo__icon">
+        <span class="logo__text">
+          <span class="logo__word">Trame</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="chi-siamo.html" class="nav__link">Chi siamo</a></li>
+          <li><a href="eventi.html" class="nav__link">Eventi</a></li>
+          <li><a href="contatti.html" class="nav__link" aria-current="page">Contatti</a></li>
+        </ul>
+        <a href="eventi.html" class="btn btn--primary">Scopri gli eventi</a>
+      </nav>
+      <button class="nav__toggle" aria-label="Apri il menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Contatti</span>
+        <h1>Scrivici, con calma</h1>
+        <p class="page-hero__subtitle">Hai un'idea per un corso, vuoi partecipare a un evento o semplicemente
+          saperne di più? Raccontacelo.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container contact-grid">
+
+        <div class="contact-info">
+          <div class="contact-block">
+            <h3>Email</h3>
+            <p><a href="mailto:info@progettotrame.it">info@progettotrame.it</a></p>
+          </div>
+          <div class="contact-block">
+            <h3>Dove siamo</h3>
+            <p>Milano</p>
+          </div>
+          <div class="contact-block">
+            <h3>Seguici</h3>
+            <div class="social-links">
+              <a href="#" aria-label="Instagram">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg>
+              </a>
+              <a href="#" aria-label="Facebook">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 8h-2a2 2 0 0 0-2 2v3H9v3h2v6h3v-6h2.2l.8-3H14v-2c0-.5.5-1 1-1h2V8z"/></svg>
+              </a>
+            </div>
+          </div>
+          <p class="form-note">Contatti e social sono in fase di attivazione — a breve i riferimenti definitivi.</p>
+        </div>
+
+        <form class="contact-form" id="contact-form">
+          <div class="form-row">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" required>
+          </div>
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          <div class="form-row">
+            <label for="argomento">Sono interessato/a a</label>
+            <select id="argomento" name="argomento">
+              <option value="Informazioni generali">Informazioni generali</option>
+              <option value="Yoga">Yoga</option>
+              <option value="Fotografia">Fotografia</option>
+              <option value="Pasticceria">Pasticceria</option>
+              <option value="Canto">Canto</option>
+              <option value="Trekking urbano">Trekking urbano</option>
+              <option value="Viaggi">Viaggi</option>
+              <option value="Voglio proporre un corso o un evento">Voglio proporre un corso o un evento</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="messaggio">Messaggio</label>
+            <textarea id="messaggio" name="messaggio" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="btn btn--primary">Invia messaggio</button>
+          <p class="form-note">Il modulo apre il tuo client di posta con il messaggio pronto da inviare.</p>
+        </form>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__about">
+          <a href="index.html" class="logo">
+            <img src="assets/img/logo.svg" alt="" class="logo__icon">
+            <span class="logo__text">
+              <span class="logo__word">Trame</span>
+              <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+            </span>
+          </a>
+          <p>Un'associazione che crea eventi e corsi per ritrovare se stessi, insieme agli altri.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Esplora</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chi-siamo.html">Chi siamo</a></li>
+            <li><a href="eventi.html">Eventi</a></li>
+            <li><a href="contatti.html">Contatti</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Le trame</h4>
+          <ul>
+            <li><a href="eventi.html#yoga">Yoga</a></li>
+            <li><a href="eventi.html#fotografia">Fotografia</a></li>
+            <li><a href="eventi.html#pasticceria">Pasticceria</a></li>
+            <li><a href="eventi.html#canto">Canto</a></li>
+            <li><a href="eventi.html#trekking-urbano">Trekking urbano</a></li>
+            <li><a href="eventi.html#viaggi">Viaggi</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Contatti</h4>
+          <ul>
+            <li><a href="mailto:info@progettotrame.it">info@progettotrame.it</a></li>
+            <li>Milano</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> ProgettoTrame — Associazione culturale</span>
+        <span>Tra me, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

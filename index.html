@@ -2,9 +2,290 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Trame</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProgettoTrame — Tra me, insieme</title>
+  <meta name="description" content="ProgettoTrame è un'associazione che crea eventi e corsi — yoga, fotografia, pasticceria, canto, trekking urbano e viaggi — per ritrovare se stessi insieme agli altri.">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <h1>Sito in costruzione</h1>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo.svg" alt="" class="logo__icon">
+        <span class="logo__text">
+          <span class="logo__word">Trame</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link" aria-current="page">Home</a></li>
+          <li><a href="chi-siamo.html" class="nav__link">Chi siamo</a></li>
+          <li><a href="eventi.html" class="nav__link">Eventi</a></li>
+          <li><a href="contatti.html" class="nav__link">Contatti</a></li>
+        </ul>
+        <a href="eventi.html" class="btn btn--primary">Scopri gli eventi</a>
+      </nav>
+      <button class="nav__toggle" aria-label="Apri il menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero__inner">
+        <span class="hero__eyebrow">Un'associazione, tante trame da intrecciare</span>
+        <h1 class="hero__title">
+          <span class="hero__script">Trame</span>
+          Tra me, insieme.
+        </h1>
+        <p class="hero__subtitle">
+          ProgettoTrame crea spazi ed esperienze per ritrovare se stessi — insieme agli altri.
+          Yoga, fotografia, pasticceria, canto, cammini urbani e viaggi: ogni evento è un filo,
+          ogni persona intreccia la propria trama.
+        </p>
+        <div class="hero__actions">
+          <a href="eventi.html" class="btn btn--primary">Scopri gli eventi</a>
+          <a href="chi-siamo.html" class="btn btn--outline">Chi siamo</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- MANIFESTO -->
+    <section class="quote-band">
+      <div class="container">
+        <blockquote>
+          Si può fare yoga senza cuore. Si può cucinare, fotografare, cantare,
+          camminare — anche viaggiare — senza cuore.<br>
+          Ma se il cuore c'è, <span class="heart">tutto cambia</span>.
+        </blockquote>
+        <cite>Il manifesto di ProgettoTrame</cite>
+      </div>
+    </section>
+
+    <!-- LE NOSTRE TRAME (categorie) -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head">
+          <span class="section__eyebrow">Le nostre trame</span>
+          <h2 class="section__title">Sei fili, un'unica trama</h2>
+          <p class="section__subtitle">Scegli il tuo filo, o intrecciali tutti: ogni categoria è un modo diverso di stare insieme.</p>
+        </div>
+
+        <div class="cards-grid">
+
+          <div class="card">
+            <div class="card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="M6 20c0-3 2-5 3-6M18 20c0-3-2-5-3-6M9 14c0-2 1-3 3-3s3 1 3 3M6 11c2-1 4-1 6-1s4 0 6 1"/></svg>
+            </div>
+            <h3 class="card__title">Yoga</h3>
+            <p class="card__desc">Respiro, equilibrio, presenza. Incontri per ritrovare il proprio centro, per ogni livello.</p>
+            <a href="eventi.html#yoga" class="card__link">Scopri i corsi</a>
+          </div>
+
+          <div class="card">
+            <div class="card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+            </div>
+            <h3 class="card__title">Fotografia</h3>
+            <p class="card__desc">Corsi tenuti da appassionati, non da cattedratici: si impara guardando insieme.</p>
+            <a href="eventi.html#fotografia" class="card__link">Scopri i corsi</a>
+          </div>
+
+          <div class="card">
+            <div class="card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 11h10l-1 9H8z"/><path d="M6 11c0-2.5 2.5-4 6-4s6 1.5 6 4"/><path d="M12 7V4M9.5 6 9 4M14.5 6l.5-2"/></svg>
+            </div>
+            <h3 class="card__title">Pasticceria</h3>
+            <p class="card__desc">Le mani in pasta, letteralmente. Si impasta, si aspetta, si condivide.</p>
+            <a href="eventi.html#pasticceria" class="card__link">Scopri i corsi</a>
+          </div>
+
+          <div class="card">
+            <div class="card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="10" rx="3"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6"/></svg>
+            </div>
+            <h3 class="card__title">Canto</h3>
+            <p class="card__desc">Voci che si intrecciano. Corsi corali e individuali per chi vuole (ri)scoprire la propria voce.</p>
+            <a href="eventi.html#canto" class="card__link">Scopri i corsi</a>
+          </div>
+
+          <div class="card">
+            <div class="card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19c3-4 5 2 8-2s3-6 6-6"/><circle cx="18" cy="7" r="3"/></svg>
+            </div>
+            <h3 class="card__title">Trekking urbano</h3>
+            <p class="card__desc">Milano vista a piedi, un quartiere alla volta, con occhi nuovi.</p>
+            <a href="eventi.html#trekking-urbano" class="card__link">Scopri i cammini</a>
+          </div>
+
+          <div class="card">
+            <div class="card__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M4 13h16"/></svg>
+            </div>
+            <h3 class="card__title">Viaggi</h3>
+            <p class="card__desc">Piccoli gruppi, mete scelte col cuore. Si parte per scoprire, si torna cambiati.</p>
+            <a href="eventi.html#viaggi" class="card__link">Scopri i viaggi</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- VALORI -->
+    <section class="section section--alt">
+      <div class="container">
+        <div class="section__head">
+          <span class="section__eyebrow">Perché lo facciamo</span>
+          <h2 class="section__title">I nostri colori, i nostri valori</h2>
+        </div>
+        <div class="values-grid">
+          <div class="value">
+            <div class="value__swatch value__swatch--terracotta"></div>
+            <h3>Autenticità</h3>
+            <p>Crediamo in ciò che è vero, caldo, umano. Come il calore di una casa.</p>
+          </div>
+          <div class="value">
+            <div class="value__swatch value__swatch--sage"></div>
+            <h3>Equilibrio</h3>
+            <p>Il colore del respiro: natura, calma, crescita. Lasciamo spazio per respirare.</p>
+          </div>
+          <div class="value">
+            <div class="value__swatch value__swatch--heart"></div>
+            <h3>Cuore</h3>
+            <p>Quello che fa la differenza. In ogni corso, in ogni incontro, in ogni trama.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROSSIMI EVENTI (esempio) -->
+    <section class="section">
+      <div class="container">
+        <div class="section__head">
+          <span class="section__eyebrow">In programma</span>
+          <h2 class="section__title">I prossimi appuntamenti</h2>
+        </div>
+
+        <!-- Contenuti di esempio: da aggiornare con le date reali -->
+        <div class="cards-grid">
+          <article class="event-card">
+            <div class="event-card__top">
+              <span class="event-card__tag">Yoga</span>
+              <h3 class="event-card__title">Yoga al tramonto</h3>
+              <p class="event-card__meta">
+                <span>📍 Parco Sempione, Milano</span>
+                <span>🗓️ Sabato 22 agosto 2026, ore 18:30</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Una pratica dolce all'aperto, per chiudere la giornata respirando.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per partecipare</a>
+            </div>
+          </article>
+
+          <article class="event-card">
+            <div class="event-card__top">
+              <span class="event-card__tag">Fotografia</span>
+              <h3 class="event-card__title">Ritratti in bianco e nero</h3>
+              <p class="event-card__meta">
+                <span>📍 Milano, sede da definire</span>
+                <span>🗓️ Sabato 5 settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Luce, sguardo, pazienza: un giorno intero dedicato al ritratto.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per partecipare</a>
+            </div>
+          </article>
+
+          <article class="event-card">
+            <div class="event-card__top">
+              <span class="event-card__tag">Pasticceria</span>
+              <h3 class="event-card__title">Impasto madre</h3>
+              <p class="event-card__meta">
+                <span>📍 Cucina condivisa, Milano</span>
+                <span>🗓️ Sabato 12 settembre 2026</span>
+              </p>
+            </div>
+            <div class="event-card__body">
+              <p class="event-card__desc">Dal rinfresco alla cottura: tutti i segreti del lievito madre.</p>
+              <a href="contatti.html" class="event-card__cta">Scrivici per partecipare</a>
+            </div>
+          </article>
+        </div>
+
+        <p class="example-note">Date ed eventi di esempio — vedi tutti gli appuntamenti nella pagina <a href="eventi.html" style="text-decoration:underline;">Eventi</a>.</p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-band">
+      <div class="container">
+        <h2>Vuoi intrecciare la tua trama con noi?</h2>
+        <p>Che tu voglia partecipare a un evento, proporre un corso o semplicemente saperne di più: scrivici, con calma.</p>
+        <a href="contatti.html" class="btn btn--primary">Contattaci</a>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__about">
+          <a href="index.html" class="logo">
+            <img src="assets/img/logo.svg" alt="" class="logo__icon">
+            <span class="logo__text">
+              <span class="logo__word">Trame</span>
+              <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+            </span>
+          </a>
+          <p>Un'associazione che crea eventi e corsi per ritrovare se stessi, insieme agli altri.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Esplora</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chi-siamo.html">Chi siamo</a></li>
+            <li><a href="eventi.html">Eventi</a></li>
+            <li><a href="contatti.html">Contatti</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Le trame</h4>
+          <ul>
+            <li><a href="eventi.html#yoga">Yoga</a></li>
+            <li><a href="eventi.html#fotografia">Fotografia</a></li>
+            <li><a href="eventi.html#pasticceria">Pasticceria</a></li>
+            <li><a href="eventi.html#canto">Canto</a></li>
+            <li><a href="eventi.html#trekking-urbano">Trekking urbano</a></li>
+            <li><a href="eventi.html#viaggi">Viaggi</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Contatti</h4>
+          <ul>
+            <li><a href="mailto:info@progettotrame.it">info@progettotrame.it</a></li>
+            <li>Milano</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> ProgettoTrame — Associazione culturale</span>
+        <span>Tra me, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
 </body>
 </html>

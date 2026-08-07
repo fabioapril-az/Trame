@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="trameLogoTitle">
+  <title id="trameLogoTitle">Simbolo di ProgettoTrame: due linee intrecciate che formano un cuore</title>
+  <!-- Filo verde salvia -->
+  <path d="M50,88 C20,65 5,45 5,28 C5,10 25,2 40,12 C46,16 50,22 50,30 C50,22 54,16 60,12 C75,2 95,10 95,28 C95,45 80,65 50,88 Z"
+        transform="rotate(-7 50 50) translate(3,4) scale(0.86)"
+        fill="none" stroke="#8A9A6E" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+  <!-- Filo terracotta -->
+  <path d="M50,88 C20,65 5,45 5,28 C5,10 25,2 40,12 C46,16 50,22 50,30 C50,22 54,16 60,12 C75,2 95,10 95,28 C95,45 80,65 50,88 Z"
+        fill="none" stroke="#C1663B" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

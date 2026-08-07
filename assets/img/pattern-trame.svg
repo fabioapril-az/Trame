@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="140" viewBox="0 0 220 140">
+  <path d="M-10,20 C 30,60 60,-20 100,20 C140,60 170,-20 210,20 C 240,55 260,10 300,20"
+        fill="none" stroke="#C1663B" stroke-width="2.5" stroke-linecap="round" opacity="0.16"/>
+  <path d="M-10,80 C 30,120 60,40 100,80 C140,120 170,40 210,80 C 240,115 260,70 300,80"
+        fill="none" stroke="#8A9A6E" stroke-width="2.5" stroke-linecap="round" opacity="0.18"/>
+  <path d="M-10,50 C 30,90 60,10 100,50 C140,90 170,10 210,50 C 240,85 260,40 300,50"
+        fill="none" stroke="#C1663B" stroke-width="1.6" stroke-linecap="round" opacity="0.1"/>
+</svg>
