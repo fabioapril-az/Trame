@@ -1,4 +1,4 @@
-// ProgettoTrame — script condiviso
+// Progetto TraMe — script condiviso
 
 document.addEventListener("DOMContentLoaded", function () {
   /* Menu mobile */
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var messaggio = contactForm.querySelector("#messaggio").value.trim();
 
       var destinatario = "info@progettotrame.it";
-      var oggetto = encodeURIComponent("[ProgettoTrame] " + (argomento || "Richiesta dal sito"));
+      var oggetto = encodeURIComponent("[Progetto TraMe] " + (argomento || "Richiesta dal sito"));
       var corpo = encodeURIComponent(
         "Nome: " + nome + "\nEmail: " + email + "\n\n" + messaggio
       );
