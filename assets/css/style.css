@@ -1,27 +1,28 @@
 /* ==========================================================================
-   ProgettoTrame — stile condiviso
-   Palette: terracotta (calore/autenticità), verde salvia (equilibrio/natura),
-   rosso (il cuore), crema (fondo caldo).
+   TraMe — stile condiviso
+   Palette e font ufficiali da "TraMe identità visiva" (documento di riferimento):
+   terracotta (calore/autenticità), verde salvia (equilibrio/natura),
+   rosso cuore, crema (fondo caldo), inchiostro (testo).
    ========================================================================== */
 
 :root {
-  --color-terracotta: #c1663b;
-  --color-terracotta-dark: #a8532e;
-  --color-terracotta-light: #e8c3ac;
-  --color-sage: #8a9a6e;
-  --color-sage-dark: #6f7f55;
-  --color-sage-light: #d9e0c9;
-  --color-heart: #b8433a;
-  --color-cream: #fbf6ee;
-  --color-cream-alt: #f4ead9;
-  --color-ink: #2e2a26;
+  --color-terracotta: #c9814b;
+  --color-terracotta-dark: #a9603a;
+  --color-terracotta-light: #ecd3be;
+  --color-sage: #8a9a5b;
+  --color-sage-dark: #6b7a46;
+  --color-sage-light: #d6dcc6;
+  --color-heart: #b23b3b;
+  --color-cream: #f6f0e4;
+  --color-cream-alt: #eee9dd;
+  --color-ink: #221f1a;
   --color-ink-soft: #5c5349;
   --color-line: #e6d9c5;
   --color-white: #ffffff;
 
-  --font-heading: "Playfair Display", Georgia, serif;
+  --font-heading: "Fraunces", Georgia, serif;
   --font-script: "Caveat", cursive;
-  --font-body: "Mulish", "Segoe UI", sans-serif;
+  --font-body: "Work Sans", "Segoe UI", sans-serif;
 
   --radius-s: 8px;
   --radius-m: 16px;
@@ -498,6 +499,79 @@ p {
   color: var(--color-ink-soft);
 }
 
+/* ---------- chi siamo: soci fondatori ---------- */
+.brand {
+  color: var(--color-terracotta-dark);
+}
+
+.founders__intro {
+  max-width: 620px;
+  margin: 0 auto 56px;
+  text-align: center;
+}
+
+.founders__logo {
+  width: 170px;
+  margin: 0 auto 28px;
+  border-radius: var(--radius-s);
+  box-shadow: var(--shadow-soft);
+}
+
+.founders__intro p {
+  color: var(--color-ink-soft);
+  font-size: 1.05rem;
+}
+
+.founders__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.founder-card {
+  background: var(--color-white);
+  border-radius: var(--radius-m);
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.founder-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px -14px rgba(46, 42, 38, 0.24);
+}
+
+.founder-card__photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.founder-card__body {
+  padding: 28px 26px 30px;
+}
+
+.founder-card__role {
+  display: block;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-terracotta-dark);
+  margin-bottom: 8px;
+}
+
+.founder-card__name {
+  font-size: 1.7rem;
+  margin-bottom: 0.4em;
+}
+
+.founder-card__body p {
+  color: var(--color-ink-soft);
+  margin: 0;
+}
+
 /* ---------- eventi in evidenza / pagina eventi ---------- */
 .event-card {
   background: var(--color-white);
@@ -825,7 +899,8 @@ p {
 @media (max-width: 900px) {
   .cards-grid,
   .events-grid,
-  .values-grid {
+  .values-grid,
+  .founders__grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -880,7 +955,8 @@ p {
 
   .cards-grid,
   .events-grid,
-  .values-grid {
+  .values-grid,
+  .founders__grid {
     grid-template-columns: 1fr;
   }
 
