@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
       var argomento = contactForm.querySelector("#argomento").value;
       var messaggio = contactForm.querySelector("#messaggio").value.trim();
 
-      var destinatario = "info@progettotrame.it";
+      var destinatario = "info@progettotrame.org";
       var oggetto = encodeURIComponent("[Progetto TraMe] " + (argomento || "Richiesta dal sito"));
       var corpo = encodeURIComponent(
         "Nome: " + nome + "\nEmail: " + email + "\n\n" + messaggio
