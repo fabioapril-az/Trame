@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diventa socio — Progetto TraMe</title>
+  <meta name="description" content="Iscriviti a Progetto TraMe: compila il modulo per diventare socio e ricevere la tua tessera associativa.">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo.svg" alt="" class="logo__icon">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="chi-siamo.html" class="nav__link">Chi siamo</a></li>
+          <li><a href="eventi.html" class="nav__link">Eventi</a></li>
+          <li><a href="contatti.html" class="nav__link">Contatti</a></li>
+          <li><a href="diventa-socio.html" class="nav__link" aria-current="page">Diventa socio</a></li>
+        </ul>
+        <a href="eventi.html" class="btn btn--primary">Scopri gli eventi</a>
+      </nav>
+      <button class="nav__toggle" aria-label="Apri il menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Diventa socio</span>
+        <h1>Entra a far parte di TraMe</h1>
+        <p class="page-hero__subtitle">Compila il modulo per iscriverti all'associazione: riceverai via email la tua
+          tessera socio, valida 12 mesi.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:640px;">
+
+        <form class="contact-form" id="socio-form">
+          <div class="form-row">
+            <label for="nome">Nome</label>
+            <input type="text" id="nome" name="nome" required maxlength="100">
+          </div>
+          <div class="form-row">
+            <label for="cognome">Cognome</label>
+            <input type="text" id="cognome" name="cognome" required maxlength="100">
+          </div>
+          <div class="form-row">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required maxlength="255">
+          </div>
+          <div class="form-row">
+            <label for="telefono">Telefono (facoltativo)</label>
+            <input type="tel" id="telefono" name="telefono" maxlength="20">
+          </div>
+          <div class="form-row">
+            <label for="data-nascita">Data di nascita</label>
+            <input type="date" id="data-nascita" name="dataNascita" required>
+            <p class="form-note" id="minorenne-note" hidden>Se sei minorenne, l'iscrizione richiede anche il consenso
+              di un genitore/tutore: dopo l'invio del modulo ti indicheremo come procedere.</p>
+          </div>
+          <div class="form-row">
+            <label for="codice-fiscale">Codice fiscale</label>
+            <input type="text" id="codice-fiscale" name="codiceFiscale" required maxlength="16"
+              pattern="^[A-Za-z]{6}\d{2}[A-EHLMPRSTabcdehlmprst]\d{2}([A-Za-z]\d{3}|\d{4})[A-Za-z]$"
+              title="Formato codice fiscale non valido">
+          </div>
+          <div class="form-row">
+            <label for="indirizzo">Indirizzo (facoltativo)</label>
+            <input type="text" id="indirizzo" name="indirizzo" maxlength="255">
+          </div>
+          <div class="form-row">
+            <label for="citta">Città (facoltativo)</label>
+            <input type="text" id="citta" name="citta" maxlength="100">
+          </div>
+          <div class="form-row">
+            <label for="cap">CAP (facoltativo)</label>
+            <input type="text" id="cap" name="cap" maxlength="10">
+          </div>
+
+          <div class="form-row form-row--checkbox">
+            <label>
+              <input type="checkbox" id="consenso" name="consenso" required>
+              Ho letto e accetto <a href="privacy.html" target="_blank" rel="noopener">l'informativa sul
+              trattamento dei dati personali</a>.
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn--primary" id="submit-btn">Invia iscrizione</button>
+          <p class="form-note" id="form-status" role="status" hidden></p>
+        </form>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__about">
+          <a href="index.html" class="logo">
+            <img src="assets/img/logo.svg" alt="" class="logo__icon">
+            <span class="logo__text">
+              <span class="logo__word">TraMe</span>
+              <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+            </span>
+          </a>
+          <p>Un'associazione che crea eventi e corsi per ritrovare se stessi, insieme agli altri.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Esplora</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chi-siamo.html">Chi siamo</a></li>
+            <li><a href="eventi.html">Eventi</a></li>
+            <li><a href="contatti.html">Contatti</a></li>
+            <li><a href="diventa-socio.html">Diventa socio</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Contatti</h4>
+          <ul>
+            <li><a href="mailto:info@progettotrame.org">info@progettotrame.org</a></li>
+            <li>Milano</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/diventa-socio.js"></script>
+</body>
+</html>
