@@ -51,7 +51,9 @@
     <section class="section">
       <div class="container">
 
-        <div class="coming-soon">
+        <div class="events-grid" data-events-mount data-status="pubblicato" data-coming-soon="eventi-coming-soon" hidden></div>
+
+        <div class="coming-soon" id="eventi-coming-soon">
           <span class="coming-soon__icon" aria-hidden="true">🗓️</span>
           <h2>Il calendario arriva presto</h2>
           <p>Stiamo organizzando i primi eventi e corsi: yoga, fotografia, pasticceria, canto,
@@ -59,6 +61,17 @@
             oppure scrivici se hai già un'idea o una passione da proporre.</p>
           <a href="contatti.html" class="btn btn--primary">Proponi un corso o un evento</a>
         </div>
+      </div>
+    </section>
+
+    <section class="section section--alt" id="eventi-passati-section" hidden>
+      <div class="container">
+        <div class="section__head">
+          <span class="section__eyebrow">Archivio</span>
+          <h2 class="section__title">Eventi passati</h2>
+        </div>
+
+        <div class="events-grid" data-events-mount data-status="fatto" data-hide-section="eventi-passati-section"></div>
       </div>
     </section>
 
@@ -123,5 +136,6 @@
   </footer>
 
   <script src="assets/js/main.js"></script>
+  <script src="assets/js/events.js"></script>
 </body>
 </html>

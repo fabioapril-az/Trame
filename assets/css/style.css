@@ -87,6 +87,12 @@ p {
   padding: 0 24px;
 }
 
+/* Garantisce che l'attributo hidden vinca sempre, anche sugli elementi
+   che impostano un display esplicito (flex/grid/ecc.). */
+[hidden] {
+  display: none !important;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -499,6 +505,105 @@ p {
   color: var(--color-ink-soft);
 }
 
+/* ---------- amministrazione (admin.html) ---------- */
+.btn--small {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  padding-bottom: 14px;
+  gap: 20px;
+}
+
+.admin-header__user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+}
+
+.admin-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
+
+.admin-panel {
+  margin-bottom: 34px;
+}
+
+.admin-form__actions {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.admin-events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-event {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-m);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.admin-event__info h3 {
+  font-size: 1.15rem;
+  margin: 6px 0 4px;
+}
+
+.admin-event__meta {
+  color: var(--color-ink-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.admin-event__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.status-badge--bozza {
+  background: var(--color-line);
+  color: var(--color-ink-soft);
+}
+
+.status-badge--pubblicato {
+  background: var(--color-sage-light);
+  color: var(--color-sage-dark);
+}
+
+.status-badge--fatto {
+  background: var(--color-terracotta-light);
+  color: var(--color-terracotta-dark);
+}
+
 /* ---------- chi siamo: soci fondatori ---------- */
 .brand {
   color: var(--color-terracotta-dark);
@@ -815,6 +920,15 @@ p {
 .social-links svg {
   width: 20px;
   height: 20px;
+}
+
+.contact-block__gallery {
+  margin-top: 14px !important;
+}
+
+.contact-block__gallery a {
+  font-weight: 700;
+  color: var(--color-terracotta-dark);
 }
 
 .contact-form {

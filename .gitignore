@@ -1,0 +1,13 @@
+# Dipendenze e impostazioni locali dell'API (Azure Functions)
+api/node_modules/
+api/local.settings.json
+api/bin/
+api/obj/
+api/.azurite/
+api/__azurite_db_*__.json
+api/__blobstorage__/
+api/__queuestorage__/
+
+# Varie
+.DS_Store
+Thumbs.db
