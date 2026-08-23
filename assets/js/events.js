@@ -1,7 +1,15 @@
-// Carica gli eventi pubblicati da /api/events e li mostra al posto del
-// messaggio "coming soon", che resta comunque nell'HTML come stato di
-// partenza — utile se JS è disabilitato, se l'API è momentaneamente giù,
-// o finché non c'è ancora nessun evento pubblicato.
+// Carica gli eventi da /api/events e li mostra al posto del messaggio
+// "coming soon", che resta comunque nell'HTML come stato di partenza —
+// utile se JS è disabilitato, se l'API è momentaneamente giù, o finché
+// non c'è ancora nessun evento pubblicato.
+//
+// Ogni contenitore [data-events-mount] può specificare:
+//   data-status="pubblicato|fatto"  quali eventi mostrare (default: pubblicato)
+//   data-max="3"                    quanti mostrarne al massimo
+//   data-coming-soon="id"           elemento di fallback da nascondere se non vuoto
+//   data-hide-section="id"          sezione intera da nascondere se non ci sono eventi
+//                                   (utile per un archivio che non deve comparire affatto
+//                                   quando è vuoto, invece di mostrare un titolo senza nulla sotto)
 
 (function () {
   var CATEGORY_LABELS = {
@@ -51,10 +59,45 @@
     return article;
   }
 
-  function mountEvents(mount) {
+  function fillMount(mount, allEvents) {
+    var status = mount.getAttribute("data-status") || "pubblicato";
+    var max = parseInt(mount.getAttribute("data-max"), 10);
     var comingSoonId = mount.getAttribute("data-coming-soon");
     var comingSoon = comingSoonId ? document.getElementById(comingSoonId) : null;
-    var max = parseInt(mount.getAttribute("data-max"), 10);
+    var hideSectionId = mount.getAttribute("data-hide-section");
+    var section = hideSectionId ? document.getElementById(hideSectionId) : null;
+
+    var events = allEvents.filter(function (event) {
+      return event.status === status;
+    });
+
+    if (!events.length) {
+      if (section) {
+        section.hidden = true;
+      }
+      return; // resta il fallback "coming soon" già nell'HTML, se presente
+    }
+
+    if (max && events.length > max) {
+      events = events.slice(0, max);
+    }
+
+    events.forEach(function (event) {
+      mount.appendChild(renderEventCard(event));
+    });
+
+    mount.hidden = false;
+    if (comingSoon) {
+      comingSoon.hidden = true;
+    }
+    if (section) {
+      section.hidden = false;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var mounts = document.querySelectorAll("[data-events-mount]");
+    if (!mounts.length) return;
 
     fetch("/api/events")
       .then(function (res) {
@@ -63,28 +106,12 @@
       })
       .then(function (data) {
         var events = (data && data.events) || [];
-        if (!events.length) {
-          return; // resta il messaggio "coming soon" già nell'HTML
-        }
-        if (max && events.length > max) {
-          events = events.slice(0, max);
-        }
-
-        events.forEach(function (event) {
-          mount.appendChild(renderEventCard(event));
+        mounts.forEach(function (mount) {
+          fillMount(mount, events);
         });
-
-        mount.hidden = false;
-        if (comingSoon) {
-          comingSoon.hidden = true;
-        }
       })
       .catch(function () {
-        // Nessun evento da mostrare: il fallback "coming soon" resta visibile.
+        // Nessun evento da mostrare: i fallback già nell'HTML restano visibili.
       });
-  }
-
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll("[data-events-mount]").forEach(mountEvents);
   });
 })();

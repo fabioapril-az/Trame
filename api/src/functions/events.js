@@ -41,9 +41,11 @@ app.http("events", {
         queryOptions: { filter: `PartitionKey eq '${PARTITION_KEY}'` },
       });
 
+      // Pubblicamente visibili: "pubblicato" (in programma) e "fatto"
+      // (archivio eventi passati, restano visibili). Solo "bozza" è nascosta.
       const events = [];
       for await (const entity of entities) {
-        if (wantsAll || entity.status === "pubblicato") {
+        if (wantsAll || entity.status === "pubblicato" || entity.status === "fatto") {
           events.push(toPublicEvent(entity));
         }
       }
