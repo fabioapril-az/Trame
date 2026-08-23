@@ -11,7 +11,12 @@
     auth: {
       clientId: window.TRAME_CONFIG.msalClientId,
       authority: window.TRAME_CONFIG.msalAuthority,
-      redirectUri: window.location.origin + window.location.pathname
+      // Pagina di redirect DEDICATA e vuota (non admin-soci.html stessa):
+      // se il popup ricaricasse l'intera app, MSAL si reinizializzerebbe
+      // anche lì, impedendo alla finestra principale di intercettare la
+      // risposta in tempo — causa reale di "timed_out"/"block_nested_popups"
+      // riscontrata in test. Vedi auth-blank.html.
+      redirectUri: window.location.origin + "/auth-blank.html"
     },
     cache: {
       cacheLocation: "sessionStorage"

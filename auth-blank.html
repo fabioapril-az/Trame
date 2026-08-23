@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Accesso in corso…</title>
+  <meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+  <!--
+    Pagina di redirect DEDICATA per MSAL.js (login popup/silent), come
+    raccomandato dalla documentazione ufficiale:
+    https://learn.microsoft.com/entra/msal/javascript/browser/errors#loginrequired
+
+    Se il redirect URI del popup fosse admin-soci.html (l'app intera), la
+    ricarica completa della pagina dentro il popup reinizializza MSAL/gli
+    script dell'app in quel contesto e impedisce alla finestra principale
+    di intercettare la risposta in tempo — causa reale di "timed_out" e
+    "block_nested_popups" riscontrata in test. Questa pagina non deve fare
+    altro che esistere: MSAL nella finestra principale legge la risposta
+    dall'URL di questa pagina e chiude il popup da sola.
+  -->
+</body>
+</html>
