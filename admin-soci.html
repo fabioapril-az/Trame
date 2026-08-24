@@ -34,9 +34,9 @@
     <section class="page-hero">
       <div class="container">
         <span class="page-hero__eyebrow">Area riservata</span>
-        <h1>Libro Soci ed eventi</h1>
-        <p class="page-hero__subtitle">Riservato a Segretario, Presidente, Vicepresidente/Tesoriere e Admin — accesso separato
-          dalla <a href="admin.html">gestione CMS eventi/impostazioni del sito →</a></p>
+        <h1>Libro Soci</h1>
+        <p class="page-hero__subtitle">Riservato a Segretario, Presidente, Vicepresidente/Tesoriere e Admin.
+          Per la gestione eventi: <a href="admin.html">vai a Impostazioni ed eventi →</a></p>
       </div>
     </section>
 
@@ -159,122 +159,6 @@
             </table>
           </div>
           <p class="form-note" id="scadenze-empty" hidden>Nessuna tessera in scadenza nel periodo indicato.</p>
-        </div>
-      </section>
-
-      <!-- EVENTI -->
-      <section class="section">
-        <div class="container">
-          <div class="section__head" style="text-align:left; margin:0 0 30px;">
-            <span class="section__eyebrow">Eventi</span>
-            <h2 class="section__title">Crea e gestisci gli eventi</h2>
-            <p class="section__subtitle">Quote, posti disponibili e iscrizioni legate al Libro Soci — pubblicati sul
-              sito quando lo stato è "Aperto" o "Chiuso".</p>
-          </div>
-
-          <div class="admin-panel">
-            <h3>Nuovo evento</h3>
-            <div class="form-row"><label for="ev-titolo">Titolo</label><input type="text" id="ev-titolo" maxlength="200"></div>
-            <div class="form-row"><label for="ev-descrizione">Descrizione</label><textarea id="ev-descrizione" rows="3"></textarea></div>
-            <div class="form-row"><label for="ev-data">Data evento</label><input type="date" id="ev-data"></div>
-            <div class="form-row"><label for="ev-luogo">Luogo</label><input type="text" id="ev-luogo" maxlength="200"></div>
-            <div class="form-row">
-              <label for="ev-categoria">Categoria (facoltativa, per il tag sul sito)</label>
-              <select id="ev-categoria">
-                <option value="">— nessuna —</option>
-                <option value="yoga">Yoga</option>
-                <option value="fotografia">Fotografia</option>
-                <option value="pasticceria">Pasticceria</option>
-                <option value="canto">Canto</option>
-                <option value="ballo">Ballo</option>
-                <option value="disegno">Disegno</option>
-                <option value="trekking-urbano">Trekking urbano</option>
-                <option value="viaggi">Viaggi</option>
-              </select>
-            </div>
-            <div class="form-row"><label for="ev-quota">Quota evento (€, facoltativa)</label><input type="number" id="ev-quota" min="0" step="0.01"></div>
-            <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
-            <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
-            <div class="form-row">
-              <label for="ev-stato">Stato</label>
-              <select id="ev-stato">
-                <option value="bozza">Bozza</option>
-                <option value="aperto">Aperto (iscrizioni attive)</option>
-                <option value="chiuso">Chiuso</option>
-                <option value="annullato">Annullato</option>
-              </select>
-            </div>
-            <button type="button" class="btn btn--primary" id="btn-crea-evento">Crea evento</button>
-            <p class="form-note" id="crea-evento-status" role="alert" hidden></p>
-          </div>
-
-          <div class="admin-panel">
-            <h3>Tutti gli eventi</h3>
-            <div class="admin-toolbar">
-              <select id="ev-filtro-stato">
-                <option value="">Tutti gli stati</option>
-                <option value="bozza">Bozza</option>
-                <option value="aperto">Aperto</option>
-                <option value="chiuso">Chiuso</option>
-                <option value="annullato">Annullato</option>
-              </select>
-              <button type="button" class="btn btn--outline btn--small" id="btn-carica-eventi">Aggiorna elenco</button>
-            </div>
-            <div style="overflow-x:auto;">
-              <table class="admin-table" id="eventi-tabella">
-                <thead><tr><th>Titolo</th><th>Data</th><th>Categoria</th><th>Stato</th><th>Posti</th><th>Azioni</th></tr></thead>
-                <tbody id="eventi-tabella-body"></tbody>
-              </table>
-            </div>
-            <p class="form-note" id="eventi-empty" hidden>Nessun evento trovato.</p>
-
-            <div id="evento-dettaglio" hidden>
-              <h3>Modifica evento</h3>
-              <div class="form-row"><label for="mod-ev-titolo">Titolo</label><input type="text" id="mod-ev-titolo" maxlength="200"></div>
-              <div class="form-row"><label for="mod-ev-descrizione">Descrizione</label><textarea id="mod-ev-descrizione" rows="3"></textarea></div>
-              <div class="form-row"><label for="mod-ev-data">Data evento</label><input type="date" id="mod-ev-data"></div>
-              <div class="form-row"><label for="mod-ev-luogo">Luogo</label><input type="text" id="mod-ev-luogo" maxlength="200"></div>
-              <div class="form-row">
-                <label for="mod-ev-categoria">Categoria</label>
-                <select id="mod-ev-categoria">
-                  <option value="">— nessuna —</option>
-                  <option value="yoga">Yoga</option>
-                  <option value="fotografia">Fotografia</option>
-                  <option value="pasticceria">Pasticceria</option>
-                  <option value="canto">Canto</option>
-                  <option value="ballo">Ballo</option>
-                  <option value="disegno">Disegno</option>
-                  <option value="trekking-urbano">Trekking urbano</option>
-                  <option value="viaggi">Viaggi</option>
-                </select>
-              </div>
-              <div class="form-row"><label for="mod-ev-quota">Quota evento (€)</label><input type="number" id="mod-ev-quota" min="0" step="0.01"></div>
-              <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
-              <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
-              <div class="form-row">
-                <label for="mod-ev-stato">Stato</label>
-                <select id="mod-ev-stato">
-                  <option value="bozza">Bozza</option>
-                  <option value="aperto">Aperto</option>
-                  <option value="chiuso">Chiuso</option>
-                  <option value="annullato">Annullato</option>
-                </select>
-              </div>
-              <p class="form-note" id="evento-posti-info"></p>
-              <div class="admin-form__actions">
-                <button type="button" class="btn btn--primary" id="btn-salva-evento">Salva modifiche</button>
-                <button type="button" class="btn btn--outline" id="btn-vedi-iscritti">Vedi iscritti</button>
-              </div>
-              <p class="form-note" id="modifica-evento-status" role="alert" hidden></p>
-            </div>
-
-            <div style="overflow-x:auto;">
-              <table class="admin-table" id="iscritti-tabella" hidden>
-                <thead><tr><th>Email</th><th>Tipo</th><th>Stato</th><th>Importo</th><th>Data</th><th>Azioni</th></tr></thead>
-                <tbody id="iscritti-tabella-body"></tbody>
-              </table>
-            </div>
-          </div>
         </div>
       </section>
 
