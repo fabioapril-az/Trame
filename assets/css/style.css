@@ -181,8 +181,8 @@ p {
 }
 
 .logo__icon {
-  width: 52px;
-  height: 52px;
+  width: 68px;
+  height: 68px;
   flex-shrink: 0;
   object-fit: contain;
 }
