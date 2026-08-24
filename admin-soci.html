@@ -124,6 +124,19 @@
             </div>
             <p class="form-note" id="rinnovo-status" role="alert" hidden></p>
           </div>
+
+          <!-- Pannello storico/audit -->
+          <div id="pannello-storico" class="admin-panel" hidden>
+            <h3>Storico modifiche</h3>
+            <div style="overflow-x:auto;">
+              <table class="admin-table" id="storico-tabella">
+                <thead><tr><th>Data/ora</th><th>Azione</th><th>Eseguita da</th><th>Dettagli</th></tr></thead>
+                <tbody id="storico-tabella-body"></tbody>
+              </table>
+            </div>
+            <p class="form-note" id="storico-empty" hidden>Nessuna voce nello storico.</p>
+            <button type="button" class="btn btn--outline btn--small" id="btn-chiudi-storico">Chiudi</button>
+          </div>
         </div>
       </section>
 

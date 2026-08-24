@@ -106,10 +106,12 @@
             '<td><span class="status-badge status-badge--' + escapeHtml(s.stato) + '">' + escapeHtml(s.stato) + "</span></td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
-            '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button></td>';
+            '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="storico">Storico</button></td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModifica(s); });
           tr.querySelector('[data-action="rinnova"]').addEventListener("click", function () { apriRinnovo(s); });
           tr.querySelector('[data-action="tessera"]').addEventListener("click", function () { scaricaTessera(s); });
+          tr.querySelector('[data-action="storico"]').addEventListener("click", function () { apriStorico(s); });
           tbody.appendChild(tr);
         });
 
@@ -162,6 +164,48 @@
       })
       .catch(function (err) { window.alert(err.message); });
   }
+
+  var AZIONE_LABELS = { creazione: "Creazione", modifica: "Modifica", cancellazione: "Cancellazione" };
+
+  function formattaDettagli(azione, dettagliJson) {
+    if (!dettagliJson) {
+      return azione === "creazione" ? "Iscrizione registrata" : "—";
+    }
+    try {
+      var diff = JSON.parse(dettagliJson);
+      return Object.keys(diff).map(function (campo) {
+        var v = diff[campo];
+        return campo + ": " + (v.prima || "—") + " → " + (v.dopo || "—");
+      }).join("; ");
+    } catch (e) {
+      return dettagliJson;
+    }
+  }
+
+  function apriStorico(socio) {
+    apiFetchAuth("/api/soci/" + socio.id + "/log")
+      .then(function (log) {
+        var tbody = document.getElementById("storico-tabella-body");
+        tbody.innerHTML = "";
+        document.getElementById("storico-empty").hidden = log.length > 0;
+        log.forEach(function (voce) {
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + new Date(voce.dataOra).toLocaleString("it-IT") + "</td>" +
+            "<td>" + escapeHtml(AZIONE_LABELS[voce.azione] || voce.azione) + "</td>" +
+            "<td>" + escapeHtml(voce.eseguitaDa) + "</td>" +
+            "<td>" + escapeHtml(formattaDettagli(voce.azione, voce.dettagli)) + "</td>";
+          tbody.appendChild(tr);
+        });
+        document.getElementById("pannello-storico").hidden = false;
+        document.getElementById("pannello-storico").scrollIntoView({ behavior: "smooth", block: "start" });
+      })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  document.getElementById("btn-chiudi-storico").addEventListener("click", function () {
+    document.getElementById("pannello-storico").hidden = true;
+  });
 
   document.getElementById("btn-salva-modifica").addEventListener("click", function () {
     var payload = {
