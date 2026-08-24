@@ -181,9 +181,10 @@ p {
 }
 
 .logo__icon {
-  width: 44px;
-  height: 44px;
+  width: 52px;
+  height: 52px;
   flex-shrink: 0;
+  object-fit: contain;
 }
 
 .logo__text {
