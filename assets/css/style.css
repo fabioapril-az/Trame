@@ -1116,3 +1116,73 @@ p {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- gestionale soci: form, tabelle, esiti ---------- */
+
+.form-row--checkbox label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 400;
+}
+
+.form-row--checkbox input[type="checkbox"] {
+  margin-top: 4px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.status-badge--attivo {
+  background: var(--color-sage-light);
+  color: var(--color-sage-dark);
+}
+
+.status-badge--scaduto,
+.status-badge--decaduto {
+  background: var(--color-terracotta-light);
+  color: var(--color-terracotta-dark);
+}
+
+.status-badge--cancellato {
+  background: var(--color-line);
+  color: var(--color-ink-soft);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 0.92rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--color-line);
+  white-space: nowrap;
+}
+
+.admin-table th {
+  color: var(--color-ink-soft);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.verifica-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-m);
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: var(--shadow-soft);
+}
+
+.verifica-card__icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 12px;
+}

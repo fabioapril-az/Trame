@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iscrizione evento — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="eventi.html" class="nav__link">Eventi</a></li>
+          <li><a href="diventa-socio.html" class="nav__link">Diventa socio</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Iscrizione evento</span>
+        <h1 id="evento-titolo">Caricamento evento…</h1>
+        <p class="page-hero__subtitle" id="evento-sottotitolo"></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:640px;">
+
+        <div id="evento-loading">Caricamento evento in corso…</div>
+        <div id="evento-chiuso" class="form-note" hidden></div>
+
+        <form id="wizard" hidden>
+
+          <!-- Step 1: email -->
+          <div id="step-email" class="admin-panel">
+            <h3>La tua email</h3>
+            <div class="form-row">
+              <label for="input-email">Email</label>
+              <input type="email" id="input-email" required>
+            </div>
+            <button type="button" class="btn btn--primary" id="btn-verifica-email">Continua</button>
+            <p class="form-note" id="email-status" role="alert" hidden></p>
+          </div>
+
+          <!-- Step 2a: nuovo socio -->
+          <div id="step-nuovo-socio" class="admin-panel" hidden>
+            <h3>Non risulti ancora iscritto/a: completa i tuoi dati</h3>
+            <div class="form-row"><label for="ns-nome">Nome</label><input type="text" id="ns-nome" maxlength="100" required></div>
+            <div class="form-row"><label for="ns-cognome">Cognome</label><input type="text" id="ns-cognome" maxlength="100" required></div>
+            <div class="form-row"><label for="ns-telefono">Telefono (facoltativo)</label><input type="tel" id="ns-telefono" maxlength="20"></div>
+            <div class="form-row"><label for="ns-data-nascita">Data di nascita</label><input type="date" id="ns-data-nascita" required></div>
+            <div class="form-row"><label for="ns-cf">Codice fiscale</label><input type="text" id="ns-cf" maxlength="16" required
+              pattern="^[A-Za-z]{6}\d{2}[A-EHLMPRSTabcdehlmprst]\d{2}([A-Za-z]\d{3}|\d{4})[A-Za-z]$"></div>
+            <div class="form-row"><label for="ns-indirizzo">Indirizzo (facoltativo)</label><input type="text" id="ns-indirizzo" maxlength="255"></div>
+            <div class="form-row"><label for="ns-citta">Città (facoltativo)</label><input type="text" id="ns-citta" maxlength="100"></div>
+            <div class="form-row"><label for="ns-cap">CAP (facoltativo)</label><input type="text" id="ns-cap" maxlength="10"></div>
+            <div class="form-row form-row--checkbox">
+              <label><input type="checkbox" id="ns-consenso" required> Ho letto e accetto
+                <a href="privacy.html" target="_blank" rel="noopener">l'informativa privacy</a>.</label>
+            </div>
+          </div>
+
+          <!-- Step 2b/2c: rinnovo -->
+          <div id="step-rinnovo" class="admin-panel" hidden>
+            <h3 id="rinnovo-titolo">Rinnovo tessera</h3>
+            <p class="form-note" id="rinnovo-nota"></p>
+            <div class="form-row">
+              <label for="rn-metodo">Metodo di pagamento (facoltativo)</label>
+              <select id="rn-metodo">
+                <option value="">— non specificato —</option>
+                <option value="bonifico">Bonifico</option>
+                <option value="contante">Contante</option>
+                <option value="satispay">Satispay</option>
+                <option value="paypal">PayPal</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="rn-importo">Importo pagato (facoltativo)</label>
+              <input type="number" id="rn-importo" min="0" step="0.01">
+            </div>
+            <div id="rinnovo-facoltativo-azioni" hidden>
+              <button type="button" class="btn btn--outline" id="btn-salta-rinnovo">Procedi senza rinnovare</button>
+            </div>
+          </div>
+
+          <!-- Step 3: conferma -->
+          <div id="step-conferma" class="admin-panel" hidden>
+            <h3>Conferma iscrizione</h3>
+            <div class="form-row">
+              <label for="importo-pagato">Importo pagato per l'evento (facoltativo)</label>
+              <input type="number" id="importo-pagato" min="0" step="0.01">
+            </div>
+            <button type="submit" class="btn btn--primary" id="btn-conferma">Conferma iscrizione</button>
+            <p class="form-note" id="conferma-status" role="alert" hidden></p>
+          </div>
+
+        </form>
+
+        <div id="esito-finale" class="admin-panel" hidden></div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/iscrizione-evento.js"></script>
+</body>
+</html>

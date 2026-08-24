@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione soci — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container admin-header">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">gestione soci</span>
+        </span>
+      </a>
+      <div class="admin-header__user">
+        <span id="auth-user-label">Non collegato</span>
+        <button type="button" class="btn btn--primary btn--small" id="btn-login">Accedi</button>
+        <button type="button" class="btn btn--outline btn--small" id="btn-logout" hidden>Esci</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Area riservata</span>
+        <h1>Libro Soci ed eventi</h1>
+        <p class="page-hero__subtitle">Riservato a Segretario, Presidente, Vicepresidente/Tesoriere e Admin.
+          <a href="admin.html">← Torna alla gestione CMS eventi/impostazioni</a></p>
+      </div>
+    </section>
+
+    <div class="container">
+      <p class="form-note" id="auth-gate-note">Accedi con il tuo account Microsoft per continuare.</p>
+    </div>
+
+    <div id="area-riservata" hidden>
+
+      <!-- LIBRO SOCI -->
+      <section class="section">
+        <div class="container">
+          <div class="section__head" style="text-align:left; margin:0 0 30px;">
+            <span class="section__eyebrow">Libro Soci</span>
+            <h2 class="section__title">Elenco soci</h2>
+          </div>
+
+          <div class="admin-toolbar">
+            <input type="search" id="soci-ricerca" placeholder="Cerca per nome, cognome o email…" style="flex:1; min-width:200px;">
+            <select id="soci-filtro-stato">
+              <option value="">Tutti gli stati</option>
+              <option value="attivo">Attivo</option>
+              <option value="scaduto">Scaduto</option>
+              <option value="decaduto">Decaduto</option>
+              <option value="cancellato">Cancellato</option>
+            </select>
+            <button type="button" class="btn btn--outline btn--small" id="btn-cerca-soci">Cerca</button>
+            <button type="button" class="btn btn--outline btn--small" id="btn-export-csv">Esporta CSV</button>
+            <a href="diventa-socio.html" class="btn btn--outline btn--small" target="_blank" rel="noopener">+ Registra nuovo socio</a>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="admin-table" id="soci-tabella">
+              <thead>
+                <tr>
+                  <th>Nome</th><th>Email</th><th>Telefono</th><th>N. tessera</th>
+                  <th>Scadenza</th><th>Stato</th><th>Azioni</th>
+                </tr>
+              </thead>
+              <tbody id="soci-tabella-body"></tbody>
+            </table>
+          </div>
+          <p class="form-note" id="soci-empty" hidden>Nessun socio trovato.</p>
+          <div class="admin-toolbar" id="soci-paginazione">
+            <button type="button" class="btn btn--outline btn--small" id="btn-pagina-prec">← Precedente</button>
+            <span id="soci-pagina-label"></span>
+            <button type="button" class="btn btn--outline btn--small" id="btn-pagina-succ">Successiva →</button>
+          </div>
+
+          <!-- Pannello modifica socio -->
+          <div id="pannello-modifica" class="contact-form admin-panel" hidden>
+            <h3>Modifica socio</h3>
+            <div class="form-row"><label for="mod-nome">Nome</label><input type="text" id="mod-nome" maxlength="100"></div>
+            <div class="form-row"><label for="mod-cognome">Cognome</label><input type="text" id="mod-cognome" maxlength="100"></div>
+            <div class="form-row"><label for="mod-telefono">Telefono</label><input type="tel" id="mod-telefono" maxlength="20"></div>
+            <div class="form-row"><label for="mod-indirizzo">Indirizzo</label><input type="text" id="mod-indirizzo" maxlength="255"></div>
+            <div class="form-row"><label for="mod-citta">Città</label><input type="text" id="mod-citta" maxlength="100"></div>
+            <div class="form-row"><label for="mod-cap">CAP</label><input type="text" id="mod-cap" maxlength="10"></div>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-salva-modifica">Salva modifiche</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-modifica">Annulla</button>
+            </div>
+            <p class="form-note" id="modifica-status" role="alert" hidden></p>
+          </div>
+
+          <!-- Pannello rinnovo -->
+          <div id="pannello-rinnovo" class="contact-form admin-panel" hidden>
+            <h3>Registra rinnovo tessera</h3>
+            <div class="form-row"><label for="rin-data">Data rinnovo</label><input type="date" id="rin-data"></div>
+            <div class="form-row">
+              <label for="rin-metodo">Metodo di pagamento</label>
+              <select id="rin-metodo">
+                <option value="">— non specificato —</option>
+                <option value="bonifico">Bonifico</option>
+                <option value="contante">Contante</option>
+                <option value="satispay">Satispay</option>
+                <option value="paypal">PayPal</option>
+              </select>
+            </div>
+            <div class="form-row"><label for="rin-importo">Importo</label><input type="number" id="rin-importo" min="0" step="0.01"></div>
+            <div class="form-row"><label for="rin-riferimento">Riferimento pagamento</label><input type="text" id="rin-riferimento" maxlength="100"></div>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-salva-rinnovo">Registra rinnovo</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-rinnovo">Annulla</button>
+            </div>
+            <p class="form-note" id="rinnovo-status" role="alert" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCADENZE -->
+      <section class="section section--alt">
+        <div class="container">
+          <div class="section__head" style="text-align:left; margin:0 0 30px;">
+            <span class="section__eyebrow">Scadenze</span>
+            <h2 class="section__title">Tessere in scadenza</h2>
+          </div>
+          <div class="admin-toolbar">
+            <label for="scadenze-giorni">Entro i prossimi</label>
+            <input type="number" id="scadenze-giorni" value="30" min="1" style="width:80px;"> giorni
+            <button type="button" class="btn btn--outline btn--small" id="btn-carica-scadenze">Carica</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="admin-table" id="scadenze-tabella">
+              <thead><tr><th>Nome</th><th>Email</th><th>N. tessera</th><th>Scadenza</th></tr></thead>
+              <tbody id="scadenze-tabella-body"></tbody>
+            </table>
+          </div>
+          <p class="form-note" id="scadenze-empty" hidden>Nessuna tessera in scadenza nel periodo indicato.</p>
+        </div>
+      </section>
+
+      <!-- EVENTI -->
+      <section class="section">
+        <div class="container">
+          <div class="section__head" style="text-align:left; margin:0 0 30px;">
+            <span class="section__eyebrow">Iscrizioni eventi</span>
+            <h2 class="section__title">Crea o gestisci un evento</h2>
+            <p class="section__subtitle">Distinto dal CMS "Eventi" del sito pubblico: qui gli eventi hanno quote,
+              posti disponibili e iscrizioni legate al Libro Soci.</p>
+          </div>
+
+          <div class="admin-panel">
+            <h3>Nuovo evento</h3>
+            <div class="form-row"><label for="ev-titolo">Titolo</label><input type="text" id="ev-titolo" maxlength="200"></div>
+            <div class="form-row"><label for="ev-descrizione">Descrizione</label><textarea id="ev-descrizione" rows="3"></textarea></div>
+            <div class="form-row"><label for="ev-data">Data evento</label><input type="date" id="ev-data"></div>
+            <div class="form-row"><label for="ev-luogo">Luogo</label><input type="text" id="ev-luogo" maxlength="200"></div>
+            <div class="form-row"><label for="ev-quota">Quota evento (€, facoltativa)</label><input type="number" id="ev-quota" min="0" step="0.01"></div>
+            <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
+            <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
+            <div class="form-row">
+              <label for="ev-stato">Stato</label>
+              <select id="ev-stato">
+                <option value="bozza">Bozza</option>
+                <option value="aperto">Aperto (iscrizioni attive)</option>
+                <option value="chiuso">Chiuso</option>
+                <option value="annullato">Annullato</option>
+              </select>
+            </div>
+            <button type="button" class="btn btn--primary" id="btn-crea-evento">Crea evento</button>
+            <p class="form-note" id="crea-evento-status" role="alert" hidden></p>
+          </div>
+
+          <div class="admin-panel">
+            <h3>Gestisci evento esistente</h3>
+            <p class="form-note">Non esiste ancora un elenco eventi: annota l'ID mostrato alla creazione.</p>
+            <div class="form-row"><label for="gestisci-evento-id">ID evento</label><input type="number" id="gestisci-evento-id" min="1"></div>
+            <button type="button" class="btn btn--outline btn--small" id="btn-carica-evento">Carica</button>
+
+            <div id="evento-dettaglio" hidden>
+              <div class="form-row"><label for="mod-ev-titolo">Titolo</label><input type="text" id="mod-ev-titolo" maxlength="200"></div>
+              <div class="form-row"><label for="mod-ev-descrizione">Descrizione</label><textarea id="mod-ev-descrizione" rows="3"></textarea></div>
+              <div class="form-row"><label for="mod-ev-data">Data evento</label><input type="date" id="mod-ev-data"></div>
+              <div class="form-row"><label for="mod-ev-luogo">Luogo</label><input type="text" id="mod-ev-luogo" maxlength="200"></div>
+              <div class="form-row"><label for="mod-ev-quota">Quota evento (€)</label><input type="number" id="mod-ev-quota" min="0" step="0.01"></div>
+              <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
+              <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
+              <div class="form-row">
+                <label for="mod-ev-stato">Stato</label>
+                <select id="mod-ev-stato">
+                  <option value="bozza">Bozza</option>
+                  <option value="aperto">Aperto</option>
+                  <option value="chiuso">Chiuso</option>
+                  <option value="annullato">Annullato</option>
+                </select>
+              </div>
+              <p class="form-note" id="evento-posti-info"></p>
+              <div class="admin-form__actions">
+                <button type="button" class="btn btn--primary" id="btn-salva-evento">Salva modifiche</button>
+                <button type="button" class="btn btn--outline" id="btn-vedi-iscritti">Vedi iscritti</button>
+              </div>
+              <p class="form-note" id="modifica-evento-status" role="alert" hidden></p>
+            </div>
+
+            <div style="overflow-x:auto;">
+              <table class="admin-table" id="iscritti-tabella" hidden>
+                <thead><tr><th>Email</th><th>Tipo</th><th>Stato</th><th>Importo</th><th>Data</th><th>Azioni</th></tr></thead>
+                <tbody id="iscritti-tabella-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@5.19.0/lib/msal-browser.min.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/msal-auth.js"></script>
+  <script src="assets/js/admin-soci.js"></script>
+</body>
+</html>
