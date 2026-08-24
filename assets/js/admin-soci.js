@@ -105,9 +105,11 @@
             "<td>" + formattaData(s.dataScadenza) + "</td>" +
             '<td><span class="status-badge status-badge--' + escapeHtml(s.stato) + '">' + escapeHtml(s.stato) + "</span></td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
-            '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button></td>';
+            '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button></td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModifica(s); });
           tr.querySelector('[data-action="rinnova"]').addEventListener("click", function () { apriRinnovo(s); });
+          tr.querySelector('[data-action="tessera"]').addEventListener("click", function () { scaricaTessera(s); });
           tbody.appendChild(tr);
         });
 
@@ -139,6 +141,27 @@
   document.getElementById("btn-annulla-modifica").addEventListener("click", function () {
     document.getElementById("pannello-modifica").hidden = true;
   });
+
+  // Endpoint pubblico (nessun login richiesto per un socio che scarica la
+  // propria tessera): da qui basta un fetch semplice, senza token.
+  function scaricaTessera(socio) {
+    fetch(window.TRAME_CONFIG.apiBaseUrl + "/api/soci/" + socio.id + "/tessera")
+      .then(function (res) {
+        if (!res.ok) throw new Error("Download tessera non riuscito (" + res.status + ").");
+        return res.blob();
+      })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download = "tessera-" + socio.numeroTessera + ".pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      })
+      .catch(function (err) { window.alert(err.message); });
+  }
 
   document.getElementById("btn-salva-modifica").addEventListener("click", function () {
     var payload = {
