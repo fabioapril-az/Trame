@@ -65,6 +65,7 @@
     btnLogout.hidden = false;
     userLabel.textContent = account.name || account.username;
     cercaSoci();
+    caricaEventi();
   }
 
   btnLogin.addEventListener("click", function () {
@@ -314,9 +315,9 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
-      .then(function (result) {
-        mostraMessaggio(document.getElementById("crea-evento-status"),
-          "Evento creato con ID " + result.id + " — annotalo per gestirlo in seguito.", false);
+      .then(function () {
+        mostraMessaggio(document.getElementById("crea-evento-status"), "Evento creato.", false);
+        caricaEventi();
       })
       .catch(function (err) { mostraMessaggio(document.getElementById("crea-evento-status"), err.message, true); });
   });
@@ -330,6 +331,7 @@
       descrizione: document.getElementById(prefix + "descrizione").value.trim() || null,
       dataEvento: document.getElementById(prefix + "data").value,
       luogo: document.getElementById(prefix + "luogo").value.trim() || null,
+      categoria: document.getElementById(prefix + "categoria").value || null,
       quotaEvento: quota ? parseFloat(quota) : null,
       quotaIscrizioneInclusa: quotaIscrizione ? parseFloat(quotaIscrizione) : null,
       postiMax: posti ? parseInt(posti, 10) : null,
@@ -337,29 +339,54 @@
     };
   }
 
-  document.getElementById("btn-carica-evento").addEventListener("click", function () {
-    var id = document.getElementById("gestisci-evento-id").value;
-    if (!id) return;
-    apiFetchAuth("/api/eventi/" + id)
-      .then(function (evento) {
-        stato.eventoCorrenteId = evento.id;
-        document.getElementById("mod-ev-titolo").value = evento.titolo;
-        document.getElementById("mod-ev-descrizione").value = evento.descrizione || "";
-        document.getElementById("mod-ev-data").value = evento.dataEvento;
-        document.getElementById("mod-ev-luogo").value = evento.luogo || "";
-        document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
-        document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
-        document.getElementById("mod-ev-posti").value = evento.postiMax || "";
-        document.getElementById("mod-ev-stato").value = evento.stato;
-        document.getElementById("evento-posti-info").textContent = evento.postiMax
-          ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
-          : "Nessun limite di posti impostato.";
-        document.getElementById("evento-dettaglio").hidden = false;
-        document.getElementById("iscritti-tabella").hidden = true;
-        document.getElementById("modifica-evento-status").hidden = true;
+  var STATO_EVENTO_LABELS = { bozza: "Bozza", aperto: "Aperto", chiuso: "Chiuso", annullato: "Annullato" };
+
+  function caricaEventi() {
+    var filtroStato = document.getElementById("ev-filtro-stato").value;
+    var query = filtroStato ? "?stato=" + encodeURIComponent(filtroStato) : "";
+    apiFetchAuth("/api/eventi" + query)
+      .then(function (eventi) {
+        var tbody = document.getElementById("eventi-tabella-body");
+        tbody.innerHTML = "";
+        document.getElementById("eventi-empty").hidden = eventi.length > 0;
+        eventi.forEach(function (ev) {
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + escapeHtml(ev.titolo) + "</td>" +
+            "<td>" + formattaData(ev.dataEvento) + "</td>" +
+            "<td>" + escapeHtml(ev.categoria || "—") + "</td>" +
+            '<td><span class="status-badge status-badge--' + escapeHtml(ev.stato) + '">' +
+            escapeHtml(STATO_EVENTO_LABELS[ev.stato] || ev.stato) + "</span></td>" +
+            "<td>" + (ev.postiMax ? ev.postiDisponibili + " / " + ev.postiMax : "illimitati") + "</td>" +
+            '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button></td>';
+          tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModificaEvento(ev); });
+          tbody.appendChild(tr);
+        });
       })
       .catch(function (err) { window.alert(err.message); });
-  });
+  }
+
+  document.getElementById("btn-carica-eventi").addEventListener("click", caricaEventi);
+
+  function apriModificaEvento(evento) {
+    stato.eventoCorrenteId = evento.id;
+    document.getElementById("mod-ev-titolo").value = evento.titolo;
+    document.getElementById("mod-ev-descrizione").value = evento.descrizione || "";
+    document.getElementById("mod-ev-data").value = evento.dataEvento;
+    document.getElementById("mod-ev-luogo").value = evento.luogo || "";
+    document.getElementById("mod-ev-categoria").value = evento.categoria || "";
+    document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
+    document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
+    document.getElementById("mod-ev-posti").value = evento.postiMax || "";
+    document.getElementById("mod-ev-stato").value = evento.stato;
+    document.getElementById("evento-posti-info").textContent = evento.postiMax
+      ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
+      : "Nessun limite di posti impostato.";
+    document.getElementById("evento-dettaglio").hidden = false;
+    document.getElementById("evento-dettaglio").scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById("iscritti-tabella").hidden = true;
+    document.getElementById("modifica-evento-status").hidden = true;
+  }
 
   document.getElementById("btn-salva-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("mod-ev-");
@@ -370,6 +397,7 @@
     })
       .then(function () {
         mostraMessaggio(document.getElementById("modifica-evento-status"), "Modifiche salvate.", false);
+        caricaEventi();
       })
       .catch(function (err) { mostraMessaggio(document.getElementById("modifica-evento-status"), err.message, true); });
   });

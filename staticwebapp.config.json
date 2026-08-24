@@ -5,21 +5,6 @@
       "allowedRoles": ["editor"]
     },
     {
-      "route": "/api/events",
-      "methods": ["GET"],
-      "allowedRoles": ["anonymous", "authenticated"]
-    },
-    {
-      "route": "/api/events",
-      "methods": ["POST"],
-      "allowedRoles": ["editor"]
-    },
-    {
-      "route": "/api/events/*",
-      "methods": ["PUT", "DELETE"],
-      "allowedRoles": ["editor"]
-    },
-    {
       "route": "/api/settings",
       "methods": ["GET"],
       "allowedRoles": ["anonymous", "authenticated"]

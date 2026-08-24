@@ -1149,6 +1149,21 @@ p {
   color: var(--color-ink-soft);
 }
 
+.status-badge--aperto {
+  background: var(--color-sage-light);
+  color: var(--color-sage-dark);
+}
+
+.status-badge--chiuso {
+  background: var(--color-terracotta-light);
+  color: var(--color-terracotta-dark);
+}
+
+.status-badge--annullato {
+  background: var(--color-line);
+  color: var(--color-ink-soft);
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;

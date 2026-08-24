@@ -33,84 +33,15 @@
     <section class="page-hero">
       <div class="container">
         <span class="page-hero__eyebrow">Area riservata</span>
-        <h1>Gestione eventi e impostazioni</h1>
-        <p class="page-hero__subtitle">Crea e aggiorna gli eventi pubblicati su TraMe, e tieni allineati i link social.</p>
-        <p class="page-hero__subtitle">Per il Libro Soci, tessere, rinnovi e iscrizioni agli eventi con posti/quote:
+        <h1>Impostazioni sito</h1>
+        <p class="page-hero__subtitle">Tieni allineati i link social e la galleria.</p>
+        <p class="page-hero__subtitle">Per il Libro Soci, tessere, rinnovi ed eventi (con posti/quote/iscrizioni):
           <a href="admin-soci.html">vai a Gestione soci →</a> (richiede un accesso separato, riservato a
-          Segretario/Presidente/Tesoriere).</p>
+          Segretario/Presidente/Tesoriere/Admin — la gestione eventi è tutta lì ora, non più qui).</p>
       </div>
     </section>
 
     <section class="section">
-      <div class="container">
-        <div class="section__head" style="text-align:left; margin:0 0 30px;">
-          <span class="section__eyebrow">Eventi</span>
-          <h2 class="section__title">I tuoi eventi</h2>
-        </div>
-
-        <div id="event-form-panel" class="contact-form admin-panel" hidden>
-          <h3 id="event-form-title">Nuovo evento</h3>
-          <form id="event-form">
-            <input type="hidden" id="event-id" value="">
-            <div class="form-row">
-              <label for="event-title">Titolo</label>
-              <input type="text" id="event-title" required>
-            </div>
-            <div class="form-row">
-              <label for="event-category">Categoria</label>
-              <select id="event-category">
-                <option value="yoga">Yoga</option>
-                <option value="fotografia">Fotografia</option>
-                <option value="pasticceria">Pasticceria</option>
-                <option value="canto">Canto</option>
-                <option value="ballo">Ballo</option>
-                <option value="disegno">Disegno</option>
-                <option value="trekking-urbano">Trekking urbano</option>
-                <option value="viaggi">Viaggi</option>
-              </select>
-            </div>
-            <div class="form-row">
-              <label for="event-when">Quando (testo libero)</label>
-              <input type="text" id="event-when" placeholder="Es. Sab 12 settembre 2026, ore 18:30">
-            </div>
-            <div class="form-row">
-              <label for="event-where">Dove (testo libero)</label>
-              <input type="text" id="event-where" placeholder="Es. Parco Sempione, Milano">
-            </div>
-            <div class="form-row">
-              <label for="event-desc">Descrizione</label>
-              <textarea id="event-desc" rows="3"></textarea>
-            </div>
-            <div class="form-row">
-              <label for="event-cta">Testo del pulsante (opzionale)</label>
-              <input type="text" id="event-cta" placeholder="Scrivici per iscriverti">
-            </div>
-            <div class="form-row">
-              <label for="event-status">Stato</label>
-              <select id="event-status">
-                <option value="bozza">Bozza (non visibile sul sito)</option>
-                <option value="pubblicato">Pubblicato</option>
-                <option value="fatto">Fatto (concluso, non più visibile)</option>
-              </select>
-            </div>
-            <div class="admin-form__actions">
-              <button type="submit" class="btn btn--primary">Salva evento</button>
-              <button type="button" id="event-form-cancel" class="btn btn--outline">Annulla</button>
-            </div>
-            <p class="form-note" id="event-form-error" role="alert" hidden></p>
-          </form>
-        </div>
-
-        <div class="admin-toolbar">
-          <button type="button" id="new-event-btn" class="btn btn--primary">+ Nuovo evento</button>
-        </div>
-
-        <p id="events-empty" class="example-note" hidden>Nessun evento creato finora.</p>
-        <div id="events-list" class="admin-events-list"></div>
-      </div>
-    </section>
-
-    <section class="section section--alt">
       <div class="container" style="max-width:640px;">
         <div class="section__head" style="text-align:left; margin:0 0 30px;">
           <span class="section__eyebrow">Impostazioni</span>
