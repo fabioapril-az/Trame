@@ -1,6 +1,19 @@
 // Progetto TraMe — script condiviso
 
 document.addEventListener("DOMContentLoaded", function () {
+  /* Logo header: l'effetto "a cavallo" tra barra e onda ha senso solo
+     in cima alla pagina. Appena si scorre, la barra sticky può trovarsi
+     sopra contenuto qualsiasi (non più solo lo sfondo decorativo), quindi
+     il logo torna dentro i bordi (vedi .site-header.is-scrolled in CSS). */
+  var siteHeader = document.querySelector(".site-header");
+  if (siteHeader) {
+    var updateHeaderScrolled = function () {
+      siteHeader.classList.toggle("is-scrolled", window.scrollY > 4);
+    };
+    updateHeaderScrolled();
+    window.addEventListener("scroll", updateHeaderScrolled, { passive: true });
+  }
+
   /* Menu mobile */
   var toggle = document.querySelector(".nav__toggle");
   var nav = document.querySelector(".nav");

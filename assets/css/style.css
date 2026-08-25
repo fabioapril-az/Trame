@@ -192,7 +192,11 @@ p {
    inferiore della barra, restando a cavallo con la sezione sottostante
    (l'onda), senza però far crescere l'altezza della barra stessa: esce
    dal flusso del layout (position: absolute) e .logo riserva lo spazio
-   orizzontale necessario con il padding-left qui sotto. */
+   orizzontale necessario con il padding-left qui sotto.
+   Questo effetto ha senso solo in cima alla pagina, su schermi larghi:
+   appena si scorre (classe .is-scrolled, aggiunta via JS) o su mobile
+   il logo torna dentro i bordi della barra, altrimenti finirebbe sopra
+   al testo sottostante. */
 .logo__icon--header {
   position: absolute;
   left: -12px;
@@ -205,6 +209,30 @@ p {
 
 .logo:has(.logo__icon--header) {
   padding-left: 155px;
+}
+
+.site-header.is-scrolled .logo__icon--header {
+  position: static;
+  width: 104px;
+  height: 104px;
+  transform: none;
+}
+
+.site-header.is-scrolled .logo:has(.logo__icon--header) {
+  padding-left: 0;
+}
+
+@media (max-width: 720px) {
+  .logo__icon--header {
+    position: static;
+    width: 104px;
+    height: 104px;
+    transform: none;
+  }
+
+  .logo:has(.logo__icon--header) {
+    padding-left: 0;
+  }
 }
 
 .logo__text {
