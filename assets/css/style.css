@@ -187,6 +187,13 @@ p {
   object-fit: contain;
 }
 
+/* Nell'header il logo può essere più grande senza sfondare la barra
+   (l'altezza della riga è dettata dal testo/bottoni, non dall'icona). */
+.logo__icon--header {
+  width: 104px;
+  height: 104px;
+}
+
 .logo__text {
   display: flex;
   flex-direction: column;
