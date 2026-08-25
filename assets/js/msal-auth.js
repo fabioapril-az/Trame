@@ -6,27 +6,27 @@
 // all'API .NET, che lo valida tramite Easy Auth (pattern già validato
 // manualmente in Sprint 5 con "az account get-access-token").
 //
-// Login/logout usano il redirect a pagina intera (loginRedirect), non il
-// popup: bug reale riscontrato in test con un account nuovo del tenant —
-// Azure AD mostra una schermata di verifica/sicurezza al primo accesso
-// (MFA, registrazione informazioni di sicurezza) che non si renderizza
-// correttamente dentro una finestra popup piccola (resta bianca, il
-// popup non si chiude mai: "timed_out"/"block_nested_popups"). Il
-// redirect a pagina intera gestisce correttamente qualsiasi passaggio
-// extra, non solo la semplice password. Il popup resta usato SOLO come
-// fallback per il rinnovo silenzioso del token (acquireTokenPopup), dove
-// l'account è già pienamente autenticato e un passaggio extra è
-// improbabile.
+// Login/logout/rinnovo token usano SEMPRE il redirect a pagina intera, mai
+// popup: due bug reali trovati in test.
+// 1) Con un account nuovo del tenant, Azure AD mostra una schermata di
+//    verifica/sicurezza al primo accesso (MFA, registrazione informazioni
+//    di sicurezza) che non si renderizza correttamente dentro un popup
+//    piccolo (resta bianca, il popup non si chiude mai: "timed_out").
+// 2) Un popup aperto automaticamente da codice (non da un click diretto
+//    dell'utente, es. il rinnovo silenzioso del token dopo un redirect di
+//    login) può restare bianco e non chiudersi mai — i browser trattano
+//    diversamente i popup non originati da un gesto utente esplicito, e
+//    MSAL non riesce sempre a intercettarne la chiusura in quel caso.
 
 (function () {
   var msalInstance = new msal.PublicClientApplication({
     auth: {
       clientId: window.TRAME_CONFIG.msalClientId,
       authority: window.TRAME_CONFIG.msalAuthority,
-      // Pagina di redirect dedicata e vuota per il fallback popup
-      // (acquireTokenPopup) — vedi auth-blank.html. Il login vero e
-      // proprio (loginRedirect) specifica il proprio redirectUri qui
-      // sotto, puntato alla pagina reale dell'app.
+      // Redirect di default (usato per l'inizializzazione/eventuali flussi
+      // impliciti di MSAL) puntato su una pagina dedicata e vuota — vedi
+      // auth-blank.html. login()/getToken() specificano invece esplicitamente
+      // appRedirectUri (la pagina reale dell'app) per il proprio redirect.
       redirectUri: window.location.origin + "/auth-blank.html"
     },
     cache: {
@@ -41,6 +41,19 @@
     .then(function (result) {
       if (result && result.account) {
         msalInstance.setActiveAccount(result.account);
+      } else if (!msalInstance.getActiveAccount()) {
+        // Caricamento pagina "normale" (non un ritorno da redirect): se la
+        // sessione ha già un account in cache ma nessuno impostato come
+        // attivo, lo impostiamo esplicitamente — senza questo,
+        // getAllAccounts()[0] può scegliere un account diverso da quello
+        // con cui è stato effettivamente ottenuto il token più recente
+        // (bug reale trovato in test: subito dopo un login via redirect,
+        // il rinnovo silenzioso del token falliva e apriva un popup di
+        // fallback che restava bloccato in bianco — vedi getAccount sotto).
+        var accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+          msalInstance.setActiveAccount(accounts[0]);
+        }
       }
     })
     .catch(function (err) {
@@ -56,6 +69,13 @@
     });
 
   function getAccount() {
+    // getActiveAccount() rispetta quale account è stato effettivamente
+    // usato per l'ultimo login/token — getAllAccounts()[0] no (l'ordine
+    // non è garantito corrispondere), causa reale del bug sopra.
+    var active = msalInstance.getActiveAccount();
+    if (active) {
+      return active;
+    }
     var accounts = msalInstance.getAllAccounts();
     return accounts.length > 0 ? accounts[0] : null;
   }
@@ -80,9 +100,13 @@
   }
 
   // Restituisce un access token valido per l'API, rinnovando in silenzio
-  // quando possibile (fallback a un popup solo se la sessione richiede
-  // di nuovo un'interazione, es. dopo molte ore — l'account è già
-  // autenticato a quel punto, un popup basta).
+  // quando possibile. Se serve di nuovo un'interazione (sessione scaduta
+  // dopo molte ore), il fallback è un redirect a pagina intera, non un
+  // popup: un popup aperto automaticamente da qui (non da un click diretto
+  // dell'utente) può restare bloccato in bianco — bug reale trovato in
+  // test. Il redirect ricarica la pagina; la chiamata che ha innescato il
+  // rinnovo va ripetuta al ritorno (chi chiama getToken() lo fa già a ogni
+  // caricamento pagina/azione, quindi succede naturalmente).
   function getToken() {
     var account = getAccount();
     if (!account) {
@@ -94,8 +118,11 @@
       })
       .then(function (result) { return result.accessToken; })
       .catch(function () {
-        return msalInstance.acquireTokenPopup({ scopes: [window.TRAME_CONFIG.apiScope], account: account })
-          .then(function (result) { return result.accessToken; });
+        return msalInstance.acquireTokenRedirect({
+          scopes: [window.TRAME_CONFIG.apiScope],
+          account: account,
+          redirectUri: appRedirectUri
+        });
       });
   }
 
