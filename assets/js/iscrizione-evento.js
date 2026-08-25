@@ -126,7 +126,7 @@
 
     var payload = {
       email: inputEmail.value.trim(),
-      importoPagato: parseImporto(document.getElementById("importo-pagato").value)
+      importoPagato: null
     };
 
     if (!stato.trovato) {
