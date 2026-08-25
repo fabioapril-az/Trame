@@ -42,6 +42,17 @@
       if (result && result.account) {
         msalInstance.setActiveAccount(result.account);
       }
+    })
+    .catch(function (err) {
+      // Bug reale riscontrato in test: se sessionStorage contiene uno stato
+      // di un tentativo di login precedente interrotto/scaduto (es. tra due
+      // pagine diverse che condividono questo stesso script, come
+      // admin.html e admin-soci.html), handleRedirectPromise() rifiuta con
+      // "no_token_request_cache_error" — e senza questo catch la rifiutava
+      // per SEMPRE ("ready" restava una promise fallita), bloccando anche un
+      // login successivo pulito. Uno stato di ritorno incoerente non deve
+      // impedire di ripartire da "non ancora autenticato".
+      console.warn("Stato di redirect MSAL incoerente, riparto da non autenticato:", err);
     });
 
   function getAccount() {
