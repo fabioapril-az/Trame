@@ -4,7 +4,9 @@
 //   2a. non trovato -> form iscrizione associazione + iscrizione evento insieme
 //   2b. trovato, scaduto/decaduto -> rinnovo obbligatorio prima di procedere
 //   2c. trovato, in scadenza entro 30gg -> rinnovo suggerito (facoltativo)
-//   2d. trovato, attivo -> procede direttamente
+//   2d. trovato, attivo -> procede direttamente (nessun secondo click: non
+//       c'è altro da compilare, chiedere comunque conferma sarebbe solo
+//       attrito — segnalato dall'utente in test)
 // In tutti i casi termina con POST /api/eventi/{id}/iscriviti.
 
 (function () {
@@ -29,7 +31,9 @@
   var rinnovoAzioniFacoltative = document.getElementById("rinnovo-facoltativo-azioni");
   var btnSaltaRinnovo = document.getElementById("btn-salta-rinnovo");
   var stepConferma = document.getElementById("step-conferma");
+  var btnConferma = document.getElementById("btn-conferma");
   var confermaStatus = document.getElementById("conferma-status");
+  var invioInCorso = document.getElementById("invio-in-corso");
 
   var stato = { trovato: false, richiedeRinnovo: false, suggerisceRinnovo: false, saltaRinnovo: false };
 
@@ -105,7 +109,10 @@
           return;
         }
 
-        stepConferma.hidden = false;
+        // Socio già attivo, nessun rinnovo necessario: non c'è altro da
+        // compilare, quindi si procede subito invece di chiedere un secondo
+        // click su un pannello altrimenti vuoto.
+        eseguiIscrizione();
       })
       .catch(function (err) {
         emailStatus.textContent = err.message;
@@ -120,8 +127,24 @@
     stepRinnovo.hidden = true;
   });
 
-  wizardEl.addEventListener("submit", function (e) {
-    e.preventDefault();
+  // Valida i campi obbligatori di una sezione (nessun <form> nativo qui:
+  // wizard è un contenitore semplice, non un elemento form — la convalida
+  // va quindi fatta esplicitamente sui singoli campi).
+  function validaSezione(container) {
+    var campi = container.querySelectorAll("input, select, textarea");
+    for (var i = 0; i < campi.length; i++) {
+      if (!campi[i].checkValidity()) {
+        campi[i].reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function eseguiIscrizione() {
+    if (!stepNuovoSocio.hidden && !validaSezione(stepNuovoSocio)) {
+      return;
+    }
     confermaStatus.hidden = true;
 
     var payload = {
@@ -153,9 +176,8 @@
       };
     }
 
-    var btnConferma = document.getElementById("btn-conferma");
     btnConferma.disabled = true;
-    btnConferma.textContent = "Invio in corso…";
+    invioInCorso.hidden = false;
 
     window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/iscriviti", {
       method: "POST",
@@ -169,12 +191,14 @@
           "Se hai completato o rinnovato la tessera, la riceverai a breve via email.</p>";
       })
       .catch(function (err) {
+        invioInCorso.hidden = true;
         confermaStatus.textContent = err.message;
         confermaStatus.hidden = false;
         btnConferma.disabled = false;
-        btnConferma.textContent = "Conferma iscrizione";
       });
-  });
+  }
+
+  btnConferma.addEventListener("click", eseguiIscrizione);
 
   function val(id) {
     return document.getElementById(id).value.trim();
