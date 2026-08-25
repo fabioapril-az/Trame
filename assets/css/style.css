@@ -195,16 +195,16 @@ p {
    orizzontale necessario con il padding-left qui sotto. */
 .logo__icon--header {
   position: absolute;
-  left: 0;
+  left: -12px;
   top: 50%;
-  transform: translateY(-38%);
-  width: 150px;
-  height: 150px;
+  transform: translateY(-28%);
+  width: 175px;
+  height: 175px;
   z-index: 5;
 }
 
 .logo:has(.logo__icon--header) {
-  padding-left: 138px;
+  padding-left: 155px;
 }
 
 .logo__text {
