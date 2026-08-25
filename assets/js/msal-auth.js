@@ -36,11 +36,35 @@
 
   var appRedirectUri = window.location.origin + window.location.pathname;
 
+  // Token tenuto in memoria per la durata di questa pagina (non in
+  // sessionStorage: quello lo gestisce già MSAL). Bug reale trovato in
+  // test: acquireTokenSilent() fallisce sistematicamente su questo
+  // account/browser (probabile blocco cookie di terze parti di Edge
+  // sull'iframe nascosto che MSAL usa per il controllo silenzioso verso
+  // login.microsoftonline.com) — non solo dopo la scadenza, ma su OGNI
+  // chiamata. Senza questa cache, ogni azione (anche solo aprire la lista
+  // eventi) ripartiva da un redirect di login completo, cancellando
+  // qualunque dato l'utente stesse compilando in un form. Il token
+  // ottenuto dal login stesso (result.accessToken, già valido) viene
+  // riusato finché non scade, senza richiamare MSAL per ogni chiamata.
+  var tokenInMemoria = null;
+
+  function tokenValido(token) {
+    return Boolean(token && token.scadenza && token.scadenza.getTime() - Date.now() > 60000);
+  }
+
+  function salvaToken(result) {
+    if (result && result.accessToken) {
+      tokenInMemoria = { accessToken: result.accessToken, scadenza: result.expiresOn };
+    }
+  }
+
   var initPromise = msalInstance.initialize()
     .then(function () { return msalInstance.handleRedirectPromise(); })
     .then(function (result) {
       if (result && result.account) {
         msalInstance.setActiveAccount(result.account);
+        salvaToken(result);
       } else if (!msalInstance.getActiveAccount()) {
         // Caricamento pagina "normale" (non un ritorno da redirect): se la
         // sessione ha già un account in cache ma nessuno impostato come
@@ -99,24 +123,32 @@
     });
   }
 
-  // Restituisce un access token valido per l'API, rinnovando in silenzio
-  // quando possibile. Se serve di nuovo un'interazione (sessione scaduta
-  // dopo molte ore), il fallback è un redirect a pagina intera, non un
-  // popup: un popup aperto automaticamente da qui (non da un click diretto
-  // dell'utente) può restare bloccato in bianco — bug reale trovato in
-  // test. Il redirect ricarica la pagina; la chiamata che ha innescato il
-  // rinnovo va ripetuta al ritorno (chi chiama getToken() lo fa già a ogni
-  // caricamento pagina/azione, quindi succede naturalmente).
+  // Restituisce un access token valido per l'API. Prima controlla la cache
+  // in memoria (vedi sopra): se il token del login è ancora valido, lo
+  // riusa direttamente, senza richiamare MSAL — questo è ciò che permette
+  // di lavorare sulla pagina (compilare un form, ecc.) senza redirect
+  // improvvisi. Solo se manca o è scaduto tenta acquireTokenSilent(), e
+  // solo come ultima risorsa un redirect a pagina intera (mai un popup:
+  // aperto automaticamente da qui, non da un click diretto dell'utente,
+  // può restare bloccato in bianco — bug reale trovato in test). Un
+  // redirect qui ricarica la pagina cancellando i dati non salvati: capita
+  // ormai solo dopo un'ora reale di inattività del token, non a ogni azione.
   function getToken() {
     var account = getAccount();
     if (!account) {
       return Promise.reject(new Error("Non sei collegato."));
     }
+    if (tokenValido(tokenInMemoria)) {
+      return Promise.resolve(tokenInMemoria.accessToken);
+    }
     return initPromise
       .then(function () {
         return msalInstance.acquireTokenSilent({ scopes: [window.TRAME_CONFIG.apiScope], account: account });
       })
-      .then(function (result) { return result.accessToken; })
+      .then(function (result) {
+        salvaToken(result);
+        return result.accessToken;
+      })
       .catch(function () {
         return msalInstance.acquireTokenRedirect({
           scopes: [window.TRAME_CONFIG.apiScope],
