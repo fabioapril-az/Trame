@@ -60,6 +60,17 @@
             <p class="form-note" id="email-status" role="alert" hidden></p>
           </div>
 
+          <!-- Step 1b: scelta socio/non socio (solo se l'evento è aperto
+               anche ai non soci ed email non trovata) -->
+          <div id="step-scelta-non-socio" class="admin-panel" hidden>
+            <h3>Non risulti ancora iscritto/a</h3>
+            <p class="form-note">Questo evento è aperto anche a chi non è socio dell'associazione.</p>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--outline" id="btn-solo-evento">Iscriviti solo all'evento</button>
+              <button type="button" class="btn btn--primary" id="btn-anche-socio">Voglio anche associarmi</button>
+            </div>
+          </div>
+
           <!-- Step 2a: nuovo socio -->
           <div id="step-nuovo-socio" class="admin-panel" hidden>
             <h3>Non risulti ancora iscritto/a: completa i tuoi dati</h3>

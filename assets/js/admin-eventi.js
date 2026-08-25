@@ -101,7 +101,8 @@
       quotaEvento: quota ? parseFloat(quota) : null,
       quotaIscrizioneInclusa: quotaIscrizione ? parseFloat(quotaIscrizione) : null,
       postiMax: posti ? parseInt(posti, 10) : null,
-      stato: document.getElementById(prefix + "stato").value
+      stato: document.getElementById(prefix + "stato").value,
+      apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked
     };
   }
 
@@ -124,8 +125,14 @@
             '<td><span class="status-badge status-badge--' + escapeHtml(ev.stato) + '">' +
             escapeHtml(STATO_EVENTO_LABELS[ev.stato] || ev.stato) + "</span></td>" +
             "<td>" + (ev.postiMax ? ev.postiDisponibili + " / " + ev.postiMax : "illimitati") + "</td>" +
-            '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button></td>';
+            '<td>' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="iscritti">Iscritti</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
+            '</td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModificaEvento(ev); });
+          tr.querySelector('[data-action="iscritti"]').addEventListener("click", function () { mostraIscrittiDiretti(ev); });
+          tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaEvento(ev); });
           tbody.appendChild(tr);
         });
       })
@@ -144,6 +151,7 @@
     document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
     document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
     document.getElementById("mod-ev-posti").value = evento.postiMax || "";
+    document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax
       ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
@@ -168,8 +176,8 @@
       .catch(function (err) { mostraMessaggio(document.getElementById("modifica-evento-status"), err.message, true); });
   });
 
-  document.getElementById("btn-vedi-iscritti").addEventListener("click", function () {
-    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti")
+  function caricaIscritti(eventoId) {
+    return apiFetchAuth("/api/eventi/" + eventoId + "/iscritti")
       .then(function (iscritti) {
         var tbody = document.getElementById("iscritti-tabella-body");
         tbody.innerHTML = "";
@@ -188,7 +196,31 @@
         document.getElementById("iscritti-tabella").hidden = false;
       })
       .catch(function (err) { window.alert(err.message); });
+  }
+
+  document.getElementById("btn-vedi-iscritti").addEventListener("click", function () {
+    caricaIscritti(stato.eventoCorrenteId);
   });
+
+  // Scorciatoia dalla riga della tabella eventi: mostra direttamente
+  // l'elenco iscritti senza dover prima aprire "Modifica" (segnalato
+  // dall'utente come poco raggiungibile).
+  function mostraIscrittiDiretti(evento) {
+    stato.eventoCorrenteId = evento.id;
+    document.getElementById("evento-dettaglio").hidden = true;
+    caricaIscritti(evento.id).then(function () {
+      document.getElementById("iscritti-tabella").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  function eliminaEvento(evento) {
+    if (!window.confirm('Eliminare definitivamente l\'evento "' + evento.titolo + '"? L\'operazione non è reversibile.')) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + evento.id, { method: "DELETE" })
+      .then(function () { caricaEventi(); })
+      .catch(function (err) { window.alert(err.message); });
+  }
 
   function annullaIscrizione(iscrizioneId) {
     var vuoleRimborso = window.confirm("Registrare anche una richiesta di rimborso per questa iscrizione?");

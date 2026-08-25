@@ -10,6 +10,7 @@
     socio_cancellato: "Questo socio risulta cancellato: contatta la segreteria.",
     evento_non_trovato: "Evento non trovato.",
     evento_non_aperto: "Le iscrizioni a questo evento non sono aperte.",
+    evento_con_iscritti: "Impossibile eliminare: ci sono già iscrizioni. Annullalo invece, impostando lo stato su 'Annullato'.",
     posti_esauriti: "I posti disponibili per questo evento sono esauriti.",
     richiede_nuovo_socio: "Email non trovata: completa anche i dati di iscrizione all'associazione.",
     richiede_rinnovo: "La tessera risulta scaduta: è necessario rinnovarla per procedere.",

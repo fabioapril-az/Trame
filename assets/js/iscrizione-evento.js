@@ -1,7 +1,8 @@
 // Wizard di iscrizione a un evento (iscrizione-evento.html?id=EVENTO_ID).
 // Implementa il flusso a rami di specifiche sez. 4.3:
 //   1. cerca socio per email (GET /api/soci/verifica)
-//   2a. non trovato -> form iscrizione associazione + iscrizione evento insieme
+//   2a. non trovato, evento NON aperto ai non soci -> form iscrizione associazione + iscrizione evento insieme
+//   2a-bis. non trovato, evento aperto ai non soci -> scelta esplicita: solo evento, o anche associazione
 //   2b. trovato, scaduto/decaduto -> rinnovo obbligatorio prima di procedere
 //   2c. trovato, in scadenza entro 30gg -> rinnovo suggerito (facoltativo)
 //   2d. trovato, attivo -> procede direttamente (nessun secondo click: non
@@ -24,6 +25,9 @@
   var btnVerificaEmail = document.getElementById("btn-verifica-email");
   var emailStatus = document.getElementById("email-status");
 
+  var stepSceltaNonSocio = document.getElementById("step-scelta-non-socio");
+  var btnSoloEvento = document.getElementById("btn-solo-evento");
+  var btnAncheSocio = document.getElementById("btn-anche-socio");
   var stepNuovoSocio = document.getElementById("step-nuovo-socio");
   var stepRinnovo = document.getElementById("step-rinnovo");
   var rinnovoTitolo = document.getElementById("rinnovo-titolo");
@@ -35,7 +39,10 @@
   var confermaStatus = document.getElementById("conferma-status");
   var invioInCorso = document.getElementById("invio-in-corso");
 
-  var stato = { trovato: false, richiedeRinnovo: false, suggerisceRinnovo: false, saltaRinnovo: false };
+  var stato = {
+    trovato: false, richiedeRinnovo: false, suggerisceRinnovo: false, saltaRinnovo: false,
+    apertoNonSoci: false, soloEvento: false
+  };
 
   if (!eventoId) {
     titoloEl.textContent = "Link non valido";
@@ -49,6 +56,7 @@
     .then(function (evento) {
       loadingEl.hidden = true;
       titoloEl.textContent = evento.titolo;
+      stato.apertoNonSoci = Boolean(evento.apertoNonSoci);
       var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
       if (evento.quotaEvento) {
         dettagli += " · quota: " + evento.quotaEvento + " €";
@@ -84,8 +92,15 @@
         stato.suggerisceRinnovo = Boolean(result.suggerisceRinnovo);
 
         if (!result.trovato) {
-          stepNuovoSocio.hidden = false;
-          stepConferma.hidden = false;
+          if (stato.apertoNonSoci) {
+            // Evento aperto anche ai non soci: si chiede esplicitamente se
+            // associarsi oppure iscriversi al solo evento, invece di dare
+            // per scontato che si voglia diventare soci.
+            stepSceltaNonSocio.hidden = false;
+          } else {
+            stepNuovoSocio.hidden = false;
+            stepConferma.hidden = false;
+          }
           return;
         }
 
@@ -127,6 +142,20 @@
     stepRinnovo.hidden = true;
   });
 
+  btnSoloEvento.addEventListener("click", function () {
+    stato.soloEvento = true;
+    stepSceltaNonSocio.hidden = true;
+    stepConferma.hidden = false;
+    eseguiIscrizione();
+  });
+
+  btnAncheSocio.addEventListener("click", function () {
+    stato.soloEvento = false;
+    stepSceltaNonSocio.hidden = true;
+    stepNuovoSocio.hidden = false;
+    stepConferma.hidden = false;
+  });
+
   // Valida i campi obbligatori di una sezione (nessun <form> nativo qui:
   // wizard è un contenitore semplice, non un elemento form — la convalida
   // va quindi fatta esplicitamente sui singoli campi).
@@ -152,7 +181,7 @@
       importoPagato: null
     };
 
-    if (!stato.trovato) {
+    if (!stato.trovato && !stato.soloEvento) {
       payload.nuovoSocio = {
         nome: val("ns-nome"),
         cognome: val("ns-cognome"),
