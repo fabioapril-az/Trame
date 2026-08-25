@@ -105,13 +105,19 @@
   }
 
   // Naviga via dalla pagina (redirect a pagina intera): la Promise non si
-  // risolve mai in questo contesto — al ritorno da Azure AD, admin-soci.html
-  // si ricarica e handleRedirectPromise() sopra ripristina l'account.
+  // risolve mai in questo contesto. Il redirect punta a auth-blank.html
+  // (non a questa pagina) — bug reale trovato in test: admin.html è
+  // protetta anche dal ruolo "editor" della Static Web App, che intercetta
+  // il ritorno da login.microsoftonline.com PRIMA che questo script possa
+  // elaborarlo (vedi auth-blank.html per il dettaglio). auth-blank.html
+  // rimanda poi qui con un secondo redirect "same-site", passato tramite
+  // "state" perché è un valore che il round-trip OAuth restituisce intatto.
   function login() {
     return initPromise.then(function () {
       return msalInstance.loginRedirect({
         scopes: [window.TRAME_CONFIG.apiScope],
-        redirectUri: appRedirectUri
+        redirectUri: window.location.origin + "/auth-blank.html",
+        state: window.location.pathname
       });
     });
   }
@@ -153,7 +159,8 @@
         return msalInstance.acquireTokenRedirect({
           scopes: [window.TRAME_CONFIG.apiScope],
           account: account,
-          redirectUri: appRedirectUri
+          redirectUri: window.location.origin + "/auth-blank.html",
+          state: window.location.pathname
         });
       });
   }
