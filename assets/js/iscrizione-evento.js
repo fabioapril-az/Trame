@@ -237,6 +237,7 @@
     emailStatus.hidden = true;
     disabilitaStepEmail(true);
     btnAssociati.disabled = true;
+    stepInteresse.hidden = true;
     stato.trovato = false;
     stato.richiedeRinnovo = false;
     stato.suggerisceRinnovo = false;
@@ -264,8 +265,17 @@
     document.getElementById("interesse-solo-soci-nota").hidden = stato.apertoNonSoci;
     interesseStatus.hidden = true;
     btnAssociati.disabled = true;
-    btnConfermaSoloEvento.disabled = true;
+    // "Conferma" (solo evento) resta cliccabile anche con questo pannello
+    // aperto: chi cambia idea può scegliere quella strada senza dover
+    // ricaricare la pagina (bug reale trovato in test: prima veniva
+    // disabilitata qui e non c'era modo di riattivarla senza "Annulla",
+    // che non esisteva).
     stepInteresse.hidden = false;
+  });
+
+  document.getElementById("btn-annulla-associazione").addEventListener("click", function () {
+    stepInteresse.hidden = true;
+    btnAssociati.disabled = false;
   });
 
   // Valida i campi obbligatori di una sezione (nessun <form> nativo qui:

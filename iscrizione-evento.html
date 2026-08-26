@@ -118,7 +118,10 @@
             <div class="form-row"><label for="ia-cognome">Cognome</label><input type="text" id="ia-cognome" maxlength="100" required></div>
             <div class="form-row"><label for="ia-telefono">Telefono (facoltativo)</label><input type="tel" id="ia-telefono" maxlength="20"></div>
             <p class="form-note">Solo per poterti ricontattare: questi dati non ti associano automaticamente, la segreteria ti contatterà per completare l'iscrizione all'associazione.</p>
-            <button type="button" class="btn btn--primary" id="btn-conferma-associazione">Conferma richiesta</button>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-conferma-associazione">Conferma richiesta</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-associazione">Annulla</button>
+            </div>
             <p class="form-note" id="interesse-status" role="alert" hidden></p>
           </div>
 
