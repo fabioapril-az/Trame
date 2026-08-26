@@ -306,7 +306,14 @@
         email: inputEmail.value.trim(),
         nome: document.getElementById("ia-nome").value.trim(),
         cognome: document.getElementById("ia-cognome").value.trim(),
-        telefono: document.getElementById("ia-telefono").value.trim() || null
+        telefono: document.getElementById("ia-telefono").value.trim() || null,
+        dataNascita: document.getElementById("ia-data-nascita").value,
+        codiceFiscale: document.getElementById("ia-cf").value.trim().toUpperCase(),
+        indirizzo: document.getElementById("ia-indirizzo").value.trim() || null,
+        citta: document.getElementById("ia-citta").value.trim() || null,
+        cap: document.getElementById("ia-cap").value.trim() || null,
+        consensoAccettato: document.getElementById("ia-consenso").checked,
+        consensoVersione: "1.0"
       })
     })
       .then(function (esito) {
