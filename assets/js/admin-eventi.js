@@ -61,11 +61,13 @@
       titolo: document.getElementById(prefix + "titolo").value.trim(),
       descrizione: document.getElementById(prefix + "descrizione").value.trim() || null,
       dataEvento: document.getElementById(prefix + "data").value,
+      ora: document.getElementById(prefix + "ora").value || null,
       luogo: document.getElementById(prefix + "luogo").value.trim() || null,
       categoria: document.getElementById(prefix + "categoria").value || null,
       quotaEvento: quota ? parseFloat(quota) : null,
       quotaIscrizioneInclusa: quotaIscrizione ? parseFloat(quotaIscrizione) : null,
       postiMax: posti ? parseInt(posti, 10) : null,
+      scadenzaIscrizione: document.getElementById(prefix + "scadenza-iscrizione").value || null,
       stato: document.getElementById(prefix + "stato").value,
       apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked
     };
@@ -85,7 +87,7 @@
           var tr = document.createElement("tr");
           tr.innerHTML =
             "<td>" + escapeHtml(ev.titolo) + "</td>" +
-            "<td>" + formattaData(ev.dataEvento) + "</td>" +
+            "<td>" + formattaData(ev.dataEvento) + (ev.ora ? " · " + escapeHtml(ev.ora) : "") + "</td>" +
             "<td>" + escapeHtml(ev.categoria || "—") + "</td>" +
             '<td><span class="status-badge status-badge--' + escapeHtml(ev.stato) + '">' +
             escapeHtml(STATO_EVENTO_LABELS[ev.stato] || ev.stato) + "</span></td>" +
@@ -111,20 +113,36 @@
     document.getElementById("mod-ev-titolo").value = evento.titolo;
     document.getElementById("mod-ev-descrizione").value = evento.descrizione || "";
     document.getElementById("mod-ev-data").value = evento.dataEvento;
+    document.getElementById("mod-ev-ora").value = evento.ora || "";
     document.getElementById("mod-ev-luogo").value = evento.luogo || "";
     document.getElementById("mod-ev-categoria").value = evento.categoria || "";
     document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
     document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
     document.getElementById("mod-ev-posti").value = evento.postiMax || "";
+    document.getElementById("mod-ev-scadenza-iscrizione").value = evento.scadenzaIscrizione || "";
     document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax
       ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
       : "Nessun limite di posti impostato.";
+    aggiornaAnteprimaImmagine(evento.immagineUrl);
+    document.getElementById("mod-ev-immagine-file").value = "";
+    document.getElementById("immagine-evento-status").hidden = true;
     document.getElementById("evento-dettaglio").hidden = false;
     document.getElementById("evento-dettaglio").scrollIntoView({ behavior: "smooth", block: "start" });
     document.getElementById("iscritti-tabella").hidden = true;
     document.getElementById("modifica-evento-status").hidden = true;
+  }
+
+  function aggiornaAnteprimaImmagine(url) {
+    var img = document.getElementById("mod-ev-immagine-anteprima");
+    if (url) {
+      img.src = url;
+      img.hidden = false;
+    } else {
+      img.hidden = true;
+      img.removeAttribute("src");
+    }
   }
 
   document.getElementById("btn-salva-evento").addEventListener("click", function () {
@@ -188,6 +206,78 @@
       .then(function () { caricaEventi(); })
       .catch(function (err) { window.alert(err.message); });
   }
+
+  // Ridimensiona/comprime l'immagine lato client prima dell'invio (lato
+  // massimo ~1600px, JPEG qualità ~80%): una foto da telefono può pesare
+  // diversi MB a piena risoluzione, così si evitano sia upload lenti sia
+  // pagine pubbliche pesanti, senza bisogno di elaborazione lato server
+  // (coordinato con la sessione sul sito pubblico).
+  function ridimensionaImmagine(file, latoMassimo, qualita) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        URL.revokeObjectURL(url);
+        var scala = Math.min(1, latoMassimo / Math.max(img.width, img.height));
+        var larghezza = Math.round(img.width * scala);
+        var altezza = Math.round(img.height * scala);
+        var canvas = document.createElement("canvas");
+        canvas.width = larghezza;
+        canvas.height = altezza;
+        canvas.getContext("2d").drawImage(img, 0, 0, larghezza, altezza);
+        canvas.toBlob(function (blob) {
+          if (!blob) {
+            reject(new Error("Impossibile elaborare l'immagine."));
+            return;
+          }
+          resolve(blob);
+        }, "image/jpeg", qualita);
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error("File immagine non valido."));
+      };
+      img.src = url;
+    });
+  }
+
+  document.getElementById("btn-carica-immagine").addEventListener("click", function () {
+    var input = document.getElementById("mod-ev-immagine-file");
+    var status = document.getElementById("immagine-evento-status");
+    status.hidden = true;
+    if (!input.files || !input.files[0]) {
+      mostraMessaggio(status, "Seleziona prima un file immagine.", true);
+      return;
+    }
+
+    ridimensionaImmagine(input.files[0], 1600, 0.8)
+      .then(function (blob) {
+        var formData = new FormData();
+        formData.append("file", blob, "evento.jpg");
+        return apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/immagine", {
+          method: "POST",
+          body: formData
+        });
+      })
+      .then(function (evento) {
+        mostraMessaggio(status, "Immagine caricata.", false);
+        aggiornaAnteprimaImmagine(evento.immagineUrl);
+        caricaEventi();
+      })
+      .catch(function (err) { mostraMessaggio(status, err.message, true); });
+  });
+
+  document.getElementById("btn-rimuovi-immagine").addEventListener("click", function () {
+    var status = document.getElementById("immagine-evento-status");
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/immagine", { method: "DELETE" })
+      .then(function (evento) {
+        mostraMessaggio(status, "Immagine rimossa.", false);
+        aggiornaAnteprimaImmagine(evento.immagineUrl);
+        document.getElementById("mod-ev-immagine-file").value = "";
+        caricaEventi();
+      })
+      .catch(function (err) { mostraMessaggio(status, err.message, true); });
+  });
 
   function annullaIscrizione(iscrizioneId) {
     var vuoleRimborso = window.confirm("Registrare anche una richiesta di rimborso per questa iscrizione?");
