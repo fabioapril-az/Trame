@@ -49,26 +49,22 @@
 
         <div id="wizard" hidden>
 
-          <!-- Step 1: email -->
+          <!-- Step 1: email. Per un evento aperto anche ai non soci, oltre al
+               normale bottone di verifica compare subito un secondo bottone
+               per iscriversi al solo evento, senza dover prima scoprire se
+               l'email risulta socia o no. -->
           <div id="step-email" class="admin-panel">
             <h3>La tua email</h3>
             <div class="form-row">
               <label for="input-email">Email</label>
               <input type="email" id="input-email" required>
             </div>
-            <button type="button" class="btn btn--primary" id="btn-verifica-email">Continua</button>
-            <p class="form-note" id="email-status" role="alert" hidden></p>
-          </div>
-
-          <!-- Step 1b: scelta socio/non socio (solo se l'evento è aperto
-               anche ai non soci ed email non trovata) -->
-          <div id="step-scelta-non-socio" class="admin-panel" hidden>
-            <h3>Non risulti ancora iscritto/a</h3>
-            <p class="form-note">Questo evento è aperto anche a chi non è socio dell'associazione.</p>
+            <p class="form-note" id="evento-non-soci-nota" hidden>Questo evento è aperto anche a chi non è socio dell'associazione.</p>
             <div class="admin-form__actions">
-              <button type="button" class="btn btn--outline" id="btn-solo-evento">Iscriviti solo all'evento</button>
-              <button type="button" class="btn btn--primary" id="btn-anche-socio">Voglio anche associarmi</button>
+              <button type="button" class="btn btn--primary" id="btn-conferma-solo-evento" hidden>Conferma</button>
+              <button type="button" class="btn btn--primary" id="btn-verifica-email">Continua</button>
             </div>
+            <p class="form-note" id="email-status" role="alert" hidden></p>
           </div>
 
           <!-- Step 2a: nuovo socio -->

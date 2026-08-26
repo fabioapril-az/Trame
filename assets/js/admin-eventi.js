@@ -214,7 +214,9 @@
   }
 
   function eliminaEvento(evento) {
-    if (!window.confirm('Eliminare definitivamente l\'evento "' + evento.titolo + '"? L\'operazione non è reversibile.')) {
+    var messaggio = 'Eliminare definitivamente l\'evento "' + evento.titolo + '"? ' +
+      'L\'operazione non è reversibile: se ci sono già iscritti, vengono eliminati anche loro.';
+    if (!window.confirm(messaggio)) {
       return;
     }
     apiFetchAuth("/api/eventi/" + evento.id, { method: "DELETE" })
