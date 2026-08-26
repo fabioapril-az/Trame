@@ -268,14 +268,36 @@
     stepInteresse.hidden = false;
   });
 
+  // Valida i campi obbligatori di una sezione (nessun <form> nativo qui:
+  // wizard è un contenitore semplice, non un elemento form — la convalida
+  // va quindi fatta esplicitamente sui singoli campi).
+  function validaSezione(container) {
+    var campi = container.querySelectorAll("input, select, textarea");
+    for (var i = 0; i < campi.length; i++) {
+      if (!campi[i].checkValidity()) {
+        campi[i].reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
   btnConfermaAssociazione.addEventListener("click", function () {
+    if (!validaSezione(stepInteresse)) {
+      return;
+    }
     interesseStatus.hidden = true;
     btnConfermaAssociazione.disabled = true;
 
     window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/richiesta-associazione", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: inputEmail.value.trim() })
+      body: JSON.stringify({
+        email: inputEmail.value.trim(),
+        nome: document.getElementById("ia-nome").value.trim(),
+        cognome: document.getElementById("ia-cognome").value.trim(),
+        telefono: document.getElementById("ia-telefono").value.trim() || null
+      })
     })
       .then(function (esito) {
         wizardEl.hidden = true;
