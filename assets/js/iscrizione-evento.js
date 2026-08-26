@@ -121,6 +121,26 @@
     // genericamente insieme agli altri controlli.
   }
 
+  // Il testo del bottone cambia in "Invio in corso…" mentre la richiesta è
+  // in volo: disabilitare da solo il bottone non bastava a far capire che
+  // stava succedendo qualcosa, specie con l'API un po' lenta a rispondere
+  // (segnalato dall'utente in test).
+  function impostaCaricamento(btn, inCorso) {
+    if (inCorso) {
+      if (!btn.dataset.testoOriginale) {
+        btn.dataset.testoOriginale = btn.textContent;
+      }
+      btn.textContent = "Invio in corso…";
+      btn.disabled = true;
+    } else {
+      if (btn.dataset.testoOriginale) {
+        btn.textContent = btn.dataset.testoOriginale;
+        delete btn.dataset.testoOriginale;
+      }
+      btn.disabled = false;
+    }
+  }
+
   // Verifica automatica dell'email (debounce sull'input + verifica immediata
   // all'uscita dal campo): nessun bottone "Continua" da premere apposta, ma
   // serve SOLO a decidere quale passo mostrare — non esegue mai da sola
@@ -297,7 +317,7 @@
       return;
     }
     interesseStatus.hidden = true;
-    btnConfermaAssociazione.disabled = true;
+    impostaCaricamento(btnConfermaAssociazione, true);
 
     window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/richiesta-associazione", {
       method: "POST",
@@ -331,7 +351,7 @@
           notaEvento + "</p>";
       })
       .catch(function (err) {
-        btnConfermaAssociazione.disabled = false;
+        impostaCaricamento(btnConfermaAssociazione, false);
         interesseStatus.textContent = err.message;
         interesseStatus.hidden = false;
       });
@@ -344,6 +364,7 @@
 
   function eseguiIscrizione(opzioni) {
     var soloEvento = Boolean(opzioni && opzioni.soloEvento);
+    var pulsante = soloEvento ? btnConfermaSoloEvento : btnConferma;
     confermaStatus.hidden = true;
 
     var payload = {
@@ -360,7 +381,7 @@
       };
     }
 
-    btnConferma.disabled = true;
+    impostaCaricamento(pulsante, true);
     invioInCorso.hidden = false;
 
     window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/iscriviti", {
@@ -383,7 +404,7 @@
         invioInCorso.hidden = true;
         confermaStatus.textContent = err.message;
         confermaStatus.hidden = false;
-        btnConferma.disabled = false;
+        impostaCaricamento(pulsante, false);
         disabilitaStepEmail(false);
       });
   }
