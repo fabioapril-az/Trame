@@ -60,6 +60,14 @@
     apertoNonSoci: false, impostazioni: null
   };
   var verificaTimer = null;
+  // Email dell'ultima verifica completata: se il blur scatta di nuovo con
+  // la STESSA email (es. per lo spostamento del focus quando si clicca un
+  // bottone dentro il wizard, come "Conferma iscrizione"), non va rifatta
+  // la verifica — altrimenti i pannelli/bottoni appena mostrati vengono
+  // nascosti un istante prima che il click li raggiunga, e il click va a
+  // vuoto (bug reale trovato in test: "Conferma iscrizione"/"Conferma
+  // richiesta" sembravano non fare nulla).
+  var ultimaEmailVerificata = null;
 
   if (!eventoId) {
     titoloEl.textContent = "Link non valido";
@@ -119,18 +127,27 @@
   // un'iscrizione o un invio (richiesto esplicitamente: ogni azione finale
   // passa sempre da un click su un bottone "Conferma").
   function verificaEmail() {
+    var email = inputEmail.value.trim();
+    if (!inputEmail.checkValidity() || !email) {
+      verificaStatus.hidden = true;
+      return;
+    }
+    if (email === ultimaEmailVerificata) {
+      // Stessa email già verificata (es. blur causato dal click su un
+      // bottone del wizard): non rifare la richiesta né nascondere i
+      // pannelli già mostrati.
+      return;
+    }
+    ultimaEmailVerificata = email;
+
     btnAssociati.disabled = true;
     stepRinnovo.hidden = true;
     stepConferma.hidden = true;
     stepInteresse.hidden = true;
-    if (!inputEmail.checkValidity() || !inputEmail.value.trim()) {
-      verificaStatus.hidden = true;
-      return;
-    }
     verificaStatus.textContent = "Verifica in corso…";
     verificaStatus.hidden = false;
 
-    window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(inputEmail.value.trim()))
+    window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(email))
       .then(function (result) {
         verificaStatus.hidden = true;
         stato.trovato = result.trovato;
@@ -138,9 +155,20 @@
         stato.suggerisceRinnovo = Boolean(result.suggerisceRinnovo);
 
         if (!result.trovato) {
+          btnAssociati.hidden = false;
           btnAssociati.disabled = false;
+          if (stato.apertoNonSoci) {
+            btnConfermaSoloEvento.hidden = false;
+          }
           return;
         }
+
+        // Già socio: "Voglio associarmi"/"Conferma" (solo evento) non
+        // servono più, l'unica azione possibile è "Conferma iscrizione"
+        // (richiesto esplicitamente: prima restavano visibili insieme,
+        // confondendo a cosa servisse "Conferma").
+        btnAssociati.hidden = true;
+        btnConfermaSoloEvento.hidden = true;
 
         if (stato.richiedeRinnovo) {
           rinnovoTitolo.textContent = "La tua tessera è scaduta";
@@ -169,6 +197,7 @@
       })
       .catch(function (err) {
         verificaStatus.hidden = true;
+        ultimaEmailVerificata = null;
         emailStatus.textContent = err.message;
         emailStatus.hidden = false;
       });
@@ -182,7 +211,14 @@
     verificaEmail();
   });
   inputEmail.addEventListener("input", function () {
+    // L'email sta cambiando: torna allo stato "da verificare" — entrambi i
+    // bottoni riappaiono nelle loro condizioni di default finché la nuova
+    // verifica (blur o debounce) non stabilisce di nuovo lo stato giusto.
     btnAssociati.disabled = true;
+    btnAssociati.hidden = false;
+    if (stato.apertoNonSoci) {
+      btnConfermaSoloEvento.hidden = false;
+    }
     emailStatus.hidden = true;
     if (verificaTimer) {
       clearTimeout(verificaTimer);
@@ -225,6 +261,7 @@
     } else {
       interesseVantaggi.hidden = true;
     }
+    document.getElementById("interesse-solo-soci-nota").hidden = stato.apertoNonSoci;
     interesseStatus.hidden = true;
     btnAssociati.disabled = true;
     btnConfermaSoloEvento.disabled = true;
@@ -240,11 +277,19 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: inputEmail.value.trim() })
     })
-      .then(function () {
+      .then(function (esito) {
         wizardEl.hidden = true;
         esitoEl.hidden = false;
+        // Se l'evento è aperto anche ai non soci, la richiesta di
+        // associazione iscrive anche a QUESTO evento (l'"anche" del
+        // bottone) — altrimenti l'iscrizione resta bloccata finché la
+        // segreteria non associa la persona.
+        var notaEvento = (esito && esito.iscrittoEvento)
+          ? " Ti abbiamo anche iscritto/a a questo evento: ti aspettiamo!"
+          : "";
         esitoEl.innerHTML = "<h3>Richiesta inviata!</h3>" +
-          "<p>Grazie per l'interesse: abbiamo inoltrato la tua richiesta alla segreteria, che ti contatterà a breve.</p>";
+          "<p>Grazie per l'interesse: abbiamo inoltrato la tua richiesta alla segreteria, che ti contatterà a breve." +
+          notaEvento + "</p>";
       })
       .catch(function (err) {
         btnConfermaAssociazione.disabled = false;
