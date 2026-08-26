@@ -49,13 +49,14 @@
 
         <div id="wizard" hidden>
 
-          <!-- Step 1: email. Verifica automatica (all'uscita dal campo): se il
-               socio è già attivo si procede subito, se deve rinnovare compare
-               il passo di rinnovo, altrimenti si abilita "Voglio associarmi
-               anche" (nessuna registrazione automatica: manda solo una email
-               allo staff). Per un evento aperto anche ai non soci compare
-               anche "Conferma", per iscriversi al solo evento senza dover
-               attendere la verifica. -->
+          <!-- Step 1: email. Verifica automatica (all'uscita dal campo): non
+               esegue mai un'azione da sola, serve solo a determinare quale
+               passo mostrare — l'iscrizione o la richiesta di associazione
+               partono sempre da un click esplicito su un bottone "Conferma"
+               (richiesto: nessuna azione senza un click, nemmeno per un
+               socio già attivo). Per un evento aperto anche ai non soci
+               compare anche "Conferma" qui, per iscriversi al solo evento
+               senza dover attendere la verifica. -->
           <div id="step-email" class="admin-panel">
             <h3>La tua email</h3>
             <div class="form-row">
@@ -94,14 +95,26 @@
             </div>
           </div>
 
-          <!-- Step 3: conferma (mostrata solo per il rinnovo tessera; se il
-               socio è già attivo e non deve rinnovare, l'iscrizione parte
-               subito dopo l'email, senza un secondo click su un pannello
-               altrimenti vuoto). -->
+          <!-- Step 3: conferma (mostrata quando l'email risulta di un socio
+               — sia già attivo sia in caso di rinnovo — sempre con un click
+               esplicito, mai in automatico). -->
           <div id="step-conferma" class="admin-panel" hidden>
             <h3>Conferma iscrizione</h3>
             <button type="button" class="btn btn--primary" id="btn-conferma">Conferma iscrizione</button>
             <p class="form-note" id="conferma-status" role="alert" hidden></p>
+          </div>
+
+          <!-- Step: interesse associazione, mostrato dopo aver cliccato
+               "Voglio associarmi anche all'associazione" — quota e vantaggi
+               PRIMA di inviare la richiesta, così si decide con le
+               informazioni complete; l'invio parte solo al click su
+               "Conferma richiesta" (nessuna registrazione automatica). -->
+          <div id="step-interesse-associazione" class="admin-panel" hidden>
+            <h3>Diventare socio</h3>
+            <p class="form-note" id="interesse-quota" hidden></p>
+            <p class="form-note" id="interesse-vantaggi" style="white-space:pre-line;" hidden></p>
+            <button type="button" class="btn btn--primary" id="btn-conferma-associazione">Conferma richiesta</button>
+            <p class="form-note" id="interesse-status" role="alert" hidden></p>
           </div>
 
           <p class="form-note" id="invio-in-corso" hidden>Iscrizione in corso…</p>

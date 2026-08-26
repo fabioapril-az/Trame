@@ -1,23 +1,24 @@
 // Wizard di iscrizione a un evento (iscrizione-evento.html?id=EVENTO_ID).
-// Flusso (specifiche sez. 4.3, riviste su richiesta esplicita dell'utente:
-// nessuna registrazione automatica di nuovi soci da qui):
+// Flusso (specifiche sez. 4.3, riviste su richiesta esplicita dell'utente):
 //   - la verifica dell'email è automatica, all'uscita dal campo (nessun
-//     bottone "Continua" da premere apposta):
-//     1. trovato, attivo -> procede subito (nessun click: non c'è altro da
-//        compilare, chiedere comunque conferma sarebbe solo attrito)
-//     2. trovato, scaduto/decaduto -> rinnovo obbligatorio prima di procedere
-//     3. trovato, in scadenza entro 30gg -> rinnovo suggerito (facoltativo)
-//     4. non trovato -> abilita il bottone "Voglio associarmi anche
-//        all'associazione" (disabilitato finché non si sa che l'email non è
-//        già socia — SENZA verifica, il bottone resta disabilitato)
-//   - "Voglio associarmi anche all'associazione": non registra nulla in
-//     automatico, manda solo una email allo staff (POST .../richiesta-
-//     associazione) che segue la richiesta manualmente; la schermata finale
-//     mostra quota associativa e testo dei vantaggi (da GET /api/impostazioni,
-//     gestiti in admin-soci.html).
+//     bottone "Continua" da premere apposta) — ma NON esegue mai da sola
+//     un'azione finale: serve solo a determinare quale passo mostrare.
+//     Ogni azione finale (iscrizione o richiesta di associazione) richiede
+//     sempre un click esplicito su un bottone "Conferma" (bug reale corretto:
+//     prima un socio già attivo veniva iscritto in automatico senza alcun
+//     click, e non c'era modo di vedere/annullare l'operazione).
+//     1. trovato, attivo -> mostra "Conferma iscrizione" (step-conferma)
+//     2. trovato, scaduto/decaduto -> rinnovo obbligatorio, poi "Conferma iscrizione"
+//     3. trovato, in scadenza entro 30gg -> rinnovo suggerito (facoltativo), poi "Conferma iscrizione"
+//     4. non trovato -> abilita "Voglio associarmi anche all'associazione"
+//   - "Voglio associarmi anche all'associazione": mostra quota associativa e
+//     testo dei vantaggi (da GET /api/impostazioni, gestiti in
+//     admin-soci.html) PRIMA di inviare qualunque cosa; solo al click su
+//     "Conferma richiesta" parte una email allo staff (POST .../richiesta-
+//     associazione) — nessuna registrazione automatica di nuovi soci.
 //   - "Conferma" (solo se l'evento è aperto anche ai non soci): iscrizione al
 //     solo evento, nessuna verifica preventiva — il backend riconosce da sé
-//     un'email già socia.
+//     un'email già socia. Resta un solo click, come già era.
 // In tutti i casi (tranne la richiesta di associazione) termina con
 // POST /api/eventi/{id}/iscriviti.
 
@@ -47,6 +48,12 @@
   var btnConferma = document.getElementById("btn-conferma");
   var confermaStatus = document.getElementById("conferma-status");
   var invioInCorso = document.getElementById("invio-in-corso");
+
+  var stepInteresse = document.getElementById("step-interesse-associazione");
+  var interesseQuota = document.getElementById("interesse-quota");
+  var interesseVantaggi = document.getElementById("interesse-vantaggi");
+  var btnConfermaAssociazione = document.getElementById("btn-conferma-associazione");
+  var interesseStatus = document.getElementById("interesse-status");
 
   var stato = {
     trovato: false, richiedeRinnovo: false, suggerisceRinnovo: false, saltaRinnovo: false,
@@ -95,9 +102,9 @@
       chiusoEl.textContent = err.message;
     });
 
-  // Disabilita/riabilita i controlli del passo email — condivisa dai due
-  // punti di ingresso possibili ("Voglio associarmi" e, per un evento aperto
-  // ai non soci, "Conferma" per il solo evento).
+  // Disabilita/riabilita i controlli del passo email — condivisa dai punti
+  // di ingresso possibili ("Conferma richiesta" e, per un evento aperto ai
+  // non soci, "Conferma" per il solo evento).
   function disabilitaStepEmail(disabled) {
     inputEmail.disabled = disabled;
     btnConfermaSoloEvento.disabled = disabled;
@@ -107,13 +114,15 @@
   }
 
   // Verifica automatica dell'email (debounce sull'input + verifica immediata
-  // all'uscita dal campo): nessun bottone "Continua" da premere apposta.
-  // Il bottone "Voglio associarmi anche all'associazione" si abilita SOLO se
-  // la verifica conferma che l'email non è già di un socio (richiesto
-  // esplicitamente: prima restava sempre cliccabile).
+  // all'uscita dal campo): nessun bottone "Continua" da premere apposta, ma
+  // serve SOLO a decidere quale passo mostrare — non esegue mai da sola
+  // un'iscrizione o un invio (richiesto esplicitamente: ogni azione finale
+  // passa sempre da un click su un bottone "Conferma").
   function verificaEmail() {
     btnAssociati.disabled = true;
     stepRinnovo.hidden = true;
+    stepConferma.hidden = true;
+    stepInteresse.hidden = true;
     if (!inputEmail.checkValidity() || !inputEmail.value.trim()) {
       verificaStatus.hidden = true;
       return;
@@ -154,8 +163,9 @@
         }
 
         // Socio già attivo, nessun rinnovo necessario: non c'è altro da
-        // compilare, quindi si procede subito invece di chiedere un click.
-        eseguiIscrizione();
+        // compilare, ma serve comunque un click esplicito su "Conferma
+        // iscrizione" — nessuna azione deve partire da sola.
+        stepConferma.hidden = false;
       })
       .catch(function (err) {
         verificaStatus.hidden = true;
@@ -182,7 +192,8 @@
 
   // "Conferma" (solo evento, visibile solo se l'evento è aperto anche ai non
   // soci): nessuna verifica preventiva, si invia subito — è il backend a
-  // occuparsi di riconoscere un'email già socia (vedi IscrivitiAsync).
+  // occuparsi di riconoscere un'email già socia (vedi IscrivitiAsync). Resta
+  // un solo click, era già così.
   btnConfermaSoloEvento.addEventListener("click", function () {
     if (!inputEmail.reportValidity()) {
       return;
@@ -196,13 +207,33 @@
     eseguiIscrizione({ soloEvento: true });
   });
 
-  // "Voglio associarmi anche all'associazione": nessuna registrazione
-  // automatica (richiesto esplicitamente) — manda solo una email allo staff,
-  // che segue la richiesta manualmente. Abilitato solo dopo verificaEmail()
+  // "Voglio associarmi anche all'associazione": mostra quota e vantaggi
+  // PRIMA di inviare qualunque cosa — l'invio parte solo al click su
+  // "Conferma richiesta" (vedi sotto). Abilitato solo dopo che verificaEmail()
   // ha confermato che l'email non è già di un socio.
   btnAssociati.addEventListener("click", function () {
-    disabilitaStepEmail(true);
+    var imp = stato.impostazioni;
+    if (imp && imp.quotaIscrizioneSoci) {
+      interesseQuota.textContent = "Quota associativa: " + imp.quotaIscrizioneSoci + " €";
+      interesseQuota.hidden = false;
+    } else {
+      interesseQuota.hidden = true;
+    }
+    if (imp && imp.testoVantaggiIscrizione) {
+      interesseVantaggi.textContent = imp.testoVantaggiIscrizione;
+      interesseVantaggi.hidden = false;
+    } else {
+      interesseVantaggi.hidden = true;
+    }
+    interesseStatus.hidden = true;
     btnAssociati.disabled = true;
+    btnConfermaSoloEvento.disabled = true;
+    stepInteresse.hidden = false;
+  });
+
+  btnConfermaAssociazione.addEventListener("click", function () {
+    interesseStatus.hidden = true;
+    btnConfermaAssociazione.disabled = true;
 
     window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/richiesta-associazione", {
       method: "POST",
@@ -212,34 +243,15 @@
       .then(function () {
         wizardEl.hidden = true;
         esitoEl.hidden = false;
-        esitoEl.innerHTML = renderEsitoRichiestaAssociazione();
+        esitoEl.innerHTML = "<h3>Richiesta inviata!</h3>" +
+          "<p>Grazie per l'interesse: abbiamo inoltrato la tua richiesta alla segreteria, che ti contatterà a breve.</p>";
       })
       .catch(function (err) {
-        disabilitaStepEmail(false);
-        btnAssociati.disabled = false;
-        emailStatus.textContent = err.message;
-        emailStatus.hidden = false;
+        btnConfermaAssociazione.disabled = false;
+        interesseStatus.textContent = err.message;
+        interesseStatus.hidden = false;
       });
   });
-
-  function renderEsitoRichiestaAssociazione() {
-    var html = "<h3>Richiesta inviata!</h3>" +
-      "<p>Grazie per l'interesse: abbiamo inoltrato la tua richiesta alla segreteria, che ti contatterà a breve.</p>";
-    var imp = stato.impostazioni;
-    if (imp && imp.quotaIscrizioneSoci) {
-      html += "<p><strong>Quota associativa:</strong> " + imp.quotaIscrizioneSoci + " €</p>";
-    }
-    if (imp && imp.testoVantaggiIscrizione) {
-      html += "<p>" + escapeHtml(imp.testoVantaggiIscrizione).replace(/\n/g, "<br>") + "</p>";
-    }
-    return html;
-  }
-
-  function escapeHtml(value) {
-    var div = document.createElement("div");
-    div.textContent = value == null ? "" : String(value);
-    return div.innerHTML;
-  }
 
   btnSaltaRinnovo.addEventListener("click", function () {
     stato.saltaRinnovo = true;
@@ -285,11 +297,6 @@
       })
       .catch(function (err) {
         invioInCorso.hidden = true;
-        // Sia nel percorso "socio già attivo" (invio automatico) sia in
-        // quello "Conferma" per il solo evento, il pannello di conferma
-        // resta nascosto di default: se qui si torna con un errore, va reso
-        // visibile, altrimenti il messaggio non si vede da nessuna parte.
-        stepConferma.hidden = false;
         confermaStatus.textContent = err.message;
         confermaStatus.hidden = false;
         btnConferma.disabled = false;
