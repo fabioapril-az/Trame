@@ -65,6 +65,7 @@
     btnLogout.hidden = false;
     userLabel.textContent = account.name || account.username;
     cercaSoci();
+    caricaImpostazioniIscrizione();
   }
 
   btnLogin.addEventListener("click", function () {
@@ -303,5 +304,46 @@
         });
       })
       .catch(function (err) { window.alert(err.message); });
+  });
+
+  // --- Iscrizione soci (quota + testo vantaggi, mostrati in
+  //     iscrizione-evento.html a chi non è ancora socio) ---
+  // Condivide /api/impostazioni con i link social di admin.html: è un PUT
+  // che sovrascrive tutti i campi, quindi qui si tengono in cache quelli non
+  // editati in questa pagina (instagram/facebook/galleria) per non
+  // azzerarli inviando solo quota e testo.
+  var impostazioniCorrenti = null;
+
+  function caricaImpostazioniIscrizione() {
+    window.trameFetch("/api/impostazioni")
+      .then(function (impostazioni) {
+        impostazioniCorrenti = impostazioni;
+        document.getElementById("is-quota").value = impostazioni.quotaIscrizioneSoci || "";
+        document.getElementById("is-vantaggi").value = impostazioni.testoVantaggiIscrizione || "";
+      })
+      .catch(function () { /* form vuoto: si può comunque compilare da zero */ });
+  }
+
+  document.getElementById("iscrizione-soci-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var status = document.getElementById("iscrizione-soci-status");
+    status.hidden = true;
+
+    var quota = document.getElementById("is-quota").value;
+    var payload = Object.assign({}, impostazioniCorrenti, {
+      quotaIscrizioneSoci: quota ? parseFloat(quota) : null,
+      testoVantaggiIscrizione: document.getElementById("is-vantaggi").value.trim() || null
+    });
+
+    apiFetchAuth("/api/impostazioni", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function (aggiornate) {
+        impostazioniCorrenti = aggiornate;
+        mostraMessaggio(status, "Salvato.", false);
+      })
+      .catch(function (err) { mostraMessaggio(status, err.message, true); });
   });
 })();

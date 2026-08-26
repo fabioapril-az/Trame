@@ -1,21 +1,25 @@
 // Wizard di iscrizione a un evento (iscrizione-evento.html?id=EVENTO_ID).
-// Implementa il flusso a rami di specifiche sez. 4.3:
-//   1a. evento NON aperto ai non soci -> un solo bottone "Continua": cerca
-//       socio per email (GET /api/soci/verifica) e si procede in base al
-//       risultato (vedi sotto).
-//   1b. evento aperto anche ai non soci -> la scelta è immediata, insieme
-//       alla mail, invece che dopo aver scoperto se l'email è già socia
-//       (segnalato dall'utente: un passaggio in meno): due bottoni,
-//       "Conferma" (iscrizione al solo evento, nessuna verifica preventiva)
-//       e "Voglio associarmi anche all'associazione" (stesso comportamento
-//       del bottone "Continua" del caso 1a).
-//   2a. non trovato -> form iscrizione associazione + iscrizione evento insieme
-//   2b. trovato, scaduto/decaduto -> rinnovo obbligatorio prima di procedere
-//   2c. trovato, in scadenza entro 30gg -> rinnovo suggerito (facoltativo)
-//   2d. trovato, attivo -> procede direttamente (nessun secondo click: non
-//       c'è altro da compilare, chiedere comunque conferma sarebbe solo
-//       attrito — segnalato dall'utente in test)
-// In tutti i casi termina con POST /api/eventi/{id}/iscriviti.
+// Flusso (specifiche sez. 4.3, riviste su richiesta esplicita dell'utente:
+// nessuna registrazione automatica di nuovi soci da qui):
+//   - la verifica dell'email è automatica, all'uscita dal campo (nessun
+//     bottone "Continua" da premere apposta):
+//     1. trovato, attivo -> procede subito (nessun click: non c'è altro da
+//        compilare, chiedere comunque conferma sarebbe solo attrito)
+//     2. trovato, scaduto/decaduto -> rinnovo obbligatorio prima di procedere
+//     3. trovato, in scadenza entro 30gg -> rinnovo suggerito (facoltativo)
+//     4. non trovato -> abilita il bottone "Voglio associarmi anche
+//        all'associazione" (disabilitato finché non si sa che l'email non è
+//        già socia — SENZA verifica, il bottone resta disabilitato)
+//   - "Voglio associarmi anche all'associazione": non registra nulla in
+//     automatico, manda solo una email allo staff (POST .../richiesta-
+//     associazione) che segue la richiesta manualmente; la schermata finale
+//     mostra quota associativa e testo dei vantaggi (da GET /api/impostazioni,
+//     gestiti in admin-soci.html).
+//   - "Conferma" (solo se l'evento è aperto anche ai non soci): iscrizione al
+//     solo evento, nessuna verifica preventiva — il backend riconosce da sé
+//     un'email già socia.
+// In tutti i casi (tranne la richiesta di associazione) termina con
+// POST /api/eventi/{id}/iscriviti.
 
 (function () {
   var eventoId = new URLSearchParams(window.location.search).get("id");
@@ -27,14 +31,13 @@
   var wizardEl = document.getElementById("wizard");
   var esitoEl = document.getElementById("esito-finale");
 
-  var stepEmail = document.getElementById("step-email");
   var inputEmail = document.getElementById("input-email");
   var eventoNonSociNota = document.getElementById("evento-non-soci-nota");
   var btnConfermaSoloEvento = document.getElementById("btn-conferma-solo-evento");
-  var btnVerificaEmail = document.getElementById("btn-verifica-email");
+  var btnAssociati = document.getElementById("btn-associati");
+  var verificaStatus = document.getElementById("verifica-status");
   var emailStatus = document.getElementById("email-status");
 
-  var stepNuovoSocio = document.getElementById("step-nuovo-socio");
   var stepRinnovo = document.getElementById("step-rinnovo");
   var rinnovoTitolo = document.getElementById("rinnovo-titolo");
   var rinnovoNota = document.getElementById("rinnovo-nota");
@@ -47,8 +50,9 @@
 
   var stato = {
     trovato: false, richiedeRinnovo: false, suggerisceRinnovo: false, saltaRinnovo: false,
-    apertoNonSoci: false, soloEvento: false
+    apertoNonSoci: false, impostazioni: null
   };
+  var verificaTimer = null;
 
   if (!eventoId) {
     titoloEl.textContent = "Link non valido";
@@ -58,6 +62,10 @@
     return;
   }
 
+  window.trameFetch("/api/impostazioni")
+    .then(function (impostazioni) { stato.impostazioni = impostazioni; })
+    .catch(function () { /* quota/testo vantaggi non essenziali per il resto del flusso */ });
+
   window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId))
     .then(function (evento) {
       loadingEl.hidden = true;
@@ -66,9 +74,6 @@
       if (stato.apertoNonSoci) {
         eventoNonSociNota.hidden = false;
         btnConfermaSoloEvento.hidden = false;
-        btnVerificaEmail.textContent = "Voglio associarmi anche all'associazione";
-        btnVerificaEmail.classList.remove("btn--primary");
-        btnVerificaEmail.classList.add("btn--outline");
       }
       var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
       if (evento.quotaEvento) {
@@ -91,30 +96,40 @@
     });
 
   // Disabilita/riabilita i controlli del passo email — condivisa dai due
-  // punti di ingresso possibili ("Continua"/"Voglio associarmi" e, per un
-  // evento aperto ai non soci, "Conferma" per il solo evento).
+  // punti di ingresso possibili ("Voglio associarmi" e, per un evento aperto
+  // ai non soci, "Conferma" per il solo evento).
   function disabilitaStepEmail(disabled) {
     inputEmail.disabled = disabled;
-    btnVerificaEmail.disabled = disabled;
     btnConfermaSoloEvento.disabled = disabled;
+    // btnAssociati resta gestito a parte: si riabilita solo se la verifica
+    // conferma che l'email non è già socia (vedi verificaEmail sotto), non
+    // genericamente insieme agli altri controlli.
   }
 
-  btnVerificaEmail.addEventListener("click", function () {
-    if (!inputEmail.reportValidity()) {
+  // Verifica automatica dell'email (debounce sull'input + verifica immediata
+  // all'uscita dal campo): nessun bottone "Continua" da premere apposta.
+  // Il bottone "Voglio associarmi anche all'associazione" si abilita SOLO se
+  // la verifica conferma che l'email non è già di un socio (richiesto
+  // esplicitamente: prima restava sempre cliccabile).
+  function verificaEmail() {
+    btnAssociati.disabled = true;
+    stepRinnovo.hidden = true;
+    if (!inputEmail.checkValidity() || !inputEmail.value.trim()) {
+      verificaStatus.hidden = true;
       return;
     }
-    emailStatus.hidden = true;
-    disabilitaStepEmail(true);
+    verificaStatus.textContent = "Verifica in corso…";
+    verificaStatus.hidden = false;
 
     window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(inputEmail.value.trim()))
       .then(function (result) {
+        verificaStatus.hidden = true;
         stato.trovato = result.trovato;
         stato.richiedeRinnovo = Boolean(result.richiedeRinnovoObbligatorio);
         stato.suggerisceRinnovo = Boolean(result.suggerisceRinnovo);
 
         if (!result.trovato) {
-          stepNuovoSocio.hidden = false;
-          stepConferma.hidden = false;
+          btnAssociati.disabled = false;
           return;
         }
 
@@ -139,56 +154,100 @@
         }
 
         // Socio già attivo, nessun rinnovo necessario: non c'è altro da
-        // compilare, quindi si procede subito invece di chiedere un secondo
-        // click su un pannello altrimenti vuoto.
+        // compilare, quindi si procede subito invece di chiedere un click.
         eseguiIscrizione();
       })
       .catch(function (err) {
+        verificaStatus.hidden = true;
         emailStatus.textContent = err.message;
         emailStatus.hidden = false;
-        disabilitaStepEmail(false);
       });
+  }
+
+  inputEmail.addEventListener("blur", function () {
+    if (verificaTimer) {
+      clearTimeout(verificaTimer);
+      verificaTimer = null;
+    }
+    verificaEmail();
+  });
+  inputEmail.addEventListener("input", function () {
+    btnAssociati.disabled = true;
+    emailStatus.hidden = true;
+    if (verificaTimer) {
+      clearTimeout(verificaTimer);
+    }
+    verificaTimer = setTimeout(verificaEmail, 700);
   });
 
-  // Iscrizione al solo evento (visibile solo se l'evento è aperto anche ai
-  // non soci): nessuna verifica preventiva, si invia subito — è il backend
-  // a occuparsi di riconoscere un'email già socia (vedi IscrivitiAsync).
+  // "Conferma" (solo evento, visibile solo se l'evento è aperto anche ai non
+  // soci): nessuna verifica preventiva, si invia subito — è il backend a
+  // occuparsi di riconoscere un'email già socia (vedi IscrivitiAsync).
   btnConfermaSoloEvento.addEventListener("click", function () {
     if (!inputEmail.reportValidity()) {
       return;
     }
     emailStatus.hidden = true;
     disabilitaStepEmail(true);
+    btnAssociati.disabled = true;
     stato.trovato = false;
     stato.richiedeRinnovo = false;
     stato.suggerisceRinnovo = false;
-    stato.soloEvento = true;
-    eseguiIscrizione();
+    eseguiIscrizione({ soloEvento: true });
   });
+
+  // "Voglio associarmi anche all'associazione": nessuna registrazione
+  // automatica (richiesto esplicitamente) — manda solo una email allo staff,
+  // che segue la richiesta manualmente. Abilitato solo dopo verificaEmail()
+  // ha confermato che l'email non è già di un socio.
+  btnAssociati.addEventListener("click", function () {
+    disabilitaStepEmail(true);
+    btnAssociati.disabled = true;
+
+    window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/richiesta-associazione", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: inputEmail.value.trim() })
+    })
+      .then(function () {
+        wizardEl.hidden = true;
+        esitoEl.hidden = false;
+        esitoEl.innerHTML = renderEsitoRichiestaAssociazione();
+      })
+      .catch(function (err) {
+        disabilitaStepEmail(false);
+        btnAssociati.disabled = false;
+        emailStatus.textContent = err.message;
+        emailStatus.hidden = false;
+      });
+  });
+
+  function renderEsitoRichiestaAssociazione() {
+    var html = "<h3>Richiesta inviata!</h3>" +
+      "<p>Grazie per l'interesse: abbiamo inoltrato la tua richiesta alla segreteria, che ti contatterà a breve.</p>";
+    var imp = stato.impostazioni;
+    if (imp && imp.quotaIscrizioneSoci) {
+      html += "<p><strong>Quota associativa:</strong> " + imp.quotaIscrizioneSoci + " €</p>";
+    }
+    if (imp && imp.testoVantaggiIscrizione) {
+      html += "<p>" + escapeHtml(imp.testoVantaggiIscrizione).replace(/\n/g, "<br>") + "</p>";
+    }
+    return html;
+  }
+
+  function escapeHtml(value) {
+    var div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+  }
 
   btnSaltaRinnovo.addEventListener("click", function () {
     stato.saltaRinnovo = true;
     stepRinnovo.hidden = true;
   });
 
-  // Valida i campi obbligatori di una sezione (nessun <form> nativo qui:
-  // wizard è un contenitore semplice, non un elemento form — la convalida
-  // va quindi fatta esplicitamente sui singoli campi).
-  function validaSezione(container) {
-    var campi = container.querySelectorAll("input, select, textarea");
-    for (var i = 0; i < campi.length; i++) {
-      if (!campi[i].checkValidity()) {
-        campi[i].reportValidity();
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function eseguiIscrizione() {
-    if (!stepNuovoSocio.hidden && !validaSezione(stepNuovoSocio)) {
-      return;
-    }
+  function eseguiIscrizione(opzioni) {
+    var soloEvento = Boolean(opzioni && opzioni.soloEvento);
     confermaStatus.hidden = true;
 
     var payload = {
@@ -196,22 +255,7 @@
       importoPagato: null
     };
 
-    if (!stato.trovato && !stato.soloEvento) {
-      payload.nuovoSocio = {
-        nome: val("ns-nome"),
-        cognome: val("ns-cognome"),
-        email: payload.email,
-        telefono: val("ns-telefono") || null,
-        dataNascita: val("ns-data-nascita"),
-        codiceFiscale: val("ns-cf").toUpperCase(),
-        indirizzo: val("ns-indirizzo") || null,
-        citta: val("ns-citta") || null,
-        cap: val("ns-cap") || null,
-        consensoAccettato: document.getElementById("ns-consenso").checked,
-        consensoVersione: "1.0",
-        consensoCanale: "evento"
-      };
-    } else if (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo)) {
+    if (!soloEvento && (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo))) {
       payload.rinnovo = {
         dataRinnovo: new Date().toISOString().slice(0, 10),
         importo: parseImporto(document.getElementById("rn-importo").value),
@@ -231,12 +275,10 @@
       .then(function (esito) {
         wizardEl.hidden = true;
         esitoEl.hidden = false;
-        // La frase sulla tessera ha senso solo per chi l'ha appena creata o
-        // rinnovata in questo passaggio — a un socio già attivo o a chi si è
-        // iscritto senza associarsi non si mostra (segnalato dall'utente:
-        // vedeva comunque il riferimento alla tessera pur non avendo fatto
-        // né una cosa né l'altra).
-        var notaTessera = (esito && (esito.tipoIscrizione === "nuovo_socio" || esito.tipoIscrizione === "rinnovo"))
+        // La frase sulla tessera ha senso solo per chi l'ha appena rinnovata
+        // in questo passaggio — a un socio già attivo o a chi si è iscritto
+        // senza associarsi non si mostra.
+        var notaTessera = (esito && esito.tipoIscrizione === "rinnovo")
           ? " Riceverai a breve la tessera via email."
           : "";
         esitoEl.innerHTML = "<h3>Iscrizione confermata!</h3><p>Ti aspettiamo all'evento." + notaTessera + "</p>";
@@ -246,8 +288,7 @@
         // Sia nel percorso "socio già attivo" (invio automatico) sia in
         // quello "Conferma" per il solo evento, il pannello di conferma
         // resta nascosto di default: se qui si torna con un errore, va reso
-        // visibile, altrimenti il messaggio non si vede da nessuna parte
-        // (bug reale: "non fa nulla").
+        // visibile, altrimenti il messaggio non si vede da nessuna parte.
         stepConferma.hidden = false;
         confermaStatus.textContent = err.message;
         confermaStatus.hidden = false;
@@ -256,7 +297,7 @@
       });
   }
 
-  btnConferma.addEventListener("click", eseguiIscrizione);
+  btnConferma.addEventListener("click", function () { eseguiIscrizione(); });
 
   function val(id) {
     return document.getElementById(id).value.trim();
