@@ -89,6 +89,10 @@
       if (stato.apertoNonSoci) {
         eventoNonSociNota.hidden = false;
         btnConfermaSoloEvento.hidden = false;
+      } else {
+        // Senza "Conferma" (solo evento) come alternativa, "anche" non ha
+        // senso: qui è l'unica azione possibile per chi non è socio.
+        btnAssociati.textContent = "Voglio iscrivermi all'associazione";
       }
       var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
       if (evento.quotaEvento) {
@@ -314,6 +318,12 @@
 
   btnConfermaAssociazione.addEventListener("click", function () {
     if (!validaSezione(stepInteresse)) {
+      // Il tooltip nativo del browser sul campo non valido a volte passa
+      // inosservato in un modulo lungo come questo: si vedeva il click
+      // apparentemente "non fare nulla" (segnalato dall'utente in test).
+      // Un messaggio esplicito rende visibile che qualcosa È successo.
+      interesseStatus.textContent = "Controlla i campi evidenziati: alcuni dati sono mancanti o non validi.";
+      interesseStatus.hidden = false;
       return;
     }
     interesseStatus.hidden = true;
