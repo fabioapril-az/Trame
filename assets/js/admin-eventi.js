@@ -1,18 +1,13 @@
-// Gestione eventi (admin.html, sezione "Eventi"). Login separato dal ruolo
-// SWA "editor" usato per il resto della pagina (Impostazioni): qui serve un
-// ruolo Azure AD App Roles (Presidente/Admin) sulla stessa App Registration
-// "Trame Backoffice" usata dal Libro Soci — verificato dall'API .NET a ogni
-// chiamata, questa pagina si limita a nascondere/mostrare l'interfaccia e a
-// mostrare gli errori che l'API restituisce (403 compreso).
+// Gestione eventi (admin.html, sezione "Eventi"). Login condiviso con il
+// resto della pagina (Impostazioni) — vedi admin-auth.js per il widget di
+// login/logout e la visibilità della sezione riservata: qui ci si limita a
+// caricare i dati quando arriva "trame:auth-ready" e a mostrare gli errori
+// che l'API restituisce (403 compreso). Serve comunque un ruolo Azure AD
+// App Roles (Presidente/Admin) sulla App Registration "Trame Backoffice"
+// usata anche dal Libro Soci, verificato dall'API .NET a ogni chiamata.
 
 (function () {
   var stato = { eventoCorrenteId: null };
-
-  var authGateNote = document.getElementById("eventi-auth-gate-note");
-  var areaRiservata = document.getElementById("eventi-area-riservata");
-  var userLabel = document.getElementById("eventi-auth-user-label");
-  var btnLogin = document.getElementById("eventi-btn-login");
-  var btnLogout = document.getElementById("eventi-btn-logout");
 
   function apiFetchAuth(path, options) {
     options = options || {};
@@ -40,37 +35,7 @@
     el.style.color = isErrore ? "var(--color-terracotta, #b5533c)" : "inherit";
   }
 
-  // --- Autenticazione ---
-
-  function refreshUi() {
-    var account = window.trameAuth.getAccount();
-    if (!account) {
-      authGateNote.hidden = false;
-      areaRiservata.hidden = true;
-      btnLogin.hidden = false;
-      btnLogout.hidden = true;
-      userLabel.textContent = "Non collegato";
-      return;
-    }
-    authGateNote.hidden = true;
-    areaRiservata.hidden = false;
-    btnLogin.hidden = true;
-    btnLogout.hidden = false;
-    userLabel.textContent = account.name || account.username;
-    caricaEventi();
-  }
-
-  btnLogin.addEventListener("click", function () {
-    window.trameAuth.login().then(refreshUi).catch(function (err) {
-      mostraMessaggio(authGateNote, "Accesso non riuscito: " + err.message, true);
-    });
-  });
-
-  btnLogout.addEventListener("click", function () {
-    window.trameAuth.logout().then(function () { window.location.reload(); });
-  });
-
-  window.trameAuth.ready.then(refreshUi);
+  window.addEventListener("trame:auth-ready", caricaEventi);
 
   // --- Eventi ---
 

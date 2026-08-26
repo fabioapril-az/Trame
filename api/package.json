@@ -2,13 +2,12 @@
   "name": "trame-api",
   "version": "1.0.0",
   "private": true,
-  "description": "API per il CMS eventi di TraMe (Azure Functions, Managed Functions su Static Web Apps).",
+  "description": "Scaffold Azure Functions della Static Web App — nessuna route esposta: eventi e impostazioni sono passati al backend .NET.",
   "main": "src/index.js",
   "scripts": {
     "start": "func start"
   },
   "dependencies": {
-    "@azure/data-tables": "^13.3.2",
     "@azure/functions": "^4.5.1"
   }
 }

@@ -1,6 +1,7 @@
 // Wrapper minimo su MSAL.js (Microsoft Authentication Library) per il
-// backoffice soci (admin-soci.html). Login con MSAL.js contro la App
-// Registration "Trame Backoffice" — stessa usata da Easy Auth sull'API,
+// backoffice (admin.html: impostazioni ed eventi; admin-soci.html: libro
+// soci). Login con MSAL.js contro la App Registration "Trame Backoffice" —
+// stessa usata da Easy Auth sull'API,
 // ma qui in modalità Single-Page Application (piattaforma "spa", nessun
 // client secret: PKCE). Il token ottenuto viene passato come Bearer
 // all'API .NET, che lo valida tramite Easy Auth (pattern già validato

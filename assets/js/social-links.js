@@ -2,17 +2,16 @@
 // valori impostati dagli editor nella pagina di amministrazione. Finché
 // non sono configurati, i link restano nascosti (hidden nell'HTML) e la
 // nota "in fase di attivazione" resta visibile.
+// GET /api/impostazioni è sul backend .NET (non più la Function Node.js
+// separata): serve trame-config.js/trame-api.js caricati prima di questo
+// script.
 
 (function () {
   document.addEventListener("DOMContentLoaded", function () {
     var links = document.querySelectorAll("[data-social]");
     if (!links.length) return;
 
-    fetch("/api/settings")
-      .then(function (res) {
-        if (!res.ok) throw new Error("Richiesta impostazioni non riuscita");
-        return res.json();
-      })
+    window.trameFetch("/api/impostazioni")
       .then(function (settings) {
         var urls = {
           instagram: settings && settings.instagramUrl,

@@ -1,5 +1,6 @@
 // Backoffice Libro Soci + gestione eventi (admin-soci.html). Login separato
-// dal ruolo SWA "editor" di admin.html: qui serve un ruolo App Roles Azure AD
+// da quello di admin.html (sessione MSAL/App Roles indipendente, anche se
+// contro la stessa App Registration): qui serve un ruolo App Roles Azure AD
 // sull'App Registration "Trame Backoffice" (segretario/presidente/
 // vicepresidente/admin), verificato dall'API stessa a ogni chiamata — questa
 // pagina non decide da sola chi può fare cosa, si limita a nascondere/mostrare

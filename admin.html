@@ -23,8 +23,9 @@
         </span>
       </a>
       <div class="admin-header__user">
-        <span id="admin-user-label">Accesso in corso…</span>
-        <a href="/.auth/logout?post_logout_redirect_uri=/" class="btn btn--outline btn--small">Esci</a>
+        <span id="admin-user-label">Non collegato</span>
+        <button type="button" class="btn btn--primary btn--small" id="admin-btn-login">Accedi</button>
+        <button type="button" class="btn btn--outline btn--small" id="admin-btn-logout" hidden>Esci</button>
       </div>
     </div>
   </header>
@@ -38,10 +39,11 @@
         <p class="page-hero__subtitle">Per il Libro Soci, tessere e rinnovi:
           <a href="admin-soci.html">vai a Gestione soci →</a> (richiede un accesso separato, riservato a
           Segretario/Presidente/Tesoriere/Admin).</p>
+        <p class="form-note" id="admin-auth-gate-note">Accedi con il tuo account Microsoft (ruolo Presidente/Admin) per gestire impostazioni ed eventi.</p>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" id="settings-area-riservata" hidden data-area-riservata>
       <div class="container" style="max-width:640px;">
         <div class="section__head" style="text-align:left; margin:0 0 30px;">
           <span class="section__eyebrow">Impostazioni</span>
@@ -68,27 +70,19 @@
       </div>
     </section>
 
-    <!-- EVENTI (con posti/quote/iscrizioni legate al Libro Soci) — accesso
-         separato dal resto della pagina: qui serve un ruolo Azure AD
-         (Presidente/Admin) sulla stessa App Registration del Libro Soci,
-         non il ruolo "editor" della Static Web App usato sopra. -->
+    <!-- EVENTI (con posti/quote/iscrizioni legate al Libro Soci) — stesso
+         accesso di Impostazioni sopra: un solo login Azure AD (ruolo
+         Presidente/Admin) per tutta la pagina. -->
     <section class="section section--alt">
       <div class="container">
         <div class="section__head" style="text-align:left; margin:0 0 30px;">
           <span class="section__eyebrow">Eventi</span>
           <h2 class="section__title">Crea e gestisci gli eventi</h2>
           <p class="section__subtitle">Quote, posti disponibili e iscrizioni legate al Libro Soci — pubblicati sul
-            sito quando lo stato è "Aperto" o "Chiuso". Accesso separato, riservato a Presidente/Admin.</p>
+            sito quando lo stato è "Aperto" o "Chiuso".</p>
         </div>
 
-        <div class="admin-toolbar">
-          <span id="eventi-auth-user-label">Non collegato</span>
-          <button type="button" class="btn btn--primary btn--small" id="eventi-btn-login">Accedi</button>
-          <button type="button" class="btn btn--outline btn--small" id="eventi-btn-logout" hidden>Esci</button>
-        </div>
-        <p class="form-note" id="eventi-auth-gate-note">Accedi con il tuo account Microsoft (ruolo Presidente/Admin) per gestire gli eventi.</p>
-
-        <div id="eventi-area-riservata" hidden>
+        <div id="eventi-area-riservata" hidden data-area-riservata>
 
           <div class="admin-panel">
             <h3>Nuovo evento</h3>
@@ -204,11 +198,12 @@
     </section>
   </main>
 
-  <script src="assets/js/admin.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@5.19.0/lib/msal-browser.min.js"></script>
   <script src="assets/js/trame-config.js"></script>
   <script src="assets/js/trame-api.js"></script>
   <script src="assets/js/msal-auth.js"></script>
+  <script src="assets/js/admin-auth.js"></script>
+  <script src="assets/js/admin.js"></script>
   <script src="assets/js/admin-eventi.js"></script>
 </body>
 </html>
