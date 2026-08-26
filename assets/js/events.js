@@ -26,8 +26,23 @@
     viaggi: "Viaggi",
   };
 
+  var CATEGORY_ICONS = {
+    yoga: "🧘",
+    fotografia: "📷",
+    pasticceria: "🍰",
+    canto: "🎤",
+    ballo: "💃",
+    disegno: "✏️",
+    "trekking-urbano": "🥾",
+    viaggi: "🧳",
+  };
+
   function categoryLabel(category) {
-    return CATEGORY_LABELS[category] || category || "";
+    return CATEGORY_LABELS[category] || category || "Altro";
+  }
+
+  function categoryIcon(category) {
+    return CATEGORY_ICONS[category] || "🗓️";
   }
 
   function escapeHtml(value) {
@@ -41,6 +56,18 @@
     return parti[2] + "/" + parti[1] + "/" + parti[0];
   }
 
+  function formattaPrezzo(valore) {
+    return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  }
+
+  // Sulla card la descrizione va su una riga sola, senza gli eventuali "\n"
+  // che nel testo completo separano i paragrafi (vedi evento-dettaglio.js).
+  function troncaDescrizione(testo, maxLen) {
+    var pulito = testo.replace(/\s+/g, " ").trim();
+    if (pulito.length <= maxLen) return pulito;
+    return pulito.slice(0, maxLen).trim() + "…";
+  }
+
   function renderEventCard(event) {
     var article = document.createElement("article");
     article.className = "event-card";
@@ -49,23 +76,42 @@
     }
 
     var metaParts = [];
+    metaParts.push(
+      "<span>🗓️ " + formattaData(event.dataEvento) + (event.ora ? " · " + escapeHtml(event.ora) : "") + "</span>"
+    );
     if (event.luogo) {
       metaParts.push("<span>📍 " + escapeHtml(event.luogo) + "</span>");
     }
-    metaParts.push("<span>🗓️ " + formattaData(event.dataEvento) + "</span>");
-    if (event.quotaEvento) {
-      metaParts.push("<span>" + event.quotaEvento + " €</span>");
-    }
+
+    // immagineUrl non esiste ancora lato API (vedi coordinamento in corso):
+    // finché non c'è, un riquadro con l'icona della categoria al posto della
+    // foto, così la card resta ben composta anche senza immagine.
+    var mediaHtml = event.immagineUrl
+      ? '<img src="' + escapeHtml(event.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
+      : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(event.categoria) + "</span>";
+
+    var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
+    var nonPrenotabile = event.stato !== "aperto" || postiEsauriti;
+    var etichettaNonPrenotabile = event.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
 
     article.innerHTML =
-      '<div class="event-card__top">' +
-      (event.categoria ? '<span class="event-card__tag">' + escapeHtml(categoryLabel(event.categoria)) + "</span>" : "") +
-      '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
-      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
+      '<div class="event-card__media">' +
+      mediaHtml +
+      (event.categoria ? '<span class="event-card__badge">' + escapeHtml(categoryLabel(event.categoria)) + "</span>" : "") +
       "</div>" +
       '<div class="event-card__body">' +
-      (event.descrizione ? '<p class="event-card__desc">' + escapeHtml(event.descrizione) + "</p>" : "") +
-      '<a href="iscrizione-evento.html?id=' + event.id + '" class="event-card__cta">Iscriviti</a>' +
+      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
+      '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
+      (event.descrizione ? '<p class="event-card__desc">' + escapeHtml(troncaDescrizione(event.descrizione, 130)) + "</p>" : "") +
+      '<div class="event-card__footer">' +
+      (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
+      '<div class="event-card__actions">' +
+      '<a href="evento.html?id=' + event.id + '" class="btn btn--outline btn--small">Dettagli →</a>' +
+      (nonPrenotabile
+        ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
+        : '<a href="iscrizione-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Prenota →</a>') +
+      "</div>" +
+      "</div>" +
       "</div>";
 
     return article;

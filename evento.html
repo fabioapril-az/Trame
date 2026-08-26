@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Evento — Progetto TraMe</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="chi-siamo.html" class="nav__link">Chi siamo</a></li>
+          <li><a href="eventi.html" class="nav__link" aria-current="page">Eventi</a></li>
+          <li><a href="contatti.html" class="nav__link">Contatti</a></li>
+        </ul>
+        <a href="contatti.html" class="btn btn--primary">Contattaci</a>
+      </nav>
+      <button class="nav__toggle" aria-label="Apri il menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" style="padding-top:48px;">
+      <div class="container" style="max-width:820px;">
+
+        <a href="eventi.html" class="event-detail__back">← Torna agli eventi</a>
+
+        <p id="evento-loading" class="example-note">Caricamento evento…</p>
+
+        <div id="evento-errore" class="coming-soon" hidden>
+          <span class="coming-soon__icon" aria-hidden="true">🔍</span>
+          <h2>Evento non trovato</h2>
+          <p id="evento-errore-msg">Il link potrebbe non essere più valido.</p>
+          <a href="eventi.html" class="btn btn--primary">Torna agli eventi</a>
+        </div>
+
+        <article id="evento-content" hidden>
+          <div class="event-detail__media">
+            <img id="evento-immagine" class="event-detail__image" alt="" hidden>
+            <span id="evento-media-icon" class="event-detail__media-icon" aria-hidden="true" hidden></span>
+            <span id="evento-badge" class="event-card__badge"></span>
+          </div>
+
+          <span class="section__eyebrow" id="evento-categoria-label"></span>
+          <h1 id="evento-titolo"></h1>
+          <p class="event-detail__meta" id="evento-meta"></p>
+          <p class="form-note" id="evento-scadenza" hidden></p>
+          <p class="form-note" id="evento-riservato" hidden>Questo evento è riservato ai soci: la segreteria ti contatterà per completare l'associazione, se necessario.</p>
+
+          <div class="event-detail__desc" id="evento-descrizione"></div>
+
+          <div class="event-detail__footer">
+            <span class="event-card__price" id="evento-prezzo"></span>
+            <a id="evento-prenota" href="#" class="btn btn--primary">Prenota →</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__about">
+          <a href="index.html" class="logo">
+            <img src="assets/img/logo-icon-dark.png" alt="" class="logo__icon">
+            <span class="logo__text">
+              <span class="logo__word">TraMe</span>
+              <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+            </span>
+          </a>
+          <p>Un'associazione che crea eventi e corsi per ritrovare se stessi, insieme agli altri.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Esplora</h4>
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="chi-siamo.html">Chi siamo</a></li>
+            <li><a href="eventi.html">Eventi</a></li>
+            <li><a href="contatti.html">Contatti</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Le trame</h4>
+          <ul>
+            <li><a href="eventi.html#yoga">Yoga</a></li>
+            <li><a href="eventi.html#fotografia">Fotografia</a></li>
+            <li><a href="eventi.html#pasticceria">Pasticceria</a></li>
+            <li><a href="eventi.html#canto">Canto</a></li>
+            <li><a href="eventi.html#trekking-urbano">Trekking urbano</a></li>
+            <li><a href="eventi.html#viaggi">Viaggi</a></li>
+            <li><a href="eventi.html#ballo">Ballo</a></li>
+            <li><a href="eventi.html#disegno">Disegno</a></li>
+          </ul>
+        </div>
+        <div class="footer__col">
+          <h4>Contatti</h4>
+          <ul>
+            <li><a href="mailto:info@progettotrame.org">info@progettotrame.org</a></li>
+            <li>Milano</li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/evento-dettaglio.js"></script>
+</body>
+</html>
