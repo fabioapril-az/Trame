@@ -87,7 +87,13 @@
       if (section) {
         section.hidden = true;
       }
-      return; // resta il fallback "coming soon" già nell'HTML, se presente
+      // Nessun evento: si mostra (di nuovo) il fallback "coming soon",
+      // gestito esplicitamente in entrambi i rami — vedi nota su
+      // comingSoon.hidden più sotto sul perché non basta lasciarlo com'era.
+      if (comingSoon) {
+        comingSoon.hidden = false;
+      }
+      return;
     }
 
     if (max && events.length > max) {
@@ -111,15 +117,46 @@
     var mounts = document.querySelectorAll("[data-events-mount]");
     if (!mounts.length) return;
 
+    // Il messaggio "coming soon" resta visibile di default nell'HTML solo
+    // come fallback per JS disabilitato — con JS attivo va nascosto SUBITO,
+    // prima ancora che la chiamata all'API risponda: altrimenti per la
+    // durata della richiesta si vede un lampo di "il calendario arriva
+    // presto" anche quando ci sono eventi reali (bug reale segnalato
+    // dall'utente). fillMount() lo farà ricomparire lui stesso se, una
+    // volta arrivata la risposta, risulta che non ci sono davvero eventi.
+    var comingSoonEls = [];
+    mounts.forEach(function (mount) {
+      var comingSoonId = mount.getAttribute("data-coming-soon");
+      var el = comingSoonId ? document.getElementById(comingSoonId) : null;
+      if (el) {
+        comingSoonEls.push(el);
+        el.hidden = true;
+      }
+    });
+    var loadingEl = null;
+    if (comingSoonEls.length) {
+      loadingEl = document.createElement("p");
+      loadingEl.className = "form-note";
+      loadingEl.textContent = "Caricamento eventi…";
+      comingSoonEls[0].parentNode.insertBefore(loadingEl, comingSoonEls[0]);
+    }
+
     window.trameFetch("/api/eventi")
       .then(function (events) {
+        if (loadingEl) {
+          loadingEl.remove();
+        }
         events = events || [];
         mounts.forEach(function (mount) {
           fillMount(mount, events);
         });
       })
       .catch(function () {
-        // Nessun evento da mostrare: i fallback già nell'HTML restano visibili.
+        // API non raggiungibile: si torna al fallback "coming soon".
+        if (loadingEl) {
+          loadingEl.remove();
+        }
+        comingSoonEls.forEach(function (el) { el.hidden = false; });
       });
   });
 })();
