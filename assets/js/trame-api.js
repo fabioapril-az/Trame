@@ -31,7 +31,16 @@
           return null;
         }
         var contentType = res.headers.get("content-type") || "";
-        return contentType.indexOf("application/json") !== -1 ? res.json() : res.text();
+        if (contentType.indexOf("application/json") !== -1) {
+          return res.json();
+        }
+        // L'API risponde sempre con JSON o 204: un 2xx con un content-type
+        // diverso non è mai un successo vero — è tipicamente la pagina HTML
+        // di "Service Unavailable" che l'infrastruttura Azure può servire
+        // con status 200 durante un cold-start (bug reale trovato in test:
+        // veniva trattata come una risposta valida, mascherando l'errore
+        // invece di mostrare il fallback previsto).
+        throw new Error("Il server ha risposto in modo imprevisto. Riprova tra qualche istante.");
       }
       return res.json().catch(function () { return null; }).then(function (body) {
         var messaggio;
