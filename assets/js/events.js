@@ -5,7 +5,12 @@
 // è momentaneamente giù, o finché non c'è ancora nessun evento aperto.
 //
 // Ogni contenitore [data-events-mount] può specificare:
-//   data-status="aperto|chiuso|annunciato"  quali eventi mostrare (default: aperto)
+//   data-status="aperto|chiuso|annunciato"  quali eventi mostrare (default: aperto).
+//                                   Si può indicare più di uno stato separandoli con
+//                                   una virgola (es. "aperto,annunciato"): compaiono
+//                                   tutti nella stessa griglia, nell'ordine degli stati
+//                                   elencati — usato per mostrare aperti e annunciati
+//                                   insieme (aperti prima), invece che in sezioni separate.
 //   data-max="3"                    quanti mostrarne al massimo
 //   data-coming-soon="id"           elemento di fallback da nascondere se non vuoto
 //   data-hide-section="id"          sezione intera da nascondere se non ci sono eventi
@@ -199,30 +204,37 @@
     return article;
   }
 
+  function ordinaAnnunciati(events) {
+    // Gli "annunciato" possono non avere ancora una data: quelli con una
+    // data già nota vanno prima (dal più vicino), quelli ancora del tutto
+    // da definire in coda — l'API non lo garantisce (i NULL SQL finiscono
+    // in fondo solo per costruzione della query, non per scelta esplicita).
+    return events.slice().sort(function (a, b) {
+      if (!a.dataEvento && !b.dataEvento) return 0;
+      if (!a.dataEvento) return 1;
+      if (!b.dataEvento) return -1;
+      return a.dataEvento < b.dataEvento ? -1 : a.dataEvento > b.dataEvento ? 1 : 0;
+    });
+  }
+
   function fillMount(mount, allEvents) {
-    var status = mount.getAttribute("data-status") || "aperto";
+    var statuses = (mount.getAttribute("data-status") || "aperto").split(",").map(function (s) { return s.trim(); });
     var max = parseInt(mount.getAttribute("data-max"), 10);
     var comingSoonId = mount.getAttribute("data-coming-soon");
     var comingSoon = comingSoonId ? document.getElementById(comingSoonId) : null;
     var hideSectionId = mount.getAttribute("data-hide-section");
     var section = hideSectionId ? document.getElementById(hideSectionId) : null;
 
-    var events = allEvents.filter(function (event) {
-      return event.stato === status;
+    // Con più stati (es. "aperto,annunciato") gli eventi restano raggruppati
+    // nell'ordine in cui gli stati sono elencati, non mescolati tra loro.
+    var events = [];
+    statuses.forEach(function (status) {
+      var gruppo = allEvents.filter(function (event) { return event.stato === status; });
+      if (status === "annunciato") {
+        gruppo = ordinaAnnunciati(gruppo);
+      }
+      events = events.concat(gruppo);
     });
-
-    // Gli "annunciato" possono non avere ancora una data: quelli con una
-    // data già nota vanno prima (dal più vicino), quelli ancora del tutto
-    // da definire in coda — l'API non lo garantisce (i NULL SQL finiscono
-    // in fondo solo per costruzione della query, non per scelta esplicita).
-    if (status === "annunciato") {
-      events = events.slice().sort(function (a, b) {
-        if (!a.dataEvento && !b.dataEvento) return 0;
-        if (!a.dataEvento) return 1;
-        if (!b.dataEvento) return -1;
-        return a.dataEvento < b.dataEvento ? -1 : a.dataEvento > b.dataEvento ? 1 : 0;
-      });
-    }
 
     if (!events.length) {
       if (section) {
