@@ -785,6 +785,12 @@ p {
   color: var(--color-white);
 }
 
+.event-card__badge--stato {
+  left: auto;
+  right: 14px;
+  background: var(--color-terracotta-dark);
+}
+
 .event-card__title {
   font-size: 1.25rem;
   margin-bottom: 0.3em;

@@ -5,14 +5,16 @@
 // è momentaneamente giù, o finché non c'è ancora nessun evento aperto.
 //
 // Ogni contenitore [data-events-mount] può specificare:
-//   data-status="aperto|chiuso"     quali eventi mostrare (default: aperto)
+//   data-status="aperto|chiuso|annunciato"  quali eventi mostrare (default: aperto)
 //   data-max="3"                    quanti mostrarne al massimo
 //   data-coming-soon="id"           elemento di fallback da nascondere se non vuoto
 //   data-hide-section="id"          sezione intera da nascondere se non ci sono eventi
 //                                   (utile per un archivio che non deve comparire affatto
 //                                   quando è vuoto, invece di mostrare un titolo senza nulla sotto)
 // Da non autenticati (visitatori del sito) l'API restituisce solo eventi
-// aperto/chiuso — mai bozza/annullato, indipendentemente da cosa si chiede.
+// aperto/chiuso/annunciato — mai bozza/annullato, indipendentemente da cosa si chiede.
+// "annunciato": pubblicato in anteprima (può non avere ancora una data),
+// niente bottone Prenota — vedi renderEventCard.
 
 (function () {
   var CATEGORY_LABELS = {
@@ -51,7 +53,10 @@
     return div.innerHTML;
   }
 
+  // Gli eventi "annunciato" possono non avere ancora una data (solo bozza e
+  // annunciato lo permettono — vedi coordinamento con l'API).
   function formattaData(isoDate) {
+    if (!isoDate) return "Data da definire";
     var parti = isoDate.split("-");
     return parti[2] + "/" + parti[1] + "/" + parti[0];
   }
@@ -139,21 +144,39 @@
       metaParts.push("<span>📍 " + escapeHtml(event.luogo) + "</span>");
     }
 
-    // immagineUrl non esiste ancora lato API (vedi coordinamento in corso):
-    // finché non c'è, un riquadro con l'icona della categoria al posto della
-    // foto, così la card resta ben composta anche senza immagine.
+    // Se manca immagineUrl, un riquadro con l'icona della categoria al
+    // posto della foto, così la card resta ben composta comunque.
     var mediaHtml = event.immagineUrl
       ? '<img src="' + escapeHtml(event.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
       : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(event.categoria) + "</span>";
 
+    // "annunciato": pubblicato in anteprima, niente iscrizioni ancora aperte
+    // — nessun bottone Prenota (non semplicemente disabilitato: proprio
+    // assente, a differenza di "chiuso"/tutto esaurito).
+    var annunciato = event.stato === "annunciato";
     var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
     var nonPrenotabile = event.stato !== "aperto" || postiEsauriti;
     var etichettaNonPrenotabile = event.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
+
+    var azionePrenota = annunciato
+      ? ""
+      : (nonPrenotabile
+        ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
+        : '<a href="iscrizione-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Prenota →</a>');
+
+    // dettagliAttivi: interruttore manuale per-evento (default true se
+    // omesso) — se spento, niente accesso alla pagina di dettaglio finché
+    // non è pronta, indipendentemente dallo stato dell'evento.
+    var dettagliAttivi = event.dettagliAttivi !== false;
+    var azioneDettagli = dettagliAttivi
+      ? '<a href="evento.html?id=' + event.id + '" class="btn btn--outline btn--small">Dettagli →</a>'
+      : "";
 
     article.innerHTML =
       '<div class="event-card__media">' +
       mediaHtml +
       (event.categoria ? '<span class="event-card__badge">' + escapeHtml(categoryLabel(event.categoria)) + "</span>" : "") +
+      (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
       "</div>" +
       '<div class="event-card__body">' +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
@@ -162,10 +185,8 @@
       '<div class="event-card__footer">' +
       (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
       '<div class="event-card__actions">' +
-      '<a href="evento.html?id=' + event.id + '" class="btn btn--outline btn--small">Dettagli →</a>' +
-      (nonPrenotabile
-        ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
-        : '<a href="iscrizione-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Prenota →</a>') +
+      azioneDettagli +
+      azionePrenota +
       "</div>" +
       "</div>" +
       "</div>";
@@ -189,6 +210,19 @@
     var events = allEvents.filter(function (event) {
       return event.stato === status;
     });
+
+    // Gli "annunciato" possono non avere ancora una data: quelli con una
+    // data già nota vanno prima (dal più vicino), quelli ancora del tutto
+    // da definire in coda — l'API non lo garantisce (i NULL SQL finiscono
+    // in fondo solo per costruzione della query, non per scelta esplicita).
+    if (status === "annunciato") {
+      events = events.slice().sort(function (a, b) {
+        if (!a.dataEvento && !b.dataEvento) return 0;
+        if (!a.dataEvento) return 1;
+        if (!b.dataEvento) return -1;
+        return a.dataEvento < b.dataEvento ? -1 : a.dataEvento > b.dataEvento ? 1 : 0;
+      });
+    }
 
     if (!events.length) {
       if (section) {

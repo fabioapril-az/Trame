@@ -3,6 +3,12 @@
 // invece di condivisi: il sito non ha un build step / bundler, e sono
 // poche righe — coerente con il resto del progetto (stessa scelta già
 // fatta per CATEGORY_LABELS tra events.js e admin.js).
+//
+// dettagliAttivi=false: l'evento esiste (l'API lo trova) ma i dettagli non
+// sono ancora pronti — niente contenuto reale nemmeno con il link diretto,
+// vedi mostraErrore("Dettagli in arrivo", ...) più sotto.
+// stato="annunciato": pubblicato in anteprima, può non avere ancora una
+// data, niente bottone Prenota.
 
 (function () {
   var CATEGORY_LABELS = {
@@ -36,6 +42,7 @@
   }
 
   function formattaData(isoDate) {
+    if (!isoDate) return "Data da definire";
     var parti = isoDate.split("-");
     return parti[2] + "/" + parti[1] + "/" + parti[0];
   }
@@ -119,13 +126,20 @@
     var id = new URLSearchParams(window.location.search).get("id");
     var loadingEl = document.getElementById("evento-loading");
     var erroreEl = document.getElementById("evento-errore");
+    var erroreIconaEl = document.getElementById("evento-errore-icona");
+    var erroreTitoloEl = document.getElementById("evento-errore-titolo");
     var erroreMsgEl = document.getElementById("evento-errore-msg");
     var contentEl = document.getElementById("evento-content");
 
-    function mostraErrore(messaggio) {
+    // titolo/icona facoltativi: di default lo stesso messaggio "evento non
+    // trovato" di sempre, riusato anche per "dettagli non ancora attivi"
+    // (dettagliAttivi=false) passando un titolo/icona diversi.
+    function mostraErrore(messaggio, titolo, icona) {
       loadingEl.hidden = true;
       contentEl.hidden = true;
       erroreEl.hidden = false;
+      erroreIconaEl.textContent = icona || "🔍";
+      erroreTitoloEl.textContent = titolo || "Evento non trovato";
       if (messaggio) {
         erroreMsgEl.textContent = messaggio;
       }
@@ -138,6 +152,18 @@
 
     window.trameFetch("/api/eventi/" + encodeURIComponent(id))
       .then(function (event) {
+        // Interruttore manuale per-evento: se spento, niente accesso al
+        // contenuto reale nemmeno con il link diretto — l'evento esiste
+        // (l'API l'ha trovato) ma i dettagli non sono ancora pronti.
+        if (event.dettagliAttivi === false) {
+          mostraErrore(
+            "Prova a tornare più avanti, oppure scrivici per saperne di più.",
+            "Dettagli in arrivo",
+            "🕒"
+          );
+          return;
+        }
+
         loadingEl.hidden = true;
         contentEl.hidden = false;
         document.title = event.titolo + " — Progetto TraMe";
@@ -210,7 +236,11 @@
 
         var prenotaEl = document.getElementById("evento-prenota");
         var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
-        if (event.stato !== "aperto") {
+        if (event.stato === "annunciato") {
+          // Pubblicato in anteprima: niente bottone Prenota, non solo
+          // disabilitato — le iscrizioni non sono ancora aperte.
+          prenotaEl.hidden = true;
+        } else if (event.stato !== "aperto") {
           disabilitaBottone(prenotaEl, "Iscrizioni chiuse");
         } else if (postiEsauriti) {
           disabilitaBottone(prenotaEl, "Posti esauriti");
