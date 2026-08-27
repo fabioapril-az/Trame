@@ -821,6 +821,14 @@ p {
   margin-bottom: 0;
 }
 
+.event-card__desc img,
+.event-detail__desc img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-m);
+  margin: 0.4em 0;
+}
+
 .event-card__footer {
   display: flex;
   align-items: center;

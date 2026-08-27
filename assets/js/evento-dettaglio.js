@@ -44,6 +44,48 @@
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
+  function escapeHtml(value) {
+    var div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+  }
+
+  // Dall'editor di formattazione in admin (Quill) testoDettaglio/descrizione
+  // arrivano come HTML, ma gli eventi creati prima che l'editor esistesse
+  // hanno ancora testo semplice con eventuali "\n" come separatori di
+  // paragrafo — le due situazioni si distinguono cercando un tag HTML nel
+  // valore. Duplicato da events.js, non condiviso: stessa scelta già fatta
+  // per gli altri helper di questo file.
+  var TAG_HTML = /<[a-z][\s\S]*>/i;
+
+  function contieneHtml(testo) {
+    return TAG_HTML.test(testo);
+  }
+
+  function sanitizza(html) {
+    if (!window.DOMPurify) {
+      var div = document.createElement("div");
+      div.innerHTML = html;
+      return escapeHtml(div.textContent);
+    }
+    return window.DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "s", "span", "ol", "ul", "li", "a", "img"],
+      ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "style", "class"],
+    });
+  }
+
+  function formattaTestoRicco(testo) {
+    if (contieneHtml(testo)) {
+      return sanitizza(testo);
+    }
+    return testo
+      .split(/\n+/)
+      .map(function (paragrafo) { return paragrafo.trim(); })
+      .filter(Boolean)
+      .map(function (paragrafo) { return "<p>" + escapeHtml(paragrafo) + "</p>"; })
+      .join("");
+  }
+
   function disabilitaBottone(el, testo) {
     el.textContent = testo;
     el.classList.remove("btn--primary");
@@ -113,16 +155,10 @@
 
         // testoDettaglio: testo esteso pensato apposta per questa pagina,
         // facoltativo — finché non è compilato si mostra la descrizione
-        // breve (la stessa usata, troncata, sulla card) così un evento
-        // creato prima dell'aggiunta di questo campo non resta senza testo.
+        // breve (la stessa usata sulla card) così un evento creato prima
+        // dell'aggiunta di questo campo non resta senza testo.
         var descEl = document.getElementById("evento-descrizione");
-        (event.testoDettaglio || event.descrizione || "").split(/\n+/).forEach(function (paragrafo) {
-          paragrafo = paragrafo.trim();
-          if (!paragrafo) return;
-          var p = document.createElement("p");
-          p.textContent = paragrafo;
-          descEl.appendChild(p);
-        });
+        descEl.innerHTML = formattaTestoRicco(event.testoDettaglio || event.descrizione || "");
 
         var socialEl = document.getElementById("evento-social");
         var igEl = document.getElementById("evento-instagram");

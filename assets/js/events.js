@@ -60,12 +60,43 @@
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
+  // Dall'editor di formattazione in admin (Quill) "Descrizione"/testoDettaglio
+  // arrivano come HTML (grassetto/corsivo/colore/liste/immagini), ma gli
+  // eventi creati prima che l'editor esistesse hanno ancora testo semplice
+  // con eventuali "\n" come separatori di paragrafo — le due situazioni si
+  // distinguono cercando un tag HTML nel valore (stesso criterio usato in
+  // admin per la stessa ragione). Duplicato in evento-dettaglio.js, non
+  // condiviso: stessa scelta già fatta per gli altri helper di questo file.
+  var TAG_HTML = /<[a-z][\s\S]*>/i;
+
+  function contieneHtml(testo) {
+    return TAG_HTML.test(testo);
+  }
+
+  function sanitizza(html) {
+    if (!window.DOMPurify) {
+      // DOMPurify non caricato (CDN irraggiungibile): meglio testo semplice
+      // e sicuro che HTML non filtrato.
+      var div = document.createElement("div");
+      div.innerHTML = html;
+      return escapeHtml(div.textContent);
+    }
+    return window.DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "s", "span", "ol", "ul", "li", "a", "img"],
+      ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "style", "class"],
+    });
+  }
+
   // "Descrizione" è pensata apposta come testo breve per la card (il testo
   // esteso va nel campo separato testoDettaglio, mostrato solo nella pagina
   // di dettaglio — vedi evento-dettaglio.js): qui si mostra per intero,
-  // senza troncare, rispettando eventuali "a capo" come paragrafi separati
-  // (stesso trattamento della pagina di dettaglio, non uniti su una riga).
-  function paragrafiDescrizioneCard(testo) {
+  // senza troncare.
+  function formattaDescrizioneCard(testo) {
+    if (contieneHtml(testo)) {
+      return sanitizza(testo);
+    }
+    // Testo semplice "vecchio stile": paragrafi separati da eventuali "\n",
+    // non uniti su una riga.
     return testo
       .split(/\n+/)
       .map(function (paragrafo) { return paragrafo.trim(); })
@@ -108,7 +139,7 @@
       '<div class="event-card__body">' +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
-      (event.descrizione ? '<div class="event-card__desc">' + paragrafiDescrizioneCard(event.descrizione) + "</div>" : "") +
+      (event.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(event.descrizione) + "</div>" : "") +
       '<div class="event-card__footer">' +
       (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
       '<div class="event-card__actions">' +
