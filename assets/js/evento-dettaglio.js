@@ -70,7 +70,26 @@
     }
     return window.DOMPurify.sanitize(html, {
       ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "s", "span", "ol", "ul", "li", "a", "img"],
-      ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "style", "class"],
+      ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "style", "class", "data-list"],
+    });
+  }
+
+  // Quill genera SEMPRE <ol> per gli elenchi, puntati compresi: distingue i
+  // due tipi con l'attributo data-list="bullet"/"ordered" su ogni <li>, e li
+  // rende visivamente diversi con il proprio CSS (non incluso qui, solo
+  // l'HTML che produce). Senza quel CSS un elenco puntato risulterebbe
+  // numerato di default: qui si converte in un vero <ul> quando serve, così
+  // basta il CSS normale del sito. Duplicato da events.js.
+  function normalizzaListeQuill(container) {
+    container.querySelectorAll("ol").forEach(function (ol) {
+      var primoConTipo = ol.querySelector("li[data-list]");
+      var puntato = primoConTipo && primoConTipo.getAttribute("data-list") === "bullet";
+      ol.querySelectorAll("li[data-list]").forEach(function (li) { li.removeAttribute("data-list"); });
+      if (puntato) {
+        var ul = document.createElement("ul");
+        while (ol.firstChild) { ul.appendChild(ol.firstChild); }
+        ol.replaceWith(ul);
+      }
     });
   }
 
@@ -159,6 +178,7 @@
         // dell'aggiunta di questo campo non resta senza testo.
         var descEl = document.getElementById("evento-descrizione");
         descEl.innerHTML = formattaTestoRicco(event.testoDettaglio || event.descrizione || "");
+        normalizzaListeQuill(descEl);
 
         var socialEl = document.getElementById("evento-social");
         var igEl = document.getElementById("evento-instagram");

@@ -829,6 +829,29 @@ p {
   margin: 0.4em 0;
 }
 
+.event-card__desc ul,
+.event-detail__desc ul {
+  list-style: disc; /* il reset globale "ul { list-style:none }" (per i menu) va annullato qui */
+}
+
+.event-card__desc ol,
+.event-detail__desc ol {
+  list-style: decimal;
+}
+
+.event-card__desc ul,
+.event-card__desc ol,
+.event-detail__desc ul,
+.event-detail__desc ol {
+  margin: 0 0 0.6em;
+  padding-left: 1.3em;
+}
+
+.event-card__desc li,
+.event-detail__desc li {
+  margin-bottom: 0.25em;
+}
+
 .event-card__footer {
   display: flex;
   align-items: center;
