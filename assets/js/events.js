@@ -60,12 +60,17 @@
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
-  // Sulla card la descrizione va su una riga sola, senza gli eventuali "\n"
-  // che nel testo completo separano i paragrafi (vedi evento-dettaglio.js).
+  // Sulla card si mostra solo il primo paragrafo (separato da eventuali "\n"
+  // nel testo completo — vedi evento-dettaglio.js per come vengono mostrati
+  // tutti quanti nella pagina di dettaglio). Prima si univano tutti i
+  // paragrafi in un'unica riga con uno spazio al posto degli "a capo": se il
+  // primo paragrafo era scritto come una breve frase d'apertura (come "Una
+  // domenica dorata" seguito dal testo vero e proprio), il risultato si
+  // leggeva come un'unica frase confusa invece che come un'anteprima pulita.
   function troncaDescrizione(testo, maxLen) {
-    var pulito = testo.replace(/\s+/g, " ").trim();
-    if (pulito.length <= maxLen) return pulito;
-    return pulito.slice(0, maxLen).trim() + "…";
+    var primoParagrafo = testo.split(/\n+/)[0].replace(/\s+/g, " ").trim();
+    if (primoParagrafo.length <= maxLen) return primoParagrafo;
+    return primoParagrafo.slice(0, maxLen).trim() + "…";
   }
 
   function renderEventCard(event) {
