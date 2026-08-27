@@ -111,14 +111,42 @@
           document.getElementById("evento-riservato").hidden = false;
         }
 
+        // testoDettaglio: testo esteso pensato apposta per questa pagina,
+        // facoltativo — finché non è compilato si mostra la descrizione
+        // breve (la stessa usata, troncata, sulla card) così un evento
+        // creato prima dell'aggiunta di questo campo non resta senza testo.
         var descEl = document.getElementById("evento-descrizione");
-        (event.descrizione || "").split(/\n+/).forEach(function (paragrafo) {
+        (event.testoDettaglio || event.descrizione || "").split(/\n+/).forEach(function (paragrafo) {
           paragrafo = paragrafo.trim();
           if (!paragrafo) return;
           var p = document.createElement("p");
           p.textContent = paragrafo;
           descEl.appendChild(p);
         });
+
+        var socialEl = document.getElementById("evento-social");
+        var igEl = document.getElementById("evento-instagram");
+        var fbEl = document.getElementById("evento-facebook");
+        var galleriaEl = document.getElementById("evento-galleria");
+        var haSocial = false;
+        if (event.instagramUrl) {
+          igEl.href = event.instagramUrl;
+          igEl.hidden = false;
+          haSocial = true;
+        }
+        if (event.facebookUrl) {
+          fbEl.href = event.facebookUrl;
+          fbEl.hidden = false;
+          haSocial = true;
+        }
+        if (event.galleryUrl) {
+          galleriaEl.href = event.galleryUrl;
+          galleriaEl.hidden = false;
+          haSocial = true;
+        }
+        if (haSocial) {
+          socialEl.hidden = false;
+        }
 
         if (event.quotaEvento) {
           document.getElementById("evento-prezzo").textContent = formattaPrezzo(event.quotaEvento);

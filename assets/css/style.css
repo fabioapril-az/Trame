@@ -963,6 +963,10 @@ p {
   margin-bottom: 1em;
 }
 
+.event-detail__social {
+  margin: 24px 0;
+}
+
 .event-detail__footer {
   display: flex;
   align-items: center;
