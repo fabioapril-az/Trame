@@ -674,10 +674,8 @@ p {
 }
 
 .founders__logo {
-  width: 170px;
+  width: 240px;
   margin: 0 auto 28px;
-  border-radius: var(--radius-s);
-  box-shadow: var(--shadow-soft);
 }
 
 .founders__intro p {
@@ -1057,17 +1055,15 @@ p {
 }
 
 .split__art {
-  background: var(--color-cream-alt);
-  border-radius: var(--radius-l);
-  padding: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
 }
 
 .split__art img {
   width: 100%;
-  max-width: 260px;
+  max-width: 420px;
 }
 
 .split h2 {
