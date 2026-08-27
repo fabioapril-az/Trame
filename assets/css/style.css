@@ -1077,33 +1077,60 @@ p {
 }
 
 /* ---------- pagina contatti ---------- */
-.contact-info {
-  max-width: 480px;
+.contact-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  max-width: 900px;
   margin: 0 auto;
-  background: var(--color-white);
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-l);
-  box-shadow: var(--shadow-soft);
-  padding: 48px 44px;
 }
 
-.contact-info h3 {
+.contact-tile {
+  text-align: center;
+}
+
+.contact-tile__icon {
+  width: 68px;
+  height: 68px;
+  border-radius: var(--radius-m);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: var(--color-terracotta-dark);
+}
+
+.contact-tile__icon--sage {
+  color: var(--color-sage-dark);
+  background: var(--color-sage-light);
+}
+
+.contact-tile__icon:not(.contact-tile__icon--sage) {
+  background: var(--color-terracotta-light);
+}
+
+.contact-tile__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.contact-tile h3 {
   font-size: 1.1rem;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.contact-info .contact-block {
-  margin-bottom: 30px;
-}
-
-.contact-info .contact-block p {
+.contact-tile p {
   color: var(--color-ink-soft);
   margin: 0;
 }
 
-.contact-info .contact-block a {
+.contact-tile a {
   color: var(--color-terracotta-dark);
   font-weight: 700;
+}
+
+.contact-tile .social-links {
+  justify-content: center;
 }
 
 .social-links {
@@ -1254,7 +1281,8 @@ p {
   .cards-grid,
   .events-grid,
   .values-grid,
-  .founders__grid {
+  .founders__grid,
+  .contact-tiles {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1309,7 +1337,8 @@ p {
   .cards-grid,
   .events-grid,
   .values-grid,
-  .founders__grid {
+  .founders__grid,
+  .contact-tiles {
     grid-template-columns: 1fr;
   }
 
