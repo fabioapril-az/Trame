@@ -76,6 +76,7 @@
     return {
       titolo: document.getElementById(prefix + "titolo").value.trim(),
       descrizione: document.getElementById(prefix + "descrizione").value.trim() || null,
+      testoDettaglio: document.getElementById(prefix + "testo-dettaglio").value.trim() || null,
       dataEvento: document.getElementById(prefix + "data").value,
       ora: document.getElementById(prefix + "ora").value || null,
       luogo: document.getElementById(prefix + "luogo").value.trim() || null,
@@ -84,6 +85,9 @@
       quotaIscrizioneInclusa: quotaIscrizione ? parseFloat(quotaIscrizione) : null,
       postiMax: posti ? parseInt(posti, 10) : null,
       scadenzaIscrizione: document.getElementById(prefix + "scadenza-iscrizione").value || null,
+      instagramUrl: document.getElementById(prefix + "instagram").value.trim() || null,
+      facebookUrl: document.getElementById(prefix + "facebook").value.trim() || null,
+      galleryUrl: document.getElementById(prefix + "galleria").value.trim() || null,
       stato: document.getElementById(prefix + "stato").value,
       apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked
     };
@@ -128,6 +132,7 @@
     stato.eventoCorrenteId = evento.id;
     document.getElementById("mod-ev-titolo").value = evento.titolo;
     document.getElementById("mod-ev-descrizione").value = evento.descrizione || "";
+    document.getElementById("mod-ev-testo-dettaglio").value = evento.testoDettaglio || "";
     document.getElementById("mod-ev-data").value = evento.dataEvento;
     document.getElementById("mod-ev-ora").value = evento.ora || "";
     document.getElementById("mod-ev-luogo").value = evento.luogo || "";
@@ -136,6 +141,9 @@
     document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
     document.getElementById("mod-ev-posti").value = evento.postiMax || "";
     document.getElementById("mod-ev-scadenza-iscrizione").value = evento.scadenzaIscrizione || "";
+    document.getElementById("mod-ev-instagram").value = evento.instagramUrl || "";
+    document.getElementById("mod-ev-facebook").value = evento.facebookUrl || "";
+    document.getElementById("mod-ev-galleria").value = evento.galleryUrl || "";
     document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax

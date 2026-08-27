@@ -87,7 +87,8 @@
           <div class="admin-panel" id="pannello-nuovo-evento" hidden>
             <h3>Nuovo evento</h3>
             <div class="form-row"><label for="ev-titolo">Titolo</label><input type="text" id="ev-titolo" maxlength="200"></div>
-            <div class="form-row"><label for="ev-descrizione">Descrizione</label><textarea id="ev-descrizione" rows="3"></textarea></div>
+            <div class="form-row"><label for="ev-descrizione">Descrizione breve (per la card)</label><textarea id="ev-descrizione" rows="3"></textarea></div>
+            <div class="form-row"><label for="ev-testo-dettaglio">Testo esteso (per la pagina dettaglio, facoltativo)</label><textarea id="ev-testo-dettaglio" rows="5"></textarea></div>
             <div class="form-row"><label for="ev-data">Data evento</label><input type="date" id="ev-data"></div>
             <div class="form-row"><label for="ev-ora">Ora (facoltativa)</label><input type="time" id="ev-ora"></div>
             <div class="form-row"><label for="ev-luogo">Luogo</label><input type="text" id="ev-luogo" maxlength="200"></div>
@@ -109,6 +110,9 @@
             <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
             <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
             <div class="form-row"><label for="ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="ev-scadenza-iscrizione"></div>
+            <div class="form-row"><label for="ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="ev-instagram" placeholder="https://instagram.com/..."></div>
+            <div class="form-row"><label for="ev-facebook">Link Facebook di questo evento (facoltativo)</label><input type="url" id="ev-facebook" placeholder="https://facebook.com/..."></div>
+            <div class="form-row"><label for="ev-galleria">Link galleria fotografica di questo evento (facoltativo)</label><input type="url" id="ev-galleria" placeholder="https://..."></div>
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="ev-aperto-non-soci"> Aperto anche ai non soci (l'iscrizione all'evento non richiede di associarsi)</label>
             </div>
@@ -152,7 +156,8 @@
             <div id="evento-dettaglio" hidden>
               <h3>Modifica evento</h3>
               <div class="form-row"><label for="mod-ev-titolo">Titolo</label><input type="text" id="mod-ev-titolo" maxlength="200"></div>
-              <div class="form-row"><label for="mod-ev-descrizione">Descrizione</label><textarea id="mod-ev-descrizione" rows="3"></textarea></div>
+              <div class="form-row"><label for="mod-ev-descrizione">Descrizione breve (per la card)</label><textarea id="mod-ev-descrizione" rows="3"></textarea></div>
+              <div class="form-row"><label for="mod-ev-testo-dettaglio">Testo esteso (per la pagina dettaglio, facoltativo)</label><textarea id="mod-ev-testo-dettaglio" rows="5"></textarea></div>
               <div class="form-row"><label for="mod-ev-data">Data evento</label><input type="date" id="mod-ev-data"></div>
               <div class="form-row"><label for="mod-ev-ora">Ora (facoltativa)</label><input type="time" id="mod-ev-ora"></div>
               <div class="form-row"><label for="mod-ev-luogo">Luogo</label><input type="text" id="mod-ev-luogo" maxlength="200"></div>
@@ -174,6 +179,9 @@
               <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
               <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
               <div class="form-row"><label for="mod-ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="mod-ev-scadenza-iscrizione"></div>
+              <div class="form-row"><label for="mod-ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="mod-ev-instagram" placeholder="https://instagram.com/..."></div>
+              <div class="form-row"><label for="mod-ev-facebook">Link Facebook di questo evento (facoltativo)</label><input type="url" id="mod-ev-facebook" placeholder="https://facebook.com/..."></div>
+              <div class="form-row"><label for="mod-ev-galleria">Link galleria fotografica di questo evento (facoltativo)</label><input type="url" id="mod-ev-galleria" placeholder="https://..."></div>
               <div class="form-row form-row--checkbox">
                 <label><input type="checkbox" id="mod-ev-aperto-non-soci"> Aperto anche ai non soci (l'iscrizione all'evento non richiede di associarsi)</label>
               </div>
