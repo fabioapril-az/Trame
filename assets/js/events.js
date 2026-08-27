@@ -60,17 +60,18 @@
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
-  // Sulla card si mostra solo il primo paragrafo (separato da eventuali "\n"
-  // nel testo completo — vedi evento-dettaglio.js per come vengono mostrati
-  // tutti quanti nella pagina di dettaglio). Prima si univano tutti i
-  // paragrafi in un'unica riga con uno spazio al posto degli "a capo": se il
-  // primo paragrafo era scritto come una breve frase d'apertura (come "Una
-  // domenica dorata" seguito dal testo vero e proprio), il risultato si
-  // leggeva come un'unica frase confusa invece che come un'anteprima pulita.
-  function troncaDescrizione(testo, maxLen) {
-    var primoParagrafo = testo.split(/\n+/)[0].replace(/\s+/g, " ").trim();
-    if (primoParagrafo.length <= maxLen) return primoParagrafo;
-    return primoParagrafo.slice(0, maxLen).trim() + "…";
+  // "Descrizione" è pensata apposta come testo breve per la card (il testo
+  // esteso va nel campo separato testoDettaglio, mostrato solo nella pagina
+  // di dettaglio — vedi evento-dettaglio.js): qui si mostra per intero,
+  // senza troncare, rispettando eventuali "a capo" come paragrafi separati
+  // (stesso trattamento della pagina di dettaglio, non uniti su una riga).
+  function paragrafiDescrizioneCard(testo) {
+    return testo
+      .split(/\n+/)
+      .map(function (paragrafo) { return paragrafo.trim(); })
+      .filter(Boolean)
+      .map(function (paragrafo) { return "<p>" + escapeHtml(paragrafo) + "</p>"; })
+      .join("");
   }
 
   function renderEventCard(event) {
@@ -107,7 +108,7 @@
       '<div class="event-card__body">' +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
-      (event.descrizione ? '<p class="event-card__desc">' + escapeHtml(troncaDescrizione(event.descrizione, 130)) + "</p>" : "") +
+      (event.descrizione ? '<div class="event-card__desc">' + paragrafiDescrizioneCard(event.descrizione) + "</div>" : "") +
       '<div class="event-card__footer">' +
       (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
       '<div class="event-card__actions">' +

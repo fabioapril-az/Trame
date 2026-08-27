@@ -813,6 +813,14 @@ p {
   flex-grow: 1;
 }
 
+.event-card__desc p {
+  margin: 0 0 0.6em;
+}
+
+.event-card__desc p:last-child {
+  margin-bottom: 0;
+}
+
 .event-card__footer {
   display: flex;
   align-items: center;
