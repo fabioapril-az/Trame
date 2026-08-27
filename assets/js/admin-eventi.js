@@ -305,8 +305,10 @@
             "<td>" + escapeHtml(i.stato) + "</td>" +
             "<td>" + (i.importoPagato != null ? i.importoPagato + " €" : "—") + "</td>" +
             "<td>" + formattaData(i.dataIscrizione) + "</td>" +
-            '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button></td>';
+            '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button></td>';
           tr.querySelector('[data-action="annulla"]').addEventListener("click", function () { annullaIscrizione(i.id); });
+          tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaIscrizione(i.id); });
           tbody.appendChild(tr);
         });
         document.getElementById("iscritti-tabella").hidden = false;
@@ -421,6 +423,19 @@
       body: JSON.stringify({ richiediRimborso: vuoleRimborso, noteRimborso: note })
     })
       .then(function () { document.getElementById("btn-vedi-iscritti").click(); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Eliminazione vera (non annullamento): la riga sparisce, non solo il suo
+  // stato — pensata per ripulire iscrizioni di prova (segnalato dall'utente:
+  // "Annulla" lascia comunque la riga visibile, con decine di test accumulati
+  // nella tabella).
+  function eliminaIscrizione(iscrizioneId) {
+    if (!window.confirm("Eliminare definitivamente questa iscrizione? L'operazione non è reversibile.")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId, { method: "DELETE" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
 })();
