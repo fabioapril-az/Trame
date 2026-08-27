@@ -108,11 +108,16 @@
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button> ' +
-            '<button type="button" class="btn btn--outline btn--small" data-action="storico">Storico</button></td>';
+            '<button type="button" class="btn btn--outline btn--small" data-action="storico">Storico</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button></td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModifica(s); });
           tr.querySelector('[data-action="rinnova"]').addEventListener("click", function () { apriRinnovo(s); });
           tr.querySelector('[data-action="tessera"]').addEventListener("click", function () { scaricaTessera(s); });
           tr.querySelector('[data-action="storico"]').addEventListener("click", function () { apriStorico(s); });
+          tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaSocio(s); });
+          if (s.stato === "cancellato") {
+            tr.querySelector('[data-action="elimina"]').disabled = true;
+          }
           tbody.appendChild(tr);
         });
 
@@ -207,6 +212,22 @@
   document.getElementById("btn-chiudi-storico").addEventListener("click", function () {
     document.getElementById("pannello-storico").hidden = true;
   });
+
+  // Cancellazione soft: l'API imposta stato = 'cancellato' (non un DELETE
+  // fisico), tessere/rinnovi/log restano. Da qui in poi rinnovo e iscrizione
+  // eventi risultano bloccati (già gestito lato API), il socio resta visibile
+  // filtrando per stato "cancellato".
+  function eliminaSocio(socio) {
+    var conferma = window.confirm(
+      "Eliminare " + socio.nome + " " + socio.cognome + "?\n\n" +
+      "Il socio verrà segnato come cancellato: non sarà più possibile rinnovarlo " +
+      "o iscriverlo a eventi, ma tessera e storico restano consultabili.");
+    if (!conferma) return;
+
+    apiFetchAuth("/api/soci/" + socio.id + "/cancella", { method: "POST" })
+      .then(function () { cercaSoci(); })
+      .catch(function (err) { window.alert(err.message); });
+  }
 
   document.getElementById("btn-salva-modifica").addEventListener("click", function () {
     var payload = {
