@@ -35,6 +35,96 @@
     el.style.color = isErrore ? "var(--color-terracotta, #b5533c)" : "inherit";
   }
 
+  // --- Editor rich text (Descrizione/TestoDettaglio) ---
+  // Fabio ha scelto un editor di testo libero (Quill) invece di un
+  // componente strutturato ad hoc — coordinato con la sessione sul sito
+  // pubblico, che sanitizza in lettura (DOMPurify) prima di mostrare
+  // l'HTML sulle pagine pubbliche. Qui si sanitizza allo stesso modo
+  // quando si ricarica il contenuto per la modifica: un account
+  // Presidente/Admin compromesso non deve poter eseguire script anche
+  // nel browser di un altro operatore che apre "Modifica evento".
+  var TOOLBAR_BASE = [["bold", "italic"], [{ color: [] }], [{ list: "ordered" }, { list: "bullet" }]];
+  var TOOLBAR_CON_IMMAGINE = TOOLBAR_BASE.concat([["image"]]);
+  var quillEditors = {};
+
+  function inizializzaEditor(id, conImmagine) {
+    var quill = new Quill("#" + id + "-editor", {
+      theme: "snow",
+      modules: { toolbar: conImmagine ? TOOLBAR_CON_IMMAGINE : TOOLBAR_BASE }
+    });
+    if (conImmagine) {
+      registraGestoreImmagineInline(quill);
+    }
+    quillEditors[id] = quill;
+  }
+
+  // Il bottone immagine è disponibile solo negli editor di "Modifica
+  // evento" (serve un eventoId per l'endpoint di upload): in "Nuovo
+  // evento" la toolbar non lo include affatto.
+  inizializzaEditor("ev-descrizione", false);
+  inizializzaEditor("ev-testo-dettaglio", false);
+  inizializzaEditor("mod-ev-descrizione", true);
+  inizializzaEditor("mod-ev-testo-dettaglio", true);
+
+  function contenutoQuill(quill) {
+    return quill.getText().trim() === "" ? null : quill.root.innerHTML;
+  }
+
+  // Compatibilità con gli eventi creati prima dell'editor rich text: se il
+  // valore salvato non contiene già tag HTML, è testo semplice (con
+  // eventuali "\n" a separare i paragrafi) — lo si converte invece di
+  // mostrarlo appiattito su una riga sola (stesso criterio adottato lato
+  // sito pubblico, nessuna migrazione dati).
+  function sembraHtml(testo) {
+    return /<[a-z][\s\S]*>/i.test(testo);
+  }
+
+  function testoSempliceInHtml(testo) {
+    return testo.split(/\n{2,}/).map(function (paragrafo) {
+      return "<p>" + escapeHtml(paragrafo).replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+
+  function impostaContenutoQuill(quill, valore) {
+    if (!valore) {
+      quill.setText("");
+      return;
+    }
+    var html = sembraHtml(valore) ? valore : testoSempliceInHtml(valore);
+    quill.root.innerHTML = DOMPurify.sanitize(html);
+  }
+
+  function registraGestoreImmagineInline(quill) {
+    quill.getModule("toolbar").addHandler("image", function () {
+      if (!stato.eventoCorrenteId) {
+        window.alert("Salva prima l'evento per poter inserire immagini nel testo.");
+        return;
+      }
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/jpeg,image/png,image/webp";
+      input.onchange = function () {
+        if (!input.files || !input.files[0]) return;
+        var range = quill.getSelection(true);
+        ridimensionaImmagine(input.files[0], 1600, 0.8)
+          .then(function (blob) {
+            var formData = new FormData();
+            formData.append("file", blob, "immagine.jpg");
+            return apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/immagini-contenuto", {
+              method: "POST",
+              body: formData
+            });
+          })
+          .then(function (result) {
+            quill.insertEmbed(range.index, "image", result.url, "user");
+            quill.setSelection(range.index + 1);
+          })
+          .catch(function (err) { window.alert(err.message); });
+      };
+      input.click();
+    });
+  }
+
   window.addEventListener("trame:auth-ready", caricaEventi);
 
   // --- Eventi ---
@@ -75,8 +165,8 @@
     var posti = document.getElementById(prefix + "posti").value;
     return {
       titolo: document.getElementById(prefix + "titolo").value.trim(),
-      descrizione: document.getElementById(prefix + "descrizione").value.trim() || null,
-      testoDettaglio: document.getElementById(prefix + "testo-dettaglio").value.trim() || null,
+      descrizione: contenutoQuill(quillEditors[prefix + "descrizione"]),
+      testoDettaglio: contenutoQuill(quillEditors[prefix + "testo-dettaglio"]),
       dataEvento: document.getElementById(prefix + "data").value,
       ora: document.getElementById(prefix + "ora").value || null,
       luogo: document.getElementById(prefix + "luogo").value.trim() || null,
@@ -131,8 +221,8 @@
   function apriModificaEvento(evento) {
     stato.eventoCorrenteId = evento.id;
     document.getElementById("mod-ev-titolo").value = evento.titolo;
-    document.getElementById("mod-ev-descrizione").value = evento.descrizione || "";
-    document.getElementById("mod-ev-testo-dettaglio").value = evento.testoDettaglio || "";
+    impostaContenutoQuill(quillEditors["mod-ev-descrizione"], evento.descrizione);
+    impostaContenutoQuill(quillEditors["mod-ev-testo-dettaglio"], evento.testoDettaglio);
     document.getElementById("mod-ev-data").value = evento.dataEvento;
     document.getElementById("mod-ev-ora").value = evento.ora || "";
     document.getElementById("mod-ev-luogo").value = evento.luogo || "";
