@@ -84,7 +84,7 @@
 
         <div id="eventi-area-riservata" hidden data-area-riservata>
 
-          <div class="admin-panel">
+          <div class="admin-panel" id="pannello-nuovo-evento" hidden>
             <h3>Nuovo evento</h3>
             <div class="form-row"><label for="ev-titolo">Titolo</label><input type="text" id="ev-titolo" maxlength="200"></div>
             <div class="form-row"><label for="ev-descrizione">Descrizione</label><textarea id="ev-descrizione" rows="3"></textarea></div>
@@ -121,13 +121,17 @@
                 <option value="annullato">Annullato</option>
               </select>
             </div>
-            <button type="button" class="btn btn--primary" id="btn-crea-evento">Crea evento</button>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-crea-evento">Crea evento</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-nuovo-evento">Annulla</button>
+            </div>
             <p class="form-note" id="crea-evento-status" role="alert" hidden></p>
           </div>
 
           <div class="admin-panel">
             <h3>Tutti gli eventi</h3>
             <div class="admin-toolbar">
+              <button type="button" class="btn btn--primary btn--small" id="btn-mostra-nuovo-evento">+ Nuovo evento</button>
               <select id="ev-filtro-stato">
                 <option value="">Tutti gli stati</option>
                 <option value="bozza">Bozza</option>

@@ -39,6 +39,22 @@
 
   // --- Eventi ---
 
+  // Il form "Nuovo evento" resta nascosto finché non serve (segnalato
+  // dall'utente: prima stava sempre espanso sopra la tabella) — il
+  // pulsante vive nella toolbar di "Tutti gli eventi", accanto ad
+  // "Aggiorna elenco".
+  document.getElementById("btn-mostra-nuovo-evento").addEventListener("click", function () {
+    var pannello = document.getElementById("pannello-nuovo-evento");
+    pannello.hidden = !pannello.hidden;
+    if (!pannello.hidden) {
+      pannello.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+
+  document.getElementById("btn-annulla-nuovo-evento").addEventListener("click", function () {
+    document.getElementById("pannello-nuovo-evento").hidden = true;
+  });
+
   document.getElementById("btn-crea-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("ev-");
     apiFetchAuth("/api/eventi", {
