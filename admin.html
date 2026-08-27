@@ -44,7 +44,23 @@
       </div>
     </section>
 
-    <section class="section" id="settings-area-riservata" hidden data-area-riservata>
+    <!-- Impostazioni ed Eventi condividono lo stesso accesso riservato
+         (data-area-riservata sul wrapper qui sotto, mostrato/nascosto in
+         blocco da admin-auth.js), ma sono due schede separate — prima
+         stavano una sotto l'altra sempre entrambe visibili, rendendo la
+         pagina lunghissima anche quando serve solo una delle due
+         (segnalato dall'utente). -->
+    <div id="area-riservata" hidden data-area-riservata>
+      <section class="section">
+        <div class="container">
+          <nav class="admin-tabs" style="display:flex; gap:10px; margin:0 0 10px;">
+            <button type="button" class="btn btn--primary" id="tab-btn-eventi" data-tab-target="eventi">Eventi</button>
+            <button type="button" class="btn btn--outline" id="tab-btn-impostazioni" data-tab-target="impostazioni">Impostazioni</button>
+          </nav>
+        </div>
+      </section>
+
+    <section class="section" id="settings-area-riservata" data-tab-panel="impostazioni" hidden>
       <div class="container" style="max-width:640px;">
         <div class="section__head" style="text-align:left; margin:0 0 30px;">
           <span class="section__eyebrow">Impostazioni</span>
@@ -74,7 +90,7 @@
     <!-- EVENTI (con posti/quote/iscrizioni legate al Libro Soci) — stesso
          accesso di Impostazioni sopra: un solo login Azure AD (ruolo
          Presidente/Admin) per tutta la pagina. -->
-    <section class="section section--alt">
+    <section class="section section--alt" data-tab-panel="eventi">
       <div class="container">
         <div class="section__head" style="text-align:left; margin:0 0 30px;">
           <span class="section__eyebrow">Eventi</span>
@@ -83,7 +99,7 @@
             sito quando lo stato è "Aperto" o "Chiuso".</p>
         </div>
 
-        <div id="eventi-area-riservata" hidden data-area-riservata>
+        <div id="eventi-area-riservata">
 
           <div class="admin-panel" id="pannello-nuovo-evento" hidden>
             <h3>Nuovo evento</h3>
@@ -239,6 +255,7 @@
         </div>
       </div>
     </section>
+    </div>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@5.19.0/lib/msal-browser.min.js"></script>
@@ -250,5 +267,6 @@
   <script src="assets/js/admin-auth.js"></script>
   <script src="assets/js/admin.js"></script>
   <script src="assets/js/admin-eventi.js"></script>
+  <script src="assets/js/admin-tabs.js"></script>
 </body>
 </html>
