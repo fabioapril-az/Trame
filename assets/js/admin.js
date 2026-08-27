@@ -59,6 +59,10 @@
   });
 
   // Caricate solo dopo il login (admin-auth.js), non al semplice load della
-  // pagina: prima del login la sezione è comunque nascosta.
-  window.addEventListener("trame:auth-ready", loadSettings);
+  // pagina: prima del login la sezione è comunque nascosta. Una Promise,
+  // non un evento: si "ricorda" di essersi già risolta anche se il login si
+  // completa prima che questo script sia stato eseguito (bug reale
+  // segnalato dall'utente su un CustomEvent che poteva essere sparato
+  // troppo presto).
+  window.trameAuthUiReady.then(loadSettings);
 })();

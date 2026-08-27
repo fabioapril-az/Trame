@@ -1,10 +1,11 @@
 // Gestione eventi (admin.html, sezione "Eventi"). Login condiviso con il
 // resto della pagina (Impostazioni) — vedi admin-auth.js per il widget di
 // login/logout e la visibilità della sezione riservata: qui ci si limita a
-// caricare i dati quando arriva "trame:auth-ready" e a mostrare gli errori
-// che l'API restituisce (403 compreso). Serve comunque un ruolo Azure AD
-// App Roles (Presidente/Admin) sulla App Registration "Trame Backoffice"
-// usata anche dal Libro Soci, verificato dall'API .NET a ogni chiamata.
+// caricare i dati quando window.trameAuthUiReady si risolve e a mostrare
+// gli errori che l'API restituisce (403 compreso). Serve comunque un ruolo
+// Azure AD App Roles (Presidente/Admin) sulla App Registration "Trame
+// Backoffice" usata anche dal Libro Soci, verificato dall'API .NET a ogni
+// chiamata.
 
 (function () {
   var stato = { eventoCorrenteId: null };
@@ -125,7 +126,12 @@
     });
   }
 
-  window.addEventListener("trame:auth-ready", caricaEventi);
+  // Promise, non un evento: si "ricorda" di essersi già risolta anche se il
+  // login si completa prima che questo script (ultimo in ordine di
+  // caricamento) sia stato eseguito — con un CustomEvent sparato una sola
+  // volta, in quel caso l'elenco restava vuoto finché non si premeva
+  // manualmente "Aggiorna elenco" (bug reale segnalato dall'utente).
+  window.trameAuthUiReady.then(caricaEventi);
 
   // --- Eventi ---
 
@@ -251,6 +257,15 @@
     document.getElementById("iscritti-tabella").hidden = true;
     document.getElementById("modifica-evento-status").hidden = true;
   }
+
+  // Chiude il pannello "Modifica evento" senza salvare (nessuna richiesta
+  // API): segnalato dall'utente come mancante, a differenza del pannello
+  // "Nuovo evento" che ha già "Annulla" — stesso comportamento, chiude
+  // anche l'elenco iscritti se aperto sotto lo stesso evento.
+  document.getElementById("btn-chiudi-evento").addEventListener("click", function () {
+    document.getElementById("evento-dettaglio").hidden = true;
+    document.getElementById("iscritti-tabella").hidden = true;
+  });
 
   function aggiornaAnteprimaImmagine(url) {
     var img = document.getElementById("mod-ev-immagine-anteprima");

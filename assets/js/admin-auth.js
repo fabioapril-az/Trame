@@ -8,7 +8,19 @@
 // Le sezioni riservate sono marcate con [data-area-riservata] e mostrate/
 // nascoste tutte insieme da qui; il caricamento dei rispettivi dati
 // (impostazioni, elenco eventi) resta a admin.js/admin-eventi.js, che
-// ascoltano l'evento "trame:auth-ready".
+// attendono window.trameAuthUiReady.
+//
+// Una Promise (non un CustomEvent) apposta: admin.js/admin-eventi.js si
+// registrano con .then() solo dopo che i rispettivi script sono stati
+// caricati ed eseguiti (tag <script> successivi a questo), e nel frattempo
+// il login MSAL può già essersi risolto — un evento sparato una sola volta
+// prima che il listener esista andrebbe perso per sempre, lasciando le
+// liste vuote finché non si preme manualmente "Aggiorna elenco" (bug reale
+// segnalato dall'utente). Una Promise invece "ricorda" di essersi già
+// risolta anche per chi si iscrive in ritardo.
+window.trameAuthUiReady = new Promise(function (resolve) {
+  window._trameAuthUiReadyResolve = resolve;
+});
 
 (function () {
   var userLabel = document.getElementById("admin-user-label");
@@ -38,7 +50,7 @@
     btnLogout.hidden = false;
     userLabel.textContent = account.name || account.username;
     mostraAree(true);
-    window.dispatchEvent(new CustomEvent("trame:auth-ready"));
+    window._trameAuthUiReadyResolve();
   }
 
   btnLogin.addEventListener("click", function () {
