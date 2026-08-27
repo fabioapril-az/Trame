@@ -1349,6 +1349,11 @@ p {
   color: var(--color-ink-soft);
 }
 
+.status-badge--annunciato {
+  background: var(--color-cream-alt);
+  color: var(--color-ink-soft);
+}
+
 .status-badge--aperto {
   background: var(--color-sage-light);
   color: var(--color-sage-dark);

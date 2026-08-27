@@ -167,7 +167,7 @@
       titolo: document.getElementById(prefix + "titolo").value.trim(),
       descrizione: contenutoQuill(quillEditors[prefix + "descrizione"]),
       testoDettaglio: contenutoQuill(quillEditors[prefix + "testo-dettaglio"]),
-      dataEvento: document.getElementById(prefix + "data").value,
+      dataEvento: document.getElementById(prefix + "data").value || null,
       ora: document.getElementById(prefix + "ora").value || null,
       luogo: document.getElementById(prefix + "luogo").value.trim() || null,
       categoria: document.getElementById(prefix + "categoria").value || null,
@@ -179,11 +179,14 @@
       facebookUrl: document.getElementById(prefix + "facebook").value.trim() || null,
       galleryUrl: document.getElementById(prefix + "galleria").value.trim() || null,
       stato: document.getElementById(prefix + "stato").value,
-      apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked
+      apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked,
+      dettagliAttivi: document.getElementById(prefix + "dettagli-attivi").checked
     };
   }
 
-  var STATO_EVENTO_LABELS = { bozza: "Bozza", aperto: "Aperto", chiuso: "Chiuso", annullato: "Annullato" };
+  var STATO_EVENTO_LABELS = {
+    bozza: "Bozza", annunciato: "Annunciato", aperto: "Aperto", chiuso: "Chiuso", annullato: "Annullato"
+  };
 
   function caricaEventi() {
     var filtroStato = document.getElementById("ev-filtro-stato").value;
@@ -235,6 +238,7 @@
     document.getElementById("mod-ev-facebook").value = evento.facebookUrl || "";
     document.getElementById("mod-ev-galleria").value = evento.galleryUrl || "";
     document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
+    document.getElementById("mod-ev-dettagli-attivi").checked = Boolean(evento.dettagliAttivi);
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax
       ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
