@@ -61,23 +61,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  /* Form contatti: costruisce una mail (nessun backend sul sito statico) */
-  var contactForm = document.getElementById("contact-form");
-  if (contactForm) {
-    contactForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var nome = contactForm.querySelector("#nome").value.trim();
-      var email = contactForm.querySelector("#email").value.trim();
-      var argomento = contactForm.querySelector("#argomento").value;
-      var messaggio = contactForm.querySelector("#messaggio").value.trim();
-
-      var destinatario = "info@progettotrame.org";
-      var oggetto = encodeURIComponent("[Progetto TraMe] " + (argomento || "Richiesta dal sito"));
-      var corpo = encodeURIComponent(
-        "Nome: " + nome + "\nEmail: " + email + "\n\n" + messaggio
-      );
-
-      window.location.href = "mailto:" + destinatario + "?subject=" + oggetto + "&body=" + corpo;
-    });
-  }
 });
