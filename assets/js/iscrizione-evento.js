@@ -115,10 +115,10 @@
 
       impostaModalitaPartecipazione(evento.opzioniPartecipazione || []);
       // Solo un limite lato UI (il backend rifiuta comunque se si supera
-      // davvero la capienza): evita di far compilare tutto il modulo a chi
-      // sta chiaramente chiedendo più posti di quanti ce ne siano.
-      if (evento.postiMax) {
-        inputNumeroPersone.max = evento.postiDisponibili;
+      // davvero la capienza): evita di far scegliere nel menu più posti di
+      // quanti ce ne siano davvero.
+      if (evento.postiMax && (evento.opzioniPartecipazione || []).length) {
+        popolaNumeroPersone(Math.max(1, Math.min(6, evento.postiDisponibili)));
       }
 
       if (evento.stato !== "aperto") {
@@ -150,6 +150,24 @@
     // genericamente insieme agli altri controlli.
   }
 
+  // Menu a tendina 1-6 (richiesto esplicitamente al posto di un campo
+  // numerico libero): "max" lo riduce ulteriormente se i posti disponibili
+  // sono meno di 6, così non si può nemmeno provare a chiedere più posti di
+  // quanti ce ne siano davvero.
+  function popolaNumeroPersone(max) {
+    var valorePrecedente = inputNumeroPersone.value || "1";
+    inputNumeroPersone.innerHTML = "";
+    for (var n = 1; n <= max; n++) {
+      var option = document.createElement("option");
+      option.value = n;
+      option.textContent = n;
+      inputNumeroPersone.appendChild(option);
+    }
+    if (inputNumeroPersone.querySelector('option[value="' + valorePrecedente + '"]')) {
+      inputNumeroPersone.value = valorePrecedente;
+    }
+  }
+
   // Popola il selettore modalità solo se l'evento ne ha (admin, facoltative):
   // un evento a quota unica non mostra questi campi, resta come prima.
   function impostaModalitaPartecipazione(opzioni) {
@@ -157,6 +175,7 @@
     if (!opzioni.length) {
       return;
     }
+    popolaNumeroPersone(6);
     campoNumeroPersone.hidden = false;
     campoOpzione.hidden = false;
     inputOpzione.innerHTML = "";
@@ -194,7 +213,7 @@
     opzionePrezzoTotale.hidden = false;
   }
 
-  inputNumeroPersone.addEventListener("input", aggiornaPrezzoTotale);
+  inputNumeroPersone.addEventListener("change", aggiornaPrezzoTotale);
   inputOpzione.addEventListener("change", aggiornaPrezzoTotale);
 
   // Nome/cognome servono solo a chi si iscrive al solo evento senza essere
