@@ -42,8 +42,8 @@
     <section class="page-hero">
       <div class="container">
         <span class="page-hero__eyebrow">Eventi e corsi</span>
-        <h1>Tante categorie, un filo comune</h1>
-        <p class="page-hero__subtitle">La voglia di fare qualcosa insieme, con cura. Il calendario dei primi
+        <h1 id="eventi-titolo">Tante categorie, un filo comune</h1>
+        <p class="page-hero__subtitle" id="eventi-sottotitolo">La voglia di fare qualcosa insieme, con cura. Il calendario dei primi
           eventi e corsi è in arrivo.</p>
       </div>
     </section>
@@ -51,7 +51,12 @@
     <section class="section">
       <div class="container">
 
-        <div class="events-grid" data-events-mount data-status="aperto,annunciato" data-coming-soon="eventi-coming-soon" hidden></div>
+        <!-- data-empty-categoria: quando si arriva filtrati su una categoria
+             (eventi.html#yoga, link dalle card "Le nostre trame" in home) e
+             quella categoria non ha ancora eventi, si mostra questo invece
+             del fallback generico sotto — il generico resta per quando non
+             c'è NESSUN evento pubblicato, a prescindere dalla categoria. -->
+        <div class="events-grid" data-events-mount data-status="aperto,annunciato" data-coming-soon="eventi-coming-soon" data-empty-categoria="eventi-categoria-vuota" hidden></div>
 
         <div class="coming-soon" id="eventi-coming-soon">
           <span class="coming-soon__icon" aria-hidden="true">🗓️</span>
@@ -60,6 +65,14 @@
             ballo, disegno, trekking urbano, viaggi e tutto ciò che porterà chi si unirà a noi. Torna a trovarci a breve,
             oppure scrivici se hai già un'idea o una passione da proporre.</p>
           <a href="contatti.html" class="btn btn--primary">Proponi un corso o un evento</a>
+        </div>
+
+        <div class="coming-soon" id="eventi-categoria-vuota" hidden>
+          <span class="coming-soon__icon" aria-hidden="true">✨</span>
+          <h2>Arriveranno presto</h2>
+          <p>Non ci sono ancora eventi o corsi di <strong data-categoria-nome></strong> in programma: stiamo
+            lavorando per organizzarli. Nel frattempo dai un'occhiata a quello che c'è già.</p>
+          <a href="eventi.html" class="btn btn--primary">Scopri gli altri corsi attivi per le altre trame</a>
         </div>
       </div>
     </section>

@@ -16,6 +16,11 @@
 //   data-hide-section="id"          sezione intera da nascondere se non ci sono eventi
 //                                   (utile per un archivio che non deve comparire affatto
 //                                   quando è vuoto, invece di mostrare un titolo senza nulla sotto)
+//   data-empty-categoria="id"       elemento da mostrare (invece di data-coming-soon) quando
+//                                   si arriva filtrati su una categoria (eventi.html#yoga, dalle
+//                                   card "Le nostre trame" in home/footer) e quella categoria
+//                                   specifica non ha eventi — deve contenere un elemento con
+//                                   [data-categoria-nome], dove viene scritto il nome della categoria
 // Da non autenticati (visitatori del sito) l'API restituisce solo eventi
 // aperto/chiuso/annunciato — mai bozza/annullato, indipendentemente da cosa si chiede.
 // "annunciato": pubblicato in anteprima (può non avere ancora una data),
@@ -217,13 +222,15 @@
     });
   }
 
-  function fillMount(mount, allEvents) {
+  function fillMount(mount, allEvents, categoriaFiltro) {
     var statuses = (mount.getAttribute("data-status") || "aperto").split(",").map(function (s) { return s.trim(); });
     var max = parseInt(mount.getAttribute("data-max"), 10);
     var comingSoonId = mount.getAttribute("data-coming-soon");
     var comingSoon = comingSoonId ? document.getElementById(comingSoonId) : null;
     var hideSectionId = mount.getAttribute("data-hide-section");
     var section = hideSectionId ? document.getElementById(hideSectionId) : null;
+    var emptyCategoriaId = mount.getAttribute("data-empty-categoria");
+    var emptyCategoria = emptyCategoriaId ? document.getElementById(emptyCategoriaId) : null;
 
     // Con più stati (es. "aperto,annunciato") gli eventi restano raggruppati
     // nell'ordine in cui gli stati sono elencati, non mescolati tra loro.
@@ -236,9 +243,30 @@
       events = events.concat(gruppo);
     });
 
+    // Arrivo filtrato da una card categoria in home (eventi.html#yoga, ecc.)
+    // — vedi lettura di categoriaFiltro dall'hash più sotto.
+    if (categoriaFiltro) {
+      events = events.filter(function (event) { return event.categoria === categoriaFiltro; });
+    }
+
     if (!events.length) {
       if (section) {
         section.hidden = true;
+      }
+      // Categoria filtrata ma senza eventi propri: messaggio dedicato
+      // ("Arriveranno presto"), diverso dal fallback generico sotto che
+      // invece è per quando non c'è NESSUN evento pubblicato in nessuna
+      // categoria.
+      if (categoriaFiltro && emptyCategoria) {
+        var nomeEl = emptyCategoria.querySelector("[data-categoria-nome]");
+        if (nomeEl) {
+          nomeEl.textContent = categoryLabel(categoriaFiltro);
+        }
+        emptyCategoria.hidden = false;
+        if (comingSoon) {
+          comingSoon.hidden = true;
+        }
+        return;
       }
       // Nessun evento: si mostra (di nuovo) il fallback "coming soon",
       // gestito esplicitamente in entrambi i rami — vedi nota su
@@ -261,14 +289,52 @@
     if (comingSoon) {
       comingSoon.hidden = true;
     }
+    if (emptyCategoria) {
+      emptyCategoria.hidden = true;
+    }
     if (section) {
       section.hidden = false;
+    }
+  }
+
+  // Categoria scelta da una card "Le nostre trame" in home (eventi.html#yoga,
+  // eventi.html#trekking-urbano, ecc. — stessi link anche nel footer). Un
+  // hash che non corrisponde a una categoria nota (o assente) non filtra
+  // nulla, invece di mostrare per errore "nessun evento" per una categoria
+  // inesistente.
+  function leggiCategoriaFiltro() {
+    var hash = (window.location.hash || "").replace(/^#/, "");
+    return hash && CATEGORY_LABELS.hasOwnProperty(hash) ? hash : null;
+  }
+
+  // Solo su eventi.html il titolo ha questi id (in home, dove events.js
+  // gira anche per la sezione "In programma", non esistono: qui non
+  // succede nulla). Aggiorna titolo/sottotitolo per riflettere la
+  // categoria scelta, invece di lasciare l'intestazione generica "Tante
+  // categorie, un filo comune" su una pagina che ne mostra solo una.
+  function aggiornaIntestazionePerCategoria(categoriaFiltro) {
+    if (!categoriaFiltro) return;
+    var titoloEl = document.getElementById("eventi-titolo");
+    var sottotitoloEl = document.getElementById("eventi-sottotitolo");
+    if (titoloEl) {
+      titoloEl.textContent = categoryLabel(categoriaFiltro);
+    }
+    if (sottotitoloEl) {
+      sottotitoloEl.textContent = "";
+      sottotitoloEl.appendChild(document.createTextNode("Solo gli eventi e i corsi di questa categoria. "));
+      var link = document.createElement("a");
+      link.href = "eventi.html";
+      link.textContent = "Vedi tutte le categorie →";
+      sottotitoloEl.appendChild(link);
     }
   }
 
   document.addEventListener("DOMContentLoaded", function () {
     var mounts = document.querySelectorAll("[data-events-mount]");
     if (!mounts.length) return;
+
+    var categoriaFiltro = leggiCategoriaFiltro();
+    aggiornaIntestazionePerCategoria(categoriaFiltro);
 
     // Il messaggio "coming soon" resta visibile di default nell'HTML solo
     // come fallback per JS disabilitato — con JS attivo va nascosto SUBITO,
@@ -301,7 +367,7 @@
         }
         events = events || [];
         mounts.forEach(function (mount) {
-          fillMount(mount, events);
+          fillMount(mount, events, categoriaFiltro);
         });
       })
       .catch(function () {
