@@ -125,6 +125,12 @@
             </div>
             <div class="form-row"><label for="ev-quota">Quota evento (€, facoltativa)</label><input type="number" id="ev-quota" min="0" step="0.01"></div>
             <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
+            <div class="form-row">
+              <label>Modalità di partecipazione (facoltative)</label>
+              <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non aggiungi nessuna modalità, l'evento resta a quota unica come sopra.</p>
+              <div id="ev-opzioni-lista"></div>
+              <button type="button" class="btn btn--outline btn--small" id="ev-opzioni-aggiungi">+ Aggiungi modalità</button>
+            </div>
             <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
             <div class="form-row"><label for="ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="ev-scadenza-iscrizione"></div>
             <div class="form-row"><label for="ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="ev-instagram" placeholder="https://instagram.com/..."></div>
@@ -200,6 +206,12 @@
               </div>
               <div class="form-row"><label for="mod-ev-quota">Quota evento (€)</label><input type="number" id="mod-ev-quota" min="0" step="0.01"></div>
               <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
+              <div class="form-row">
+                <label>Modalità di partecipazione (facoltative)</label>
+                <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non c'è nessuna modalità, l'evento resta a quota unica come sopra.</p>
+                <div id="mod-ev-opzioni-lista"></div>
+                <button type="button" class="btn btn--outline btn--small" id="mod-ev-opzioni-aggiungi">+ Aggiungi modalità</button>
+              </div>
               <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
               <div class="form-row"><label for="mod-ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="mod-ev-scadenza-iscrizione"></div>
               <div class="form-row"><label for="mod-ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="mod-ev-instagram" placeholder="https://instagram.com/..."></div>
@@ -247,7 +259,7 @@
 
             <div style="overflow-x:auto;">
               <table class="admin-table" id="iscritti-tabella" hidden>
-                <thead><tr><th>Email</th><th>Tipo</th><th>Stato</th><th>Importo</th><th>Data</th><th>Azioni</th></tr></thead>
+                <thead><tr><th>Email</th><th>Tipo</th><th>Persone</th><th>Modalità</th><th>Stato</th><th>Importo</th><th>Data</th><th>Azioni</th></tr></thead>
                 <tbody id="iscritti-tabella-body"></tbody>
               </table>
             </div>

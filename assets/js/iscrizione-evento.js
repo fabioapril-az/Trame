@@ -39,6 +39,19 @@
   var verificaStatus = document.getElementById("verifica-status");
   var emailStatus = document.getElementById("email-status");
 
+  // Modalità di partecipazione (facoltative, definite in admin per evento) e
+  // dati richiesti solo a chi si iscrive al solo evento senza essere socio —
+  // vedi impostaModalitaPartecipazione()/mostraCampiSoloEvento() più sotto.
+  var campoNumeroPersone = document.getElementById("campo-numero-persone");
+  var inputNumeroPersone = document.getElementById("input-numero-persone");
+  var campoOpzione = document.getElementById("campo-opzione");
+  var inputOpzione = document.getElementById("input-opzione");
+  var opzionePrezzoTotale = document.getElementById("opzione-prezzo-totale");
+  var campoNomeSoloEvento = document.getElementById("campo-nome-solo-evento");
+  var campoCognomeSoloEvento = document.getElementById("campo-cognome-solo-evento");
+  var inputSoloEventoNome = document.getElementById("se-nome");
+  var inputSoloEventoCognome = document.getElementById("se-cognome");
+
   var stepRinnovo = document.getElementById("step-rinnovo");
   var rinnovoTitolo = document.getElementById("rinnovo-titolo");
   var rinnovoNota = document.getElementById("rinnovo-nota");
@@ -57,7 +70,7 @@
 
   var stato = {
     trovato: false, richiedeRinnovo: false, suggerisceRinnovo: false, saltaRinnovo: false,
-    apertoNonSoci: false, impostazioni: null
+    apertoNonSoci: false, impostazioni: null, opzioniPartecipazione: []
   };
   var verificaTimer = null;
   // Email dell'ultima verifica completata: se il blur scatta di nuovo con
@@ -88,7 +101,7 @@
       stato.apertoNonSoci = Boolean(evento.apertoNonSoci);
       if (stato.apertoNonSoci) {
         eventoNonSociNota.hidden = false;
-        btnConfermaSoloEvento.hidden = false;
+        mostraCampiSoloEvento(true);
       } else {
         // Senza "Conferma" (solo evento) come alternativa, "anche" non ha
         // senso: qui è l'unica azione possibile per chi non è socio.
@@ -99,6 +112,14 @@
         dettagli += " · quota: " + evento.quotaEvento + " €";
       }
       sottotitoloEl.textContent = dettagli;
+
+      impostaModalitaPartecipazione(evento.opzioniPartecipazione || []);
+      // Solo un limite lato UI (il backend rifiuta comunque se si supera
+      // davvero la capienza): evita di far compilare tutto il modulo a chi
+      // sta chiaramente chiedendo più posti di quanti ce ne siano.
+      if (evento.postiMax) {
+        inputNumeroPersone.max = evento.postiDisponibili;
+      }
 
       if (evento.stato !== "aperto") {
         chiusoEl.hidden = false;
@@ -120,9 +141,70 @@
   function disabilitaStepEmail(disabled) {
     inputEmail.disabled = disabled;
     btnConfermaSoloEvento.disabled = disabled;
+    inputNumeroPersone.disabled = disabled;
+    inputOpzione.disabled = disabled;
+    inputSoloEventoNome.disabled = disabled;
+    inputSoloEventoCognome.disabled = disabled;
     // btnAssociati resta gestito a parte: si riabilita solo se la verifica
     // conferma che l'email non è già socia (vedi verificaEmail sotto), non
     // genericamente insieme agli altri controlli.
+  }
+
+  // Popola il selettore modalità solo se l'evento ne ha (admin, facoltative):
+  // un evento a quota unica non mostra questi campi, resta come prima.
+  function impostaModalitaPartecipazione(opzioni) {
+    stato.opzioniPartecipazione = opzioni;
+    if (!opzioni.length) {
+      return;
+    }
+    campoNumeroPersone.hidden = false;
+    campoOpzione.hidden = false;
+    inputOpzione.innerHTML = "";
+    // Placeholder vuoto e obbligatorio (required in HTML): senza, il
+    // <select> selezionerebbe da solo la prima modalità, facendo confermare
+    // un prezzo diverso da quello che ci si aspetta senza essersene accorti.
+    var placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = "— scegli —";
+    placeholder.disabled = true;
+    placeholder.selected = true;
+    inputOpzione.appendChild(placeholder);
+    opzioni.forEach(function (o) {
+      var option = document.createElement("option");
+      option.value = o.id;
+      option.textContent = o.nome + " — " + o.prezzoPersona + " € a persona";
+      inputOpzione.appendChild(option);
+    });
+    aggiornaPrezzoTotale();
+  }
+
+  function opzioneSelezionata() {
+    var id = inputOpzione.value;
+    return stato.opzioniPartecipazione.filter(function (o) { return String(o.id) === id; })[0] || null;
+  }
+
+  function aggiornaPrezzoTotale() {
+    var opzione = opzioneSelezionata();
+    var persone = parseInt(inputNumeroPersone.value, 10) || 1;
+    if (!opzione) {
+      opzionePrezzoTotale.hidden = true;
+      return;
+    }
+    opzionePrezzoTotale.textContent = "Totale: " + (opzione.prezzoPersona * persone).toFixed(2) + " €";
+    opzionePrezzoTotale.hidden = false;
+  }
+
+  inputNumeroPersone.addEventListener("input", aggiornaPrezzoTotale);
+  inputOpzione.addEventListener("change", aggiornaPrezzoTotale);
+
+  // Nome/cognome servono solo a chi si iscrive al solo evento senza essere
+  // socio (bottone "Conferma" sotto, visibile solo se l'evento è aperto
+  // anche ai non soci): un socio già noto ha questi dati in anagrafica, non
+  // glieli si richiede di nuovo.
+  function mostraCampiSoloEvento(visibile) {
+    btnConfermaSoloEvento.hidden = !visibile;
+    campoNomeSoloEvento.hidden = !visibile;
+    campoCognomeSoloEvento.hidden = !visibile;
   }
 
   // Il testo del bottone cambia in "Invio in corso…" mentre la richiesta è
@@ -182,7 +264,7 @@
           btnAssociati.hidden = false;
           btnAssociati.disabled = false;
           if (stato.apertoNonSoci) {
-            btnConfermaSoloEvento.hidden = false;
+            mostraCampiSoloEvento(true);
           }
           return;
         }
@@ -192,7 +274,7 @@
         // (richiesto esplicitamente: prima restavano visibili insieme,
         // confondendo a cosa servisse "Conferma").
         btnAssociati.hidden = true;
-        btnConfermaSoloEvento.hidden = true;
+        mostraCampiSoloEvento(false);
 
         if (stato.richiedeRinnovo) {
           rinnovoTitolo.textContent = "La tua tessera è scaduta";
@@ -241,7 +323,7 @@
     btnAssociati.disabled = true;
     btnAssociati.hidden = false;
     if (stato.apertoNonSoci) {
-      btnConfermaSoloEvento.hidden = false;
+      mostraCampiSoloEvento(true);
     }
     emailStatus.hidden = true;
     if (verificaTimer) {
@@ -256,6 +338,12 @@
   // un solo click, era già così.
   btnConfermaSoloEvento.addEventListener("click", function () {
     if (!inputEmail.reportValidity()) {
+      return;
+    }
+    if (!inputSoloEventoNome.reportValidity() || !inputSoloEventoCognome.reportValidity()) {
+      return;
+    }
+    if (stato.opzioniPartecipazione.length && (!inputNumeroPersone.reportValidity() || !inputOpzione.reportValidity())) {
       return;
     }
     emailStatus.hidden = true;
@@ -382,6 +470,20 @@
       importoPagato: null
     };
 
+    // Solo se l'evento ha modalità di partecipazione definite in admin —
+    // altrimenti un evento a quota unica manda solo l'email, come prima.
+    if (stato.opzioniPartecipazione.length) {
+      payload.numeroPersone = parseInt(inputNumeroPersone.value, 10) || 1;
+      payload.opzionePartecipazioneId = inputOpzione.value ? parseInt(inputOpzione.value, 10) : null;
+    }
+
+    // Nome/cognome solo per chi si iscrive al solo evento senza essere
+    // socio: un socio già noto li ha già in anagrafica.
+    if (soloEvento) {
+      payload.nome = inputSoloEventoNome.value.trim();
+      payload.cognome = inputSoloEventoCognome.value.trim();
+    }
+
     if (!soloEvento && (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo))) {
       payload.rinnovo = {
         dataRinnovo: new Date().toISOString().slice(0, 10),
@@ -419,7 +521,12 @@
       });
   }
 
-  btnConferma.addEventListener("click", function () { eseguiIscrizione(); });
+  btnConferma.addEventListener("click", function () {
+    if (stato.opzioniPartecipazione.length && (!inputNumeroPersone.reportValidity() || !inputOpzione.reportValidity())) {
+      return;
+    }
+    eseguiIscrizione();
+  });
 
   function val(id) {
     return document.getElementById(id).value.trim();

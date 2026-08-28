@@ -63,7 +63,34 @@
               <label for="input-email">Email</label>
               <input type="email" id="input-email" required>
             </div>
+
+            <!-- Solo se l'evento ha modalità di partecipazione definite in
+                 admin (opzioniPartecipazione): un evento a quota unica non
+                 mostra nulla di tutto questo, resta come prima. -->
+            <div class="form-row" id="campo-numero-persone" hidden>
+              <label for="input-numero-persone">Per quante persone ti iscrivi?</label>
+              <input type="number" id="input-numero-persone" min="1" value="1" required>
+            </div>
+            <div class="form-row" id="campo-opzione" hidden>
+              <label for="input-opzione">A cosa ti iscrivi?</label>
+              <select id="input-opzione" required></select>
+              <p class="form-note" id="opzione-prezzo-totale" hidden></p>
+            </div>
+
             <p class="form-note" id="evento-non-soci-nota" hidden>Questo evento è aperto anche a chi non è socio dell'associazione.</p>
+
+            <!-- Solo per chi si iscrive al solo evento senza essere socio
+                 (bottone "Conferma" sotto): un socio già noto ha già questi
+                 dati in anagrafica, non serve richiederli di nuovo. -->
+            <div class="form-row" id="campo-nome-solo-evento" hidden>
+              <label for="se-nome">Nome</label>
+              <input type="text" id="se-nome" maxlength="100" required>
+            </div>
+            <div class="form-row" id="campo-cognome-solo-evento" hidden>
+              <label for="se-cognome">Cognome</label>
+              <input type="text" id="se-cognome" maxlength="100" required>
+            </div>
+
             <div class="admin-form__actions">
               <button type="button" class="btn btn--primary" id="btn-conferma-solo-evento" hidden>Conferma</button>
               <button type="button" class="btn btn--outline" id="btn-associati" disabled>Voglio associarmi anche all'associazione</button>
