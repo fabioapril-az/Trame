@@ -1,0 +1,102 @@
+// Pagina di TEST (test-pagamento-admin.html): elenco dei record salvati
+// dall'ambiente di test Stripe + azione manuale "Segna come rimborsato"
+// (vedi api/src/functions/iscrizioni-test-admin.js). La chiave inserita qui
+// viene tenuta solo in sessionStorage del browser, mai salvata altrove.
+
+(function () {
+  var inputChiave = document.getElementById("chiave");
+  var btnCarica = document.getElementById("btn-carica");
+  var statusEl = document.getElementById("status");
+  var tbody = document.getElementById("tabella-body");
+  var emptyEl = document.getElementById("empty");
+
+  var CHIAVE_SESSIONE = "trame_test_admin_key";
+  try {
+    var salvata = window.sessionStorage.getItem(CHIAVE_SESSIONE);
+    if (salvata) {
+      inputChiave.value = salvata;
+    }
+  } catch (e) { /* storage non disponibile: si può comunque incollare la chiave a mano */ }
+
+  function escapeHtml(value) {
+    var div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+  }
+
+  function mostraStatus(testo, errore) {
+    statusEl.textContent = testo;
+    statusEl.hidden = false;
+    statusEl.style.color = errore ? "var(--color-terracotta, #b5533c)" : "inherit";
+  }
+
+  function caricaElenco() {
+    var chiave = inputChiave.value;
+    if (!chiave) {
+      mostraStatus("Inserisci la chiave admin di test.", true);
+      return;
+    }
+    try { window.sessionStorage.setItem(CHIAVE_SESSIONE, chiave); } catch (e) { /* ignorato */ }
+
+    fetch("/api/iscrizioni-test-admin", {
+      headers: { "X-Test-Admin-Key": chiave }
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          if (!res.ok) throw new Error(body.error || "Errore nel caricamento.");
+          return body;
+        });
+      })
+      .then(function (righe) {
+        statusEl.hidden = true;
+        tbody.innerHTML = "";
+        emptyEl.hidden = righe.length > 0;
+        righe.forEach(function (r) {
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + escapeHtml(r.tipoPagamento) + "</td>" +
+            "<td><code>" + escapeHtml(r.iscrizioneId) + "</code></td>" +
+            "<td>" + escapeHtml(r.stato) + "</td>" +
+            "<td>" + r.importoTotale.toFixed(2) + " €</td>" +
+            "<td><code>" + escapeHtml(r.stripePaymentIntentId || "—") + "</code></td>" +
+            "<td>" + new Date(r.createdAt).toLocaleString("it-IT") + "</td>" +
+            "<td></td>";
+          var tdAzioni = tr.lastElementChild;
+          if (r.stato === "confermato") {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "btn btn--outline btn--small";
+            btn.textContent = "Segna come rimborsato";
+            btn.addEventListener("click", function () { segnaRimborsato(r, chiave); });
+            tdAzioni.appendChild(btn);
+          } else {
+            tdAzioni.textContent = "—";
+          }
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(function (err) { mostraStatus(err.message, true); });
+  }
+
+  function segnaRimborsato(record, chiave) {
+    if (!window.confirm("Segnare come rimborsata l'iscrizione " + record.iscrizioneId + "? " +
+      "Ricorda: il rimborso vero va fatto dal Dashboard Stripe (payment_intent_id sopra), questo aggiorna solo il record di test.")) {
+      return;
+    }
+    fetch("/api/iscrizioni-test-admin/rimborso", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Test-Admin-Key": chiave },
+      body: JSON.stringify({ tipoPagamento: record.tipoPagamento, iscrizioneId: record.iscrizioneId })
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          if (!res.ok) throw new Error(body.error || "Errore nel registrare il rimborso.");
+          return body;
+        });
+      })
+      .then(function () { caricaElenco(); })
+      .catch(function (err) { mostraStatus(err.message, true); });
+  }
+
+  btnCarica.addEventListener("click", caricaElenco);
+})();

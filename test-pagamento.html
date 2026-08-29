@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[TEST] Pagamenti Stripe — Progetto TraMe</title>
+  <!-- Ambiente di TEST isolato (Fase 1): pagina non linkata da nessun menu
+       o navigazione, chiavi Stripe SOLO test lato Function, dati salvati
+       in un Table Storage separato dal backend .NET reale. Non indicizzare
+       né suggerire ai motori di ricerca. -->
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">ambiente di test pagamenti</span>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">[TEST] non pubblico</span>
+        <h1>Test pagamenti Stripe</h1>
+        <p class="page-hero__subtitle">Pagina isolata per validare i due flussi (iscrizione evento e tessera
+          associazione) con chiavi Stripe di test. Nessun dato qui è collegato a soci o eventi reali.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:640px;">
+
+        <p class="form-note" id="nota-annullato" role="alert" hidden>Pagamento annullato: puoi riprovare qui sotto.</p>
+
+        <div class="admin-toolbar">
+          <button type="button" class="btn btn--primary btn--small" id="btn-tab-evento">Flusso A — Iscrizione evento</button>
+          <button type="button" class="btn btn--outline btn--small" id="btn-tab-tessera">Flusso B — Tessera associazione</button>
+        </div>
+
+        <!-- FLUSSO A: iscrizione evento -->
+        <div id="pannello-evento" class="admin-panel" style="margin-top:20px;">
+          <h3>Iscrizione evento (test)</h3>
+
+          <div class="form-row">
+            <label for="ev-scelta">Evento di test</label>
+            <select id="ev-scelta"></select>
+          </div>
+          <div class="form-row">
+            <label for="ev-email">Email</label>
+            <input type="email" id="ev-email" required>
+          </div>
+
+          <!-- Mostrata solo se l'evento prevede ENTRAMBE Singolo e Gruppo. -->
+          <div class="form-row" id="ev-campo-scelta-modalita" hidden>
+            <label for="ev-modalita">Modalità</label>
+            <select id="ev-modalita">
+              <option value="singolo">Singolo</option>
+              <option value="gruppo">Gruppo (2-6 persone)</option>
+            </select>
+          </div>
+          <!-- Mostrata quando la modalità Gruppo è quella attiva (per scelta
+               esplicita, o perché è l'unica prevista dall'evento). -->
+          <div class="form-row" id="ev-campo-numero-gruppo" hidden>
+            <label for="ev-numero-gruppo">Per quante persone (2-6)?</label>
+            <select id="ev-numero-gruppo"></select>
+          </div>
+          <!-- Sempre combinabile con la scelta sopra, solo se l'evento ha un
+               prezzo aperitivo impostato. -->
+          <div class="form-row" id="ev-campo-aperitivo" hidden>
+            <label for="ev-aperitivo">Persone solo aperitivo (0-6)</label>
+            <select id="ev-aperitivo"></select>
+          </div>
+
+          <p class="form-note" id="ev-totale" style="font-weight:600;"></p>
+          <p class="form-note" id="ev-status" role="alert" hidden></p>
+
+          <div class="admin-form__actions">
+            <button type="button" class="btn btn--primary" id="ev-btn-paga">Vai al pagamento di test</button>
+          </div>
+        </div>
+
+        <!-- FLUSSO B: tessera associazione -->
+        <div id="pannello-tessera" class="admin-panel" style="margin-top:20px;" hidden>
+          <h3>Tessera associazione (test)</h3>
+
+          <div class="form-row">
+            <label for="te-numero">Numero tessere in questa iscrizione</label>
+            <select id="te-numero"></select>
+          </div>
+
+          <div id="te-blocchi-persone"></div>
+
+          <p class="form-note" id="te-totale" style="font-weight:600;"></p>
+          <p class="form-note" id="te-status" role="alert" hidden></p>
+
+          <div class="admin-form__actions">
+            <button type="button" class="btn btn--primary" id="te-btn-paga">Vai al pagamento di test</button>
+          </div>
+        </div>
+
+        <p class="form-note" style="margin-top:24px;">
+          Elenco/rimborso di test: <a href="test-pagamento-admin.html">test-pagamento-admin.html</a> (anch'essa non linkata).
+        </p>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — ambiente di test</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/test-pagamento.js"></script>
+</body>
+</html>

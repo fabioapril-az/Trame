@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[TEST] Admin pagamenti — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">ambiente di test pagamenti</span>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">[TEST] non pubblico</span>
+        <h1>Elenco iscrizioni di test</h1>
+        <p class="page-hero__subtitle">Il rimborso vero si fa dal Dashboard Stripe usando il payment_intent_id
+          qui sotto; il bottone "Segna come rimborsato" aggiorna solo lo stato del record di test.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="admin-toolbar">
+          <label for="chiave">Chiave admin di test (TEST_ADMIN_KEY)</label>
+          <input type="password" id="chiave" style="flex:1; min-width:200px;">
+          <button type="button" class="btn btn--primary btn--small" id="btn-carica">Carica elenco</button>
+        </div>
+        <p class="form-note" id="status" role="alert" hidden></p>
+
+        <div style="overflow-x:auto;">
+          <table class="admin-table" id="tabella">
+            <thead>
+              <tr>
+                <th>Tipo</th><th>iscrizione_id</th><th>Stato</th><th>Importo</th>
+                <th>payment_intent_id</th><th>Creato</th><th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="tabella-body"></tbody>
+          </table>
+        </div>
+        <p class="form-note" id="empty" hidden>Nessun record.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — ambiente di test</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/test-pagamento-admin.js"></script>
+</body>
+</html>

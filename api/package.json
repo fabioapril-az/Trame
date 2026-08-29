@@ -2,12 +2,14 @@
   "name": "trame-api",
   "version": "1.0.0",
   "private": true,
-  "description": "Scaffold Azure Functions della Static Web App — nessuna route esposta: eventi e impostazioni sono passati al backend .NET.",
-  "main": "src/index.js",
+  "description": "Scaffold Azure Functions della Static Web App — eventi/soci/impostazioni restano sul backend .NET; le uniche route esposte qui sono l'ambiente di TEST per Stripe Checkout (vedi src/functions/pagamenti-test-shared.js), isolato in un proprio Table Storage.",
+  "main": "src/functions/*.js",
   "scripts": {
     "start": "func start"
   },
   "dependencies": {
-    "@azure/functions": "^4.5.1"
+    "@azure/data-tables": "^13.3.0",
+    "@azure/functions": "^4.5.1",
+    "stripe": "^17.4.0"
   }
 }
