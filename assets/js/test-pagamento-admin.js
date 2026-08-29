@@ -99,4 +99,64 @@
   }
 
   btnCarica.addEventListener("click", caricaElenco);
+
+  // --- Sconto socio sugli eventi (vedi config-sconto-test.js) ---
+  var inputScontoEuro = document.getElementById("sconto-euro");
+  var inputScontoMaxEventi = document.getElementById("sconto-max-eventi");
+  var scontoStatus = document.getElementById("sconto-status");
+
+  function mostraScontoStatus(testo, errore) {
+    scontoStatus.textContent = testo;
+    scontoStatus.hidden = false;
+    scontoStatus.style.color = errore ? "var(--color-terracotta, #b5533c)" : "inherit";
+  }
+
+  function chiaveCorrente() {
+    var chiave = inputChiave.value;
+    if (!chiave) {
+      mostraScontoStatus("Inserisci prima la chiave admin di test (in cima alla pagina).", true);
+      return null;
+    }
+    return chiave;
+  }
+
+  document.getElementById("btn-carica-sconto").addEventListener("click", function () {
+    var chiave = chiaveCorrente();
+    if (!chiave) return;
+    scontoStatus.hidden = true;
+    fetch("/api/config-sconto-test", { headers: { "X-Test-Admin-Key": chiave } })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          if (!res.ok) throw new Error(body.error || "Errore nel caricamento.");
+          return body;
+        });
+      })
+      .then(function (config) {
+        inputScontoEuro.value = config.scontoSocioEuro;
+        inputScontoMaxEventi.value = config.scontoSocioMaxEventi;
+      })
+      .catch(function (err) { mostraScontoStatus(err.message, true); });
+  });
+
+  document.getElementById("btn-salva-sconto").addEventListener("click", function () {
+    var chiave = chiaveCorrente();
+    if (!chiave) return;
+    scontoStatus.hidden = true;
+    fetch("/api/config-sconto-test", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "X-Test-Admin-Key": chiave },
+      body: JSON.stringify({
+        scontoSocioEuro: parseFloat(inputScontoEuro.value),
+        scontoSocioMaxEventi: parseInt(inputScontoMaxEventi.value, 10)
+      })
+    })
+      .then(function (res) {
+        return res.json().then(function (body) {
+          if (!res.ok) throw new Error(body.error || "Errore nel salvataggio.");
+          return body;
+        });
+      })
+      .then(function () { mostraScontoStatus("Salvato.", false); })
+      .catch(function (err) { mostraScontoStatus(err.message, true); });
+  });
 })();

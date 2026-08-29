@@ -57,10 +57,6 @@
             <label for="ev-scelta">Evento di test</label>
             <select id="ev-scelta"></select>
           </div>
-          <div class="form-row">
-            <label for="ev-email">Email</label>
-            <input type="email" id="ev-email" required>
-          </div>
 
           <!-- Mostrata solo se l'evento prevede ENTRAMBE Singolo e Gruppo. -->
           <div class="form-row" id="ev-campo-scelta-modalita" hidden>
@@ -76,14 +72,22 @@
             <label for="ev-numero-gruppo">Per quante persone (2-6)?</label>
             <select id="ev-numero-gruppo"></select>
           </div>
+
+          <!-- Un blocco nome/cognome/email per persona (1 per Singolo, N per
+               Gruppo): serve un'email a testa per sapere, persona per
+               persona, se è socia e se le spetta lo sconto socio. -->
+          <div id="ev-blocchi-persone"></div>
+
           <!-- Sempre combinabile con la scelta sopra, solo se l'evento ha un
-               prezzo aperitivo impostato. -->
+               prezzo aperitivo impostato. Numero soltanto (non nominale):
+               l'aperitivo non matura né riceve lo sconto socio. -->
           <div class="form-row" id="ev-campo-aperitivo" hidden>
             <label for="ev-aperitivo">Persone solo aperitivo (0-6)</label>
             <select id="ev-aperitivo"></select>
           </div>
 
           <p class="form-note" id="ev-totale" style="font-weight:600;"></p>
+          <p class="form-note">Lo sconto socio (dal 2° evento, se spetta) viene calcolato dal server al momento del pagamento — non è incluso in questa anteprima.</p>
           <p class="form-note" id="ev-status" role="alert" hidden></p>
 
           <div class="admin-form__actions">

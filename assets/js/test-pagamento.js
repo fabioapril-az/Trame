@@ -64,14 +64,71 @@
     }
   }
 
+  // Un blocco nome/cognome/email per persona, condiviso da Flusso A
+  // (Singolo/Gruppo: serve un'email a testa per lo sconto socio) e Flusso B
+  // (tessere nominali). "precedentiGetter" ripopola i blocchi che restano
+  // con i valori già inseriti, invece di azzerare tutto quando cambia solo
+  // il numero di persone.
+  function generaBlocchiPersone(container, classPrefix, n, precedentiGetter) {
+    var precedenti = precedentiGetter ? precedentiGetter() : [];
+    container.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var blocco = document.createElement("div");
+      blocco.className = "admin-panel";
+      blocco.style.cssText = "margin:12px 0; padding:14px;";
+      blocco.innerHTML =
+        "<p class=\"form-note\" style=\"margin-top:0;\">Persona " + (i + 1) + "</p>" +
+        "<div class=\"form-row\"><label>Nome</label><input type=\"text\" class=\"" + classPrefix + "-nome\" maxlength=\"100\" required></div>" +
+        "<div class=\"form-row\"><label>Cognome</label><input type=\"text\" class=\"" + classPrefix + "-cognome\" maxlength=\"100\" required></div>" +
+        "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"" + classPrefix + "-email\" maxlength=\"255\" required></div>";
+      if (precedenti[i]) {
+        blocco.querySelector("." + classPrefix + "-nome").value = precedenti[i].nome;
+        blocco.querySelector("." + classPrefix + "-cognome").value = precedenti[i].cognome;
+        blocco.querySelector("." + classPrefix + "-email").value = precedenti[i].email;
+      }
+      container.appendChild(blocco);
+    }
+  }
+
+  function leggiPersoneDaBlocchi(container, classPrefix, validare, statusEl) {
+    var blocchi = container.querySelectorAll(".admin-panel");
+    var persone = [];
+    for (var i = 0; i < blocchi.length; i++) {
+      var nome = blocchi[i].querySelector("." + classPrefix + "-nome");
+      var cognome = blocchi[i].querySelector("." + classPrefix + "-cognome");
+      var email = blocchi[i].querySelector("." + classPrefix + "-email");
+      if (validare) {
+        if (!nome.reportValidity() || !cognome.reportValidity() || !email.reportValidity()) {
+          return null;
+        }
+      }
+      persone.push({ nome: nome.value.trim(), cognome: cognome.value.trim(), email: email.value.trim() });
+    }
+    if (validare) {
+      // Stessa email su più blocchi: quasi certamente un errore di
+      // battitura (il server la rifiuta comunque, ma qui si vede subito).
+      var emailViste = {};
+      for (var j = 0; j < persone.length; j++) {
+        var emailNorm = persone[j].email.toLowerCase();
+        if (emailViste[emailNorm]) {
+          statusEl.textContent = "L'email " + persone[j].email + " è ripetuta su più persone: ogni persona richiede un'email diversa.";
+          statusEl.hidden = false;
+          return null;
+        }
+        emailViste[emailNorm] = true;
+      }
+    }
+    return persone;
+  }
+
   // ================= FLUSSO A: evento =================
 
   var evScelta = document.getElementById("ev-scelta");
-  var evEmail = document.getElementById("ev-email");
   var evCampoModalita = document.getElementById("ev-campo-scelta-modalita");
   var evModalita = document.getElementById("ev-modalita");
   var evCampoNumeroGruppo = document.getElementById("ev-campo-numero-gruppo");
   var evNumeroGruppo = document.getElementById("ev-numero-gruppo");
+  var evBlocchiPersone = document.getElementById("ev-blocchi-persone");
   var evCampoAperitivo = document.getElementById("ev-campo-aperitivo");
   var evAperitivo = document.getElementById("ev-aperitivo");
   var evTotale = document.getElementById("ev-totale");
@@ -99,6 +156,13 @@
     return evento.prezzoSingolo != null ? "singolo" : "gruppo";
   }
 
+  function generaBlocchiEvento() {
+    var n = modalitaAttiva() === "singolo" ? 1 : parseInt(evNumeroGruppo.value, 10);
+    generaBlocchiPersone(evBlocchiPersone, "ev-persona", n, function () {
+      return leggiPersoneDaBlocchi(evBlocchiPersone, "ev-persona", false);
+    });
+  }
+
   function aggiornaCampiEvento() {
     var evento = EVENTI_TEST[evScelta.value];
     var entrambe = evento.prezzoSingolo != null && evento.prezzoGruppoPersona != null;
@@ -108,10 +172,14 @@
     evCampoNumeroGruppo.hidden = modalita !== "gruppo";
     evCampoAperitivo.hidden = evento.prezzoAperitivoPersona == null;
 
+    generaBlocchiEvento();
     aggiornaTotaleEvento();
   }
 
   function aggiornaTotaleEvento() {
+    // Anteprima a prezzo pieno: lo sconto socio (se spetta) lo calcola solo
+    // il server, che è l'unico a sapere chi è socio e a che punto è col
+    // conteggio — vedi nota sotto il totale nel form.
     var evento = EVENTI_TEST[evScelta.value];
     var modalita = modalitaAttiva();
     var totale = 0;
@@ -124,28 +192,27 @@
     if (personeAperitivo > 0) {
       totale += evento.prezzoAperitivoPersona * personeAperitivo;
     }
-    evTotale.textContent = "Totale: " + totale.toFixed(2) + " €";
+    evTotale.textContent = "Totale (senza eventuale sconto socio): " + totale.toFixed(2) + " €";
   }
 
   evScelta.addEventListener("change", aggiornaCampiEvento);
   evModalita.addEventListener("change", aggiornaCampiEvento);
-  evNumeroGruppo.addEventListener("change", aggiornaTotaleEvento);
+  evNumeroGruppo.addEventListener("change", function () { generaBlocchiEvento(); aggiornaTotaleEvento(); });
   evAperitivo.addEventListener("change", aggiornaTotaleEvento);
   aggiornaCampiEvento();
 
   evBtnPaga.addEventListener("click", function () {
     evStatus.hidden = true;
-    if (!evEmail.checkValidity()) {
-      evEmail.reportValidity();
+    var persone = leggiPersoneDaBlocchi(evBlocchiPersone, "ev-persona", true, evStatus);
+    if (!persone) {
       return;
     }
     var payload = {
       tipoPagamento: "evento",
       richiestaId: nuovoRichiestaId(),
       eventoId: evScelta.value,
-      email: evEmail.value.trim(),
       modalita: modalitaAttiva(),
-      numeroPersoneGruppo: modalitaAttiva() === "gruppo" ? parseInt(evNumeroGruppo.value, 10) : null,
+      persone: persone,
       personeAperitivo: evCampoAperitivo.hidden ? 0 : parseInt(evAperitivo.value, 10)
     };
     avviaCheckout(payload, evBtnPaga, evStatus);
@@ -161,61 +228,12 @@
 
   popolaSelect(teNumero, 1, 5);
 
-  function generaBlocchiPersone() {
+  function generaBlocchiTessera() {
     var n = parseInt(teNumero.value, 10);
-    // Mantiene i valori già inseriti nei blocchi che restano, invece di
-    // azzerare tutto quando si cambia solo il numero di tessere.
-    var precedenti = leggiPersone(false);
-    teBlocchi.innerHTML = "";
-    for (var i = 0; i < n; i++) {
-      var blocco = document.createElement("div");
-      blocco.className = "admin-panel";
-      blocco.style.cssText = "margin:12px 0; padding:14px;";
-      blocco.innerHTML =
-        "<p class=\"form-note\" style=\"margin-top:0;\">Persona " + (i + 1) + "</p>" +
-        "<div class=\"form-row\"><label>Nome</label><input type=\"text\" class=\"te-nome\" maxlength=\"100\" required></div>" +
-        "<div class=\"form-row\"><label>Cognome</label><input type=\"text\" class=\"te-cognome\" maxlength=\"100\" required></div>" +
-        "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"te-persona-email\" maxlength=\"255\" required></div>";
-      if (precedenti[i]) {
-        blocco.querySelector(".te-nome").value = precedenti[i].nome;
-        blocco.querySelector(".te-cognome").value = precedenti[i].cognome;
-        blocco.querySelector(".te-persona-email").value = precedenti[i].email;
-      }
-      teBlocchi.appendChild(blocco);
-    }
+    generaBlocchiPersone(teBlocchi, "te-persona", n, function () {
+      return leggiPersoneDaBlocchi(teBlocchi, "te-persona", false);
+    });
     aggiornaTotaleTessera();
-  }
-
-  function leggiPersone(validare) {
-    var blocchi = teBlocchi.querySelectorAll(".admin-panel");
-    var persone = [];
-    for (var i = 0; i < blocchi.length; i++) {
-      var nome = blocchi[i].querySelector(".te-nome");
-      var cognome = blocchi[i].querySelector(".te-cognome");
-      var email = blocchi[i].querySelector(".te-persona-email");
-      if (validare) {
-        if (!nome.reportValidity() || !cognome.reportValidity() || !email.reportValidity()) {
-          return null;
-        }
-      }
-      persone.push({ nome: nome.value.trim(), cognome: cognome.value.trim(), email: email.value.trim() });
-    }
-    if (validare) {
-      // Stessa email su più blocchi: quasi certamente un errore di
-      // battitura, non un caso legittimo (il server la rifiuta comunque,
-      // ma qui si vede subito senza aspettare il giro col server).
-      var emailViste = {};
-      for (var j = 0; j < persone.length; j++) {
-        var emailNorm = persone[j].email.toLowerCase();
-        if (emailViste[emailNorm]) {
-          teStatus.textContent = "L'email " + persone[j].email + " è ripetuta su più persone: ogni tessera richiede un'email diversa.";
-          teStatus.hidden = false;
-          return null;
-        }
-        emailViste[emailNorm] = true;
-      }
-    }
-    return persone;
   }
 
   function aggiornaTotaleTessera() {
@@ -227,12 +245,12 @@
     teTotale.textContent = "Totale: " + (quotaTesseraCorrente * n).toFixed(2) + " €";
   }
 
-  teNumero.addEventListener("change", generaBlocchiPersone);
-  generaBlocchiPersone();
+  teNumero.addEventListener("change", generaBlocchiTessera);
+  generaBlocchiTessera();
 
   teBtnPaga.addEventListener("click", function () {
     teStatus.hidden = true;
-    var persone = leggiPersone(true);
+    var persone = leggiPersoneDaBlocchi(teBlocchi, "te-persona", true, teStatus);
     if (!persone) {
       return;
     }

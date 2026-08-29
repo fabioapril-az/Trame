@@ -17,6 +17,12 @@
 // (sola lettura) contro il backend .NET reale per non far pagare una
 // tessera a chi è già socio, prezzo sempre letto da quotaIscrizioneSoci
 // (admin-soci.html) — mai hardcoded qui.
+//
+// Flusso evento (vedi calcolaRigaEvento): Singolo/Gruppo richiedono un'email
+// per persona per applicare lo sconto socio persona per persona (dal 2°
+// evento, fino al tetto configurato — vedi test-pagamento-admin.html per
+// importo/tetto in Fase 1, admin-soci.html in Fase 2); l'aperitivo resta un
+// semplice numero, mai scontato.
 
 const { app } = require("@azure/functions");
 const {
@@ -61,17 +67,13 @@ app.http("create-checkout-session-test", {
     let datiRecord;
     try {
       if (tipoPagamento === "evento") {
-        if (!payload.email) {
-          throw new ErroreValidazione("L'email è obbligatoria.");
-        }
-        const { evento, righe: righeEvento } = calcolaRigaEvento(payload);
+        const { evento, righe: righeEvento, persone } = await calcolaRigaEvento(payload);
         righe = righeEvento;
         datiRecord = {
-          email: payload.email,
+          persone,
           eventoId: evento.id,
           eventoTitolo: evento.titolo,
           modalita: payload.modalita,
-          numeroPersoneGruppo: payload.modalita === "gruppo" ? parseInt(payload.numeroPersoneGruppo, 10) : null,
           personeAperitivo: parseInt(payload.personeAperitivo, 10) || 0
         };
       } else {

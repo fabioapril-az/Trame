@@ -97,6 +97,71 @@ const STATI = {
   RIMBORSATO: "rimborsato"
 };
 
+// --- Sconto socio sugli eventi (dal 2° evento, fino a un tetto di eventi
+//     scontati, azzerato ad ogni rinnovo tessera — deciso con l'utente).
+//     In Fase 2 importo/tetto vivranno in admin-soci.html sul backend .NET
+//     reale, insieme a un vero contatore "eventi da ultimo rinnovo" per
+//     socio (da verificare/aggiungere lì — non esiste ancora qui).
+//     Qui, in Fase 1, SIMULIAMO entrambi nel nostro Table Storage di test:
+//     - config (partitionKey "config"/rowKey "sconto-socio"): importo e
+//       tetto, modificabili da test-pagamento-admin.html;
+//     - un contatore per email (partitionKey "contatore-eventi-test"),
+//       incrementato dal webhook ad ogni evento CONFERMATO per una persona
+//       che risulta socia — mai azzerato in Fase 1 (non abbiamo qui il
+//       concetto di rinnovo), sufficiente per validare il calcolo prezzo. ---
+
+const DEFAULT_SCONTO_SOCIO_EURO = 5;
+const DEFAULT_SCONTO_SOCIO_MAX_EVENTI = 10;
+
+async function leggiConfigScontoSocio() {
+  const tableClient = await getTableClient();
+  try {
+    const entity = await tableClient.getEntity("config", "sconto-socio");
+    return {
+      scontoSocioEuro: entity.scontoSocioEuro,
+      scontoSocioMaxEventi: entity.scontoSocioMaxEventi
+    };
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return { scontoSocioEuro: DEFAULT_SCONTO_SOCIO_EURO, scontoSocioMaxEventi: DEFAULT_SCONTO_SOCIO_MAX_EVENTI };
+    }
+    throw err;
+  }
+}
+
+async function salvaConfigScontoSocio(config) {
+  const tableClient = await getTableClient();
+  await tableClient.upsertEntity({
+    partitionKey: "config",
+    rowKey: "sconto-socio",
+    scontoSocioEuro: config.scontoSocioEuro,
+    scontoSocioMaxEventi: config.scontoSocioMaxEventi
+  }, "Merge");
+}
+
+async function leggiContatoreEventiTest(emailNormalizzata) {
+  const tableClient = await getTableClient();
+  try {
+    const entity = await tableClient.getEntity("contatore-eventi-test", emailNormalizzata);
+    return entity.eventiConfermati || 0;
+  } catch (err) {
+    if (err.statusCode === 404) {
+      return 0;
+    }
+    throw err;
+  }
+}
+
+async function incrementaContatoreEventiTest(emailNormalizzata) {
+  const attuale = await leggiContatoreEventiTest(emailNormalizzata);
+  const tableClient = await getTableClient();
+  await tableClient.upsertEntity({
+    partitionKey: "contatore-eventi-test",
+    rowKey: emailNormalizzata,
+    eventiConfermati: attuale + 1
+  }, "Merge");
+}
+
 let tableClientPromise = null;
 
 // Crea il client e assicura che la tabella esista, una sola volta per
@@ -146,39 +211,87 @@ function baseUrl() {
 //     client, solo delle SCELTE (evento/modalità/persone) — i prezzi
 //     vengono sempre ripresi dal catalogo qui sopra. ---
 
-function calcolaRigaEvento(payload) {
+// Singolo/Gruppo ora richiedono un'email per persona (non solo un numero):
+// serve a sapere, persona per persona, se è socia e se le spetta lo sconto
+// — l'aperitivo resta invece un semplice numero, mai nominale e mai
+// scontato (deciso con l'utente: non matura né riceve lo sconto socio).
+async function calcolaRigaEvento(payload) {
   const evento = EVENTI_TEST[payload.eventoId];
   if (!evento) {
     throw new ErroreValidazione("Evento di test non riconosciuto.");
   }
 
-  const righe = [];
   const modalita = payload.modalita;
-
+  let prezzoBase, etichettaModalita, minPersone, maxPersone;
   if (modalita === "singolo") {
     if (evento.prezzoSingolo == null) {
       throw new ErroreValidazione("Questo evento di test non prevede la modalità Singolo.");
     }
-    righe.push({
-      descrizione: "Iscrizione " + evento.titolo + " - Singolo",
-      importoUnitario: evento.prezzoSingolo,
-      quantita: 1
-    });
+    prezzoBase = evento.prezzoSingolo;
+    etichettaModalita = "Singolo";
+    minPersone = maxPersone = 1;
   } else if (modalita === "gruppo") {
     if (evento.prezzoGruppoPersona == null) {
       throw new ErroreValidazione("Questo evento di test non prevede la modalità Gruppo.");
     }
-    const numeroPersone = parseInt(payload.numeroPersoneGruppo, 10);
-    if (!(numeroPersone >= 2 && numeroPersone <= 6)) {
-      throw new ErroreValidazione("Il numero di persone per il Gruppo deve essere tra 2 e 6.");
-    }
-    righe.push({
-      descrizione: "Iscrizione " + evento.titolo + " - Gruppo x" + numeroPersone,
-      importoUnitario: evento.prezzoGruppoPersona,
-      quantita: numeroPersone
-    });
+    prezzoBase = evento.prezzoGruppoPersona;
+    etichettaModalita = "Gruppo";
+    minPersone = 2;
+    maxPersone = 6;
   } else {
     throw new ErroreValidazione("Modalità di partecipazione non valida.");
+  }
+
+  const persone = Array.isArray(payload.persone) ? payload.persone : [];
+  if (!(persone.length >= minPersone && persone.length <= maxPersone)) {
+    throw new ErroreValidazione(
+      "Il numero di persone per " + etichettaModalita + " deve essere tra " + minPersone + " e " + maxPersone + "."
+    );
+  }
+  persone.forEach((p, i) => {
+    if (!p || !p.nome || !p.cognome || !p.email) {
+      throw new ErroreValidazione("Dati mancanti per la persona " + (i + 1) + ".");
+    }
+  });
+
+  const emailNormalizzate = persone.map((p) => p.email.trim().toLowerCase());
+  const emailViste = new Set();
+  for (const email of emailNormalizzate) {
+    if (emailViste.has(email)) {
+      throw new ErroreValidazione("L'email " + email + " è ripetuta su più persone: ogni persona richiede un'email diversa.");
+    }
+    emailViste.add(email);
+  }
+
+  // Sconto socio: per ciascuna persona, verifica se è socia e a che punto è
+  // col contatore (0 = 1° evento, nessuno sconto; 1..maxEventi = sconto;
+  // oltre = tetto raggiunto, nessuno sconto). Verifiche in parallelo.
+  const config = await leggiConfigScontoSocio();
+  const idoneiSconto = await Promise.all(emailNormalizzate.map(async (email) => {
+    const socio = await verificaSocioEsistente(email);
+    if (!socio) {
+      return false;
+    }
+    const contatore = await leggiContatoreEventiTest(email);
+    return contatore >= 1 && contatore <= config.scontoSocioMaxEventi;
+  }));
+  const numeroScontati = idoneiSconto.filter(Boolean).length;
+  const numeroPieni = persone.length - numeroScontati;
+
+  const righe = [];
+  if (numeroPieni > 0) {
+    righe.push({
+      descrizione: "Iscrizione " + evento.titolo + " - " + etichettaModalita + " x" + numeroPieni,
+      importoUnitario: prezzoBase,
+      quantita: numeroPieni
+    });
+  }
+  if (numeroScontati > 0) {
+    righe.push({
+      descrizione: "Iscrizione " + evento.titolo + " - " + etichettaModalita + " x" + numeroScontati + " (sconto socio)",
+      importoUnitario: Math.max(0, prezzoBase - config.scontoSocioEuro),
+      quantita: numeroScontati
+    });
   }
 
   const personeAperitivo = parseInt(payload.personeAperitivo, 10) || 0;
@@ -196,7 +309,7 @@ function calcolaRigaEvento(payload) {
     });
   }
 
-  return { evento, righe };
+  return { evento, righe, persone };
 }
 
 async function calcolaRigheTessera(payload) {
@@ -263,6 +376,10 @@ module.exports = {
   calcolaRigheTessera,
   leggiQuotaTessera,
   verificaSocioEsistente,
+  leggiConfigScontoSocio,
+  salvaConfigScontoSocio,
+  leggiContatoreEventiTest,
+  incrementaContatoreEventiTest,
   totaleRighe,
   ErroreValidazione
 };
