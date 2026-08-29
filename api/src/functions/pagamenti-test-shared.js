@@ -43,10 +43,52 @@ const EVENTI_TEST = {
   }
 };
 
-// Prezzo tessera di test: nella realtà sarà il valore configurabile da
-// admin (stesso posto di quotaIscrizioneSoci in admin-soci.html); qui è
-// fisso perché in Fase 1 non tocchiamo alcun pannello admin.
-const PREZZO_TESSERA_TEST = 20;
+// Backend .NET reale (vedi assets/js/trame-config.js): usato QUI SOLO in
+// lettura, per due controlli che ha senso fare contro i dati veri anche in
+// Fase 1 — non scriviamo mai nulla lì. Stessi endpoint pubblici (nessun
+// token) già chiamati da iscrizione-evento.html/diventa-socio.html.
+const BACKEND_API_BASE_URL = "https://app-trame-prod.azurewebsites.net";
+
+// Prezzo tessera: NON hardcoded — letto da /api/impostazioni sul backend
+// reale (campo quotaIscrizioneSoci, configurabile in admin-soci.html,
+// sezione "Iscrizione soci"), lo stesso valore già mostrato a chi si vuole
+// associare da iscrizione-evento.html. Così l'unico posto dove si cambia
+// il prezzo resta quel pannello admin, non il codice.
+async function leggiQuotaTessera() {
+  let res;
+  try {
+    res = await fetch(BACKEND_API_BASE_URL + "/api/impostazioni");
+  } catch (err) {
+    throw new ErroreValidazione("Impossibile contattare il backend per leggere la quota tessera (rete non raggiungibile).");
+  }
+  if (!res.ok) {
+    throw new ErroreValidazione("Impossibile leggere la quota tessera dal backend (risposta " + res.status + ").");
+  }
+  const impostazioni = await res.json();
+  if (!impostazioni || !impostazioni.quotaIscrizioneSoci) {
+    throw new ErroreValidazione(
+      "Quota tessera non configurata: impostala in admin-soci.html, sezione \"Iscrizione soci\" (Quota associativa)."
+    );
+  }
+  return impostazioni.quotaIscrizioneSoci;
+}
+
+// Verifica (sola lettura) se un'email è già di un socio esistente, per non
+// far pagare una tessera nuova a chi ce l'ha già — stesso endpoint pubblico
+// usato da iscrizione-evento.html per la stessa ragione.
+async function verificaSocioEsistente(email) {
+  let res;
+  try {
+    res = await fetch(BACKEND_API_BASE_URL + "/api/soci/verifica?email=" + encodeURIComponent(email));
+  } catch (err) {
+    throw new ErroreValidazione("Impossibile verificare se " + email + " è già socio/a (rete non raggiungibile).");
+  }
+  if (!res.ok) {
+    throw new ErroreValidazione("Impossibile verificare se " + email + " è già socio/a (risposta " + res.status + ").");
+  }
+  const risultato = await res.json();
+  return Boolean(risultato && risultato.trovato);
+}
 
 const STATI = {
   IN_ATTESA: "in_attesa_pagamento",
@@ -157,7 +199,7 @@ function calcolaRigaEvento(payload) {
   return { evento, righe };
 }
 
-function calcolaRigheTessera(payload) {
+async function calcolaRigheTessera(payload) {
   const numeroTessere = parseInt(payload.numeroTessere, 10);
   if (!(numeroTessere >= 1 && numeroTessere <= 5)) {
     throw new ErroreValidazione("Il numero di tessere deve essere tra 1 e 5.");
@@ -172,9 +214,33 @@ function calcolaRigheTessera(payload) {
     }
   });
 
+  // Stessa email su più blocchi: quasi certamente un errore di battitura
+  // (o un tentativo di far pagare due tessere alla stessa persona), non un
+  // caso legittimo — le tessere sono nominali.
+  const emailNormalizzate = persone.map((p) => p.email.trim().toLowerCase());
+  const emailViste = new Set();
+  for (const email of emailNormalizzate) {
+    if (emailViste.has(email)) {
+      throw new ErroreValidazione("L'email " + email + " è ripetuta su più persone: ogni tessera richiede un'email diversa.");
+    }
+    emailViste.add(email);
+  }
+
+  // Verifica (in parallelo) che nessuna delle persone sia già socia
+  // esistente: evita di far pagare una tessera nuova a chi ce l'ha già.
+  const risultatiVerifica = await Promise.all(emailNormalizzate.map(verificaSocioEsistente));
+  risultatiVerifica.forEach((giaSocio, i) => {
+    if (giaSocio) {
+      throw new ErroreValidazione(
+        "L'email " + persone[i].email + " risulta già di un socio/a esistente: non serve una nuova tessera."
+      );
+    }
+  });
+
+  const prezzoTessera = await leggiQuotaTessera();
   const righe = [{
     descrizione: "Tessera associazione x" + numeroTessere,
-    importoUnitario: PREZZO_TESSERA_TEST,
+    importoUnitario: prezzoTessera,
     quantita: numeroTessere
   }];
 
@@ -189,13 +255,14 @@ class ErroreValidazione extends Error {}
 
 module.exports = {
   EVENTI_TEST,
-  PREZZO_TESSERA_TEST,
   STATI,
   getTableClient,
   getStripe,
   baseUrl,
   calcolaRigaEvento,
   calcolaRigheTessera,
+  leggiQuotaTessera,
+  verificaSocioEsistente,
   totaleRighe,
   ErroreValidazione
 };

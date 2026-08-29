@@ -11,6 +11,12 @@
 // quelli abilitati nel Dashboard (Impostazioni > Metodi di pagamento) per
 // l'account collegato alla chiave di test — nessuna modifica al codice
 // serve per abilitarne uno nuovo.
+//
+// Flusso tessera (vedi calcolaRigheTessera in pagamenti-test-shared.js):
+// email duplicate nello stesso invio rifiutate, ciascuna email verificata
+// (sola lettura) contro il backend .NET reale per non far pagare una
+// tessera a chi è già socio, prezzo sempre letto da quotaIscrizioneSoci
+// (admin-soci.html) — mai hardcoded qui.
 
 const { app } = require("@azure/functions");
 const {
@@ -41,6 +47,16 @@ app.http("create-checkout-session-test", {
       return { status: 400, jsonBody: { error: "tipoPagamento deve essere 'evento' o 'tessera'." } };
     }
 
+    // Generato dal client una sola volta per tentativo di pagamento (stesso
+    // valore anche se il fetch viene ripetuto per un problema di rete):
+    // usato come idempotency key verso Stripe, così un doppio invio della
+    // STESSA richiesta non crea due Checkout Session/due addebiti. Se manca
+    // (client vecchio, o richiesta di test manuale) se ne genera uno qui,
+    // che però non protegge da un doppio invio dal client.
+    const richiestaId = typeof payload.richiestaId === "string" && payload.richiestaId
+      ? payload.richiestaId
+      : crypto.randomUUID();
+
     let righe;
     let datiRecord;
     try {
@@ -59,7 +75,7 @@ app.http("create-checkout-session-test", {
           personeAperitivo: parseInt(payload.personeAperitivo, 10) || 0
         };
       } else {
-        const { numeroTessere, persone, righe: righeTessera } = calcolaRigheTessera(payload);
+        const { numeroTessere, persone, righe: righeTessera } = await calcolaRigheTessera(payload);
         righe = righeTessera;
         datiRecord = { numeroTessere, persone };
       }
@@ -118,7 +134,7 @@ app.http("create-checkout-session-test", {
         success_url: base + "/test-pagamento-ok.html?iscrizione_id=" + encodeURIComponent(iscrizioneId) +
           "&tipo=" + encodeURIComponent(tipoPagamento),
         cancel_url: base + "/test-pagamento.html?annullato=1"
-      });
+      }, { idempotencyKey: "checkout-test-" + richiestaId });
     } catch (err) {
       context.error("Errore creazione Checkout Session:", err);
       return { status: 500, jsonBody: { error: "Errore nella creazione della sessione di pagamento Stripe." } };

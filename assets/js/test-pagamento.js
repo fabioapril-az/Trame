@@ -12,7 +12,26 @@
     "evt-laboratorio": { id: "evt-laboratorio", titolo: "Laboratorio creativo (test)", prezzoSingolo: 15, prezzoGruppoPersona: null, prezzoAperitivoPersona: null },
     "evt-aperitivo-gruppo": { id: "evt-aperitivo-gruppo", titolo: "Uscita di gruppo (test)", prezzoSingolo: null, prezzoGruppoPersona: 18, prezzoAperitivoPersona: 10 }
   };
-  var PREZZO_TESSERA_TEST = 20;
+
+  // Prezzo tessera: NON hardcoded, letto dal backend .NET reale
+  // (quotaIscrizioneSoci, admin-soci.html) — qui è solo un'anteprima, il
+  // totale vero è sempre ricalcolato dal server al momento del pagamento.
+  var quotaTesseraCorrente = null;
+  fetch("https://app-trame-prod.azurewebsites.net/api/impostazioni")
+    .then(function (res) { return res.ok ? res.json() : null; })
+    .then(function (impostazioni) {
+      quotaTesseraCorrente = (impostazioni && impostazioni.quotaIscrizioneSoci) || null;
+      aggiornaTotaleTessera();
+    })
+    .catch(function () { /* niente anteprima: il totale reale si vede comunque al pagamento */ });
+
+  // Generato una sola volta per tentativo di pagamento (non ad ogni
+  // click): se lo stesso fetch venisse ripetuto per un problema di rete,
+  // arriva sempre lo stesso valore, che il server usa come idempotency key
+  // verso Stripe per non creare due sessioni/due addebiti per lo stesso invio.
+  function nuovoRichiestaId() {
+    return (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Date.now() + "-" + Math.random());
+  }
 
   var params = new URLSearchParams(window.location.search);
   if (params.get("annullato")) {
@@ -122,6 +141,7 @@
     }
     var payload = {
       tipoPagamento: "evento",
+      richiestaId: nuovoRichiestaId(),
       eventoId: evScelta.value,
       email: evEmail.value.trim(),
       modalita: modalitaAttiva(),
@@ -180,12 +200,31 @@
       }
       persone.push({ nome: nome.value.trim(), cognome: cognome.value.trim(), email: email.value.trim() });
     }
+    if (validare) {
+      // Stessa email su più blocchi: quasi certamente un errore di
+      // battitura, non un caso legittimo (il server la rifiuta comunque,
+      // ma qui si vede subito senza aspettare il giro col server).
+      var emailViste = {};
+      for (var j = 0; j < persone.length; j++) {
+        var emailNorm = persone[j].email.toLowerCase();
+        if (emailViste[emailNorm]) {
+          teStatus.textContent = "L'email " + persone[j].email + " è ripetuta su più persone: ogni tessera richiede un'email diversa.";
+          teStatus.hidden = false;
+          return null;
+        }
+        emailViste[emailNorm] = true;
+      }
+    }
     return persone;
   }
 
   function aggiornaTotaleTessera() {
     var n = parseInt(teNumero.value, 10);
-    teTotale.textContent = "Totale: " + (PREZZO_TESSERA_TEST * n).toFixed(2) + " €";
+    if (quotaTesseraCorrente == null) {
+      teTotale.textContent = "Totale: calcolato al pagamento (quota non ancora caricata)";
+      return;
+    }
+    teTotale.textContent = "Totale: " + (quotaTesseraCorrente * n).toFixed(2) + " €";
   }
 
   teNumero.addEventListener("change", generaBlocchiPersone);
@@ -199,6 +238,7 @@
     }
     var payload = {
       tipoPagamento: "tessera",
+      richiestaId: nuovoRichiestaId(),
       numeroTessere: parseInt(teNumero.value, 10),
       persone: persone
     };
