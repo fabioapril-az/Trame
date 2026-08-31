@@ -156,11 +156,39 @@
     return evento.prezzoSingolo != null ? "singolo" : "gruppo";
   }
 
+  // Anteprima sconto socio: email -> { socio, scontoApplicabile, scontoEuro }
+  // (o "loading" mentre si aspetta la risposta), riempita quando si esce da
+  // un campo email — stessa verifica che il server rifà comunque al submit
+  // (il contatore potrebbe cambiare nel frattempo, questa resta un'anteprima).
+  var scontoCache = {};
+
+  function verificaScontoEmail(email) {
+    var emailNorm = email.trim().toLowerCase();
+    if (!emailNorm || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) {
+      return;
+    }
+    scontoCache[emailNorm] = "loading";
+    fetch("/api/verifica-sconto-persona-test?email=" + encodeURIComponent(emailNorm))
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (risultato) {
+        scontoCache[emailNorm] = risultato || { socio: false, scontoApplicabile: false };
+        aggiornaTotaleEvento();
+      })
+      .catch(function () { delete scontoCache[emailNorm]; });
+  }
+
+  function collegaVerificaScontoEmail() {
+    evBlocchiPersone.querySelectorAll(".ev-persona-email").forEach(function (campo) {
+      campo.addEventListener("blur", function () { verificaScontoEmail(campo.value); });
+    });
+  }
+
   function generaBlocchiEvento() {
     var n = modalitaAttiva() === "singolo" ? 1 : parseInt(evNumeroGruppo.value, 10);
     generaBlocchiPersone(evBlocchiPersone, "ev-persona", n, function () {
       return leggiPersoneDaBlocchi(evBlocchiPersone, "ev-persona", false);
     });
+    collegaVerificaScontoEmail();
   }
 
   function aggiornaCampiEvento() {
@@ -177,22 +205,36 @@
   }
 
   function aggiornaTotaleEvento() {
-    // Anteprima a prezzo pieno: lo sconto socio (se spetta) lo calcola solo
-    // il server, che è l'unico a sapere chi è socio e a che punto è col
-    // conteggio — vedi nota sotto il totale nel form.
+    // Prezzo per persona: pieno finché l'email non è stata verificata (o
+    // non è ancora stata inserita), scontato se scontoCache dice che spetta
+    // — la verifica vera parte quando si esce dal campo email (vedi
+    // verificaScontoEmail/collegaVerificaScontoEmail). Resta un'anteprima:
+    // il server ricalcola comunque tutto da zero al momento del pagamento.
     var evento = EVENTI_TEST[evScelta.value];
     var modalita = modalitaAttiva();
+    var prezzoBase = modalita === "singolo" ? (evento.prezzoSingolo || 0) : (evento.prezzoGruppoPersona || 0);
+
     var totale = 0;
-    if (modalita === "singolo") {
-      totale += evento.prezzoSingolo || 0;
-    } else {
-      totale += (evento.prezzoGruppoPersona || 0) * parseInt(evNumeroGruppo.value, 10);
-    }
+    var inVerifica = false;
+    evBlocchiPersone.querySelectorAll(".ev-persona-email").forEach(function (campo) {
+      var emailNorm = campo.value.trim().toLowerCase();
+      var info = emailNorm ? scontoCache[emailNorm] : null;
+      if (info === "loading") {
+        inVerifica = true;
+        totale += prezzoBase;
+      } else if (info && info.scontoApplicabile) {
+        totale += Math.max(0, prezzoBase - info.scontoEuro);
+      } else {
+        totale += prezzoBase;
+      }
+    });
+
     var personeAperitivo = evCampoAperitivo.hidden ? 0 : parseInt(evAperitivo.value, 10);
     if (personeAperitivo > 0) {
       totale += evento.prezzoAperitivoPersona * personeAperitivo;
     }
-    evTotale.textContent = "Totale (senza eventuale sconto socio): " + totale.toFixed(2) + " €";
+    evTotale.textContent = "Totale" + (inVerifica ? " (provvisorio, verifica sconto socio in corso…)" : "") +
+      ": " + totale.toFixed(2) + " €";
   }
 
   evScelta.addEventListener("change", aggiornaCampiEvento);

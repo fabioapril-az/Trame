@@ -162,6 +162,23 @@ async function incrementaContatoreEventiTest(emailNormalizzata) {
   }, "Merge");
 }
 
+// Verifica se UNA persona ha diritto allo sconto (socia + contatore entro
+// il tetto). Usata sia da calcolaRigaEvento (al submit, fonte di verità)
+// sia da un endpoint dedicato che il form chiama in anteprima quando si
+// esce dal campo email — stessa identica logica nei due punti, non due
+// implementazioni che potrebbero disallinearsi.
+async function verificaScontoPersona(email) {
+  const emailNormalizzata = email.trim().toLowerCase();
+  const socio = await verificaSocioEsistente(emailNormalizzata);
+  if (!socio) {
+    return { socio: false, scontoApplicabile: false, scontoEuro: 0 };
+  }
+  const config = await leggiConfigScontoSocio();
+  const contatore = await leggiContatoreEventiTest(emailNormalizzata);
+  const scontoApplicabile = contatore >= 1 && contatore <= config.scontoSocioMaxEventi;
+  return { socio: true, scontoApplicabile, scontoEuro: config.scontoSocioEuro };
+}
+
 let tableClientPromise = null;
 
 // Crea il client e assicura che la tabella esista, una sola volta per
@@ -263,20 +280,15 @@ async function calcolaRigaEvento(payload) {
     emailViste.add(email);
   }
 
-  // Sconto socio: per ciascuna persona, verifica se è socia e a che punto è
-  // col contatore (0 = 1° evento, nessuno sconto; 1..maxEventi = sconto;
-  // oltre = tetto raggiunto, nessuno sconto). Verifiche in parallelo.
-  const config = await leggiConfigScontoSocio();
-  const idoneiSconto = await Promise.all(emailNormalizzate.map(async (email) => {
-    const socio = await verificaSocioEsistente(email);
-    if (!socio) {
-      return false;
-    }
-    const contatore = await leggiContatoreEventiTest(email);
-    return contatore >= 1 && contatore <= config.scontoSocioMaxEventi;
-  }));
-  const numeroScontati = idoneiSconto.filter(Boolean).length;
+  // Sconto socio: per ciascuna persona, stessa verifica (in parallelo) che
+  // il form chiama in anteprima all'uscita dal campo email — vedi
+  // verificaScontoPersona qui sopra.
+  const risultatiSconto = await Promise.all(emailNormalizzate.map(verificaScontoPersona));
+  const numeroScontati = risultatiSconto.filter((r) => r.scontoApplicabile).length;
   const numeroPieni = persone.length - numeroScontati;
+  const scontoEuro = risultatiSconto.find((r) => r.scontoApplicabile)
+    ? risultatiSconto.find((r) => r.scontoApplicabile).scontoEuro
+    : 0;
 
   const righe = [];
   if (numeroPieni > 0) {
@@ -289,7 +301,7 @@ async function calcolaRigaEvento(payload) {
   if (numeroScontati > 0) {
     righe.push({
       descrizione: "Iscrizione " + evento.titolo + " - " + etichettaModalita + " x" + numeroScontati + " (sconto socio)",
-      importoUnitario: Math.max(0, prezzoBase - config.scontoSocioEuro),
+      importoUnitario: Math.max(0, prezzoBase - scontoEuro),
       quantita: numeroScontati
     });
   }
@@ -380,6 +392,7 @@ module.exports = {
   salvaConfigScontoSocio,
   leggiContatoreEventiTest,
   incrementaContatoreEventiTest,
+  verificaScontoPersona,
   totaleRighe,
   ErroreValidazione
 };
