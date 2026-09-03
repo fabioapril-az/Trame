@@ -127,9 +127,16 @@
             <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
             <div class="form-row">
               <label>Modalità di partecipazione (facoltative)</label>
-              <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non aggiungi nessuna modalità, l'evento resta a quota unica come sopra.</p>
+              <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non aggiungi nessuna modalità, l'evento resta a quota unica come sopra. <strong>Alternativa</strong> ai prezzi Singolo/Gruppo/Aperitivo qui sotto: non usare entrambi sullo stesso evento.</p>
               <div id="ev-opzioni-lista"></div>
               <button type="button" class="btn btn--outline btn--small" id="ev-opzioni-aggiungi">+ Aggiungi modalità</button>
+            </div>
+            <div class="form-row">
+              <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
+              <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti sia Singolo sia Gruppo, chi si iscrive sceglie tra i due; se ne imposti solo uno, si usa direttamente quello. L'aperitivo è sempre in aggiunta, mai scontato. <strong>Non compilare insieme alle "Modalità di partecipazione" sopra</strong> — sono alternative, non si possono usare entrambe sullo stesso evento.</p>
+              <div class="form-row"><label for="ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="ev-prezzo-singolo" min="0" step="0.01"></div>
+              <div class="form-row"><label for="ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="ev-prezzo-gruppo" min="0" step="0.01"></div>
+              <div class="form-row"><label for="ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="ev-prezzo-aperitivo" min="0" step="0.01"></div>
             </div>
             <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
             <div class="form-row"><label for="ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="ev-scadenza-iscrizione"></div>
@@ -208,9 +215,16 @@
               <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
               <div class="form-row">
                 <label>Modalità di partecipazione (facoltative)</label>
-                <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non c'è nessuna modalità, l'evento resta a quota unica come sopra.</p>
+                <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non c'è nessuna modalità, l'evento resta a quota unica come sopra. <strong>Alternativa</strong> ai prezzi Singolo/Gruppo/Aperitivo qui sotto: non usare entrambi sullo stesso evento.</p>
                 <div id="mod-ev-opzioni-lista"></div>
                 <button type="button" class="btn btn--outline btn--small" id="mod-ev-opzioni-aggiungi">+ Aggiungi modalità</button>
+              </div>
+              <div class="form-row">
+                <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
+                <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti sia Singolo sia Gruppo, chi si iscrive sceglie tra i due; se ne imposti solo uno, si usa direttamente quello. L'aperitivo è sempre in aggiunta, mai scontato. <strong>Non compilare insieme alle "Modalità di partecipazione" sopra</strong>.</p>
+                <div class="form-row"><label for="mod-ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="mod-ev-prezzo-singolo" min="0" step="0.01"></div>
+                <div class="form-row"><label for="mod-ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="mod-ev-prezzo-gruppo" min="0" step="0.01"></div>
+                <div class="form-row"><label for="mod-ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="mod-ev-prezzo-aperitivo" min="0" step="0.01"></div>
               </div>
               <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
               <div class="form-row"><label for="mod-ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="mod-ev-scadenza-iscrizione"></div>
@@ -259,7 +273,7 @@
 
             <div style="overflow-x:auto;">
               <table class="admin-table" id="iscritti-tabella" hidden>
-                <thead><tr><th>Email</th><th>Tipo</th><th>Persone</th><th>Modalità</th><th>Stato</th><th>Importo</th><th>Data</th><th>Azioni</th></tr></thead>
+                <thead><tr><th>Email</th><th>Tipo</th><th>Persone</th><th>Modalità</th><th>Stato</th><th>Importo</th><th>Metodo</th><th>Data</th><th>Azioni</th></tr></thead>
                 <tbody id="iscritti-tabella-body"></tbody>
               </table>
             </div>

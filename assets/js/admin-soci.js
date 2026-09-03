@@ -82,6 +82,11 @@
 
   // --- Libro Soci ---
 
+  var METODO_PAGAMENTO_LABELS = {
+    card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
+    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay"
+  };
+
   function cercaSoci() {
     var ricerca = document.getElementById("soci-ricerca").value.trim();
     var filtroStato = document.getElementById("soci-filtro-stato").value;
@@ -105,16 +110,22 @@
             "<td>" + escapeHtml(s.numeroTessera) + "</td>" +
             "<td>" + formattaData(s.dataScadenza) + "</td>" +
             '<td><span class="status-badge status-badge--' + escapeHtml(s.stato) + '">' + escapeHtml(s.stato) + "</span></td>" +
+            "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[s.metodoPagamento] || s.metodoPagamento || "—") + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="storico">Storico</button> ' +
+            (s.metodoPagamento ? '<button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button> ' : "") +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button></td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModifica(s); });
           tr.querySelector('[data-action="rinnova"]').addEventListener("click", function () { apriRinnovo(s); });
           tr.querySelector('[data-action="tessera"]').addEventListener("click", function () { scaricaTessera(s); });
           tr.querySelector('[data-action="storico"]').addEventListener("click", function () { apriStorico(s); });
           tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaSocio(s); });
+          var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
+          if (btnRimborsa) {
+            btnRimborsa.addEventListener("click", function () { segnaSocioRimborsato(s); });
+          }
           if (s.stato === "cancellato") {
             tr.querySelector('[data-action="elimina"]').disabled = true;
           }
@@ -285,6 +296,21 @@
       .catch(function (err) { mostraMessaggio(document.getElementById("rinnovo-status"), err.message, true); });
   });
 
+  // Il rimborso vero si fa dal Dashboard Stripe: questa azione registra solo
+  // che è avvenuto, nessun automatismo (stesso pattern validato in Fase 1).
+  // Flag separato dal ciclo di vita della tessera (soci.stato resta
+  // attivo/scaduto/decaduto/cancellato): un rimborso non deve confondersi
+  // con una cancellazione o una scadenza.
+  function segnaSocioRimborsato(socio) {
+    if (!window.confirm("Segnare come rimborsata la tessera di " + socio.nome + " " + socio.cognome +
+      "? Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/soci/" + socio.id + "/rimborsato", { method: "POST" })
+      .then(function () { cercaSoci(); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
   document.getElementById("btn-export-csv").addEventListener("click", function () {
     window.trameAuth.getToken().then(function (token) {
       return fetch(window.TRAME_CONFIG.apiBaseUrl + "/api/soci/export-csv", {
@@ -341,6 +367,8 @@
         impostazioniCorrenti = impostazioni;
         document.getElementById("is-quota").value = impostazioni.quotaIscrizioneSoci || "";
         document.getElementById("is-vantaggi").value = impostazioni.testoVantaggiIscrizione || "";
+        document.getElementById("is-sconto-euro").value = impostazioni.scontoSocioEuro != null ? impostazioni.scontoSocioEuro : "";
+        document.getElementById("is-sconto-max-eventi").value = impostazioni.scontoSocioMaxEventi != null ? impostazioni.scontoSocioMaxEventi : "";
       })
       .catch(function () { /* form vuoto: si può comunque compilare da zero */ });
   }
@@ -351,9 +379,13 @@
     status.hidden = true;
 
     var quota = document.getElementById("is-quota").value;
+    var scontoEuro = document.getElementById("is-sconto-euro").value;
+    var scontoMaxEventi = document.getElementById("is-sconto-max-eventi").value;
     var payload = Object.assign({}, impostazioniCorrenti, {
       quotaIscrizioneSoci: quota ? parseFloat(quota) : null,
-      testoVantaggiIscrizione: document.getElementById("is-vantaggi").value.trim() || null
+      testoVantaggiIscrizione: document.getElementById("is-vantaggi").value.trim() || null,
+      scontoSocioEuro: scontoEuro ? parseFloat(scontoEuro) : null,
+      scontoSocioMaxEventi: scontoMaxEventi ? parseInt(scontoMaxEventi, 10) : null
     });
 
     apiFetchAuth("/api/impostazioni", {

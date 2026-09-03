@@ -153,6 +153,11 @@
 
   document.getElementById("btn-crea-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("ev-");
+    if (opzioniEPrezziIncompatibili(payload)) {
+      mostraMessaggio(document.getElementById("crea-evento-status"),
+        "Non puoi usare insieme \"Modalità di partecipazione\" e i prezzi Singolo/Gruppo/Aperitivo: scegline uno dei due.", true);
+      return;
+    }
     apiFetchAuth("/api/eventi", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -169,6 +174,9 @@
     var quota = document.getElementById(prefix + "quota").value;
     var quotaIscrizione = document.getElementById(prefix + "quota-iscrizione").value;
     var posti = document.getElementById(prefix + "posti").value;
+    var prezzoSingolo = document.getElementById(prefix + "prezzo-singolo").value;
+    var prezzoGruppo = document.getElementById(prefix + "prezzo-gruppo").value;
+    var prezzoAperitivo = document.getElementById(prefix + "prezzo-aperitivo").value;
     return {
       titolo: document.getElementById(prefix + "titolo").value.trim(),
       descrizione: contenutoQuill(quillEditors[prefix + "descrizione"]),
@@ -187,8 +195,21 @@
       stato: document.getElementById(prefix + "stato").value,
       apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked,
       dettagliAttivi: document.getElementById(prefix + "dettagli-attivi").checked,
-      opzioniPartecipazione: leggiOpzioni(prefix + "opzioni-lista")
+      opzioniPartecipazione: leggiOpzioni(prefix + "opzioni-lista"),
+      prezzoSingolo: prezzoSingolo ? parseFloat(prezzoSingolo) : null,
+      prezzoGruppoPersona: prezzoGruppo ? parseFloat(prezzoGruppo) : null,
+      prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null
     };
+  }
+
+  // "Modalità di partecipazione" e i 3 prezzi Singolo/Gruppo/Aperitivo sono
+  // alternativi (l'API .NET rifiuta con 422 se entrambi sono impostati sullo
+  // stesso evento) — controllato qui prima di inviare, per un messaggio
+  // chiaro invece del solo errore grezzo del backend.
+  function opzioniEPrezziIncompatibili(payload) {
+    var haOpzioni = payload.opzioniPartecipazione && payload.opzioniPartecipazione.length > 0;
+    var haPrezzi = payload.prezzoSingolo != null || payload.prezzoGruppoPersona != null || payload.prezzoAperitivoPersona != null;
+    return haOpzioni && haPrezzi;
   }
 
   // --- Modalità di partecipazione (facoltative, per evento) ---
@@ -293,6 +314,9 @@
     document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
     document.getElementById("mod-ev-dettagli-attivi").checked = Boolean(evento.dettagliAttivi);
     impostaOpzioni("mod-ev-opzioni-lista", evento.opzioniPartecipazione);
+    document.getElementById("mod-ev-prezzo-singolo").value = evento.prezzoSingolo != null ? evento.prezzoSingolo : "";
+    document.getElementById("mod-ev-prezzo-gruppo").value = evento.prezzoGruppoPersona != null ? evento.prezzoGruppoPersona : "";
+    document.getElementById("mod-ev-prezzo-aperitivo").value = evento.prezzoAperitivoPersona != null ? evento.prezzoAperitivoPersona : "";
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax
       ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
@@ -328,6 +352,11 @@
 
   document.getElementById("btn-salva-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("mod-ev-");
+    if (opzioniEPrezziIncompatibili(payload)) {
+      mostraMessaggio(document.getElementById("modifica-evento-status"),
+        "Non puoi usare insieme \"Modalità di partecipazione\" e i prezzi Singolo/Gruppo/Aperitivo: scegline uno dei due.", true);
+      return;
+    }
     apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -339,6 +368,15 @@
       })
       .catch(function (err) { mostraMessaggio(document.getElementById("modifica-evento-status"), err.message, true); });
   });
+
+  var STATO_ISCRIZIONE_LABELS = {
+    confermata: "Confermata", in_attesa: "In attesa pagamento", annullata: "Annullata",
+    rimborso_richiesto: "Rimborso richiesto", rimborsato: "Rimborsato"
+  };
+  var METODO_PAGAMENTO_LABELS = {
+    card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
+    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay"
+  };
 
   function caricaIscritti(eventoId) {
     return apiFetchAuth("/api/eventi/" + eventoId + "/iscritti")
@@ -361,17 +399,36 @@
             "<td>" + escapeHtml(i.tipoIscrizione) + "</td>" +
             "<td>" + (i.numeroPersone || 1) + "</td>" +
             "<td>" + escapeHtml(i.opzionePartecipazioneNome || "—") + "</td>" +
-            "<td>" + escapeHtml(i.stato) + "</td>" +
+            "<td>" + escapeHtml(STATO_ISCRIZIONE_LABELS[i.stato] || i.stato) + "</td>" +
             "<td>" + (i.importoPagato != null ? i.importoPagato + " €" : "—") + "</td>" +
+            "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[i.metodoPagamento] || i.metodoPagamento || "—") + "</td>" +
             "<td>" + formattaData(i.dataIscrizione) + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
-            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button></td>';
+            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
+            (i.stato === "confermata" ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>' : "") +
+            '</td>';
           tr.querySelector('[data-action="annulla"]').addEventListener("click", function () { annullaIscrizione(i.id); });
           tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaIscrizione(i.id); });
+          var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
+          if (btnRimborsa) {
+            btnRimborsa.addEventListener("click", function () { segnaIscrizioneRimborsata(i.id); });
+          }
           tbody.appendChild(tr);
         });
         document.getElementById("iscritti-tabella").hidden = false;
       })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Il rimborso vero si fa dal Dashboard Stripe (payment_intent_id non
+  // mostrato qui ma disponibile lato backend): questa azione registra solo
+  // che è avvenuto, nessun automatismo — stesso pattern validato in Fase 1.
+  function segnaIscrizioneRimborsata(iscrizioneId) {
+    if (!window.confirm("Segnare questa iscrizione come rimborsata? Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId + "/rimborsato", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
 
