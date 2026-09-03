@@ -6,9 +6,25 @@
 (function () {
   var inputChiave = document.getElementById("chiave");
   var btnCarica = document.getElementById("btn-carica");
+  var inputCerca = document.getElementById("cerca-persona");
   var statusEl = document.getElementById("status");
   var tbody = document.getElementById("tabella-body");
   var emptyEl = document.getElementById("empty");
+
+  // Elenco completo tenuto in memoria dopo il caricamento: la ricerca per
+  // nome/email filtra qui, senza dover richiamare l'API ad ogni carattere.
+  var righeCorrenti = [];
+  var chiaveUsataPerCaricare = null;
+
+  function persone(record) {
+    return (record.dati && Array.isArray(record.dati.persone)) ? record.dati.persone : [];
+  }
+
+  function testoPersone(record) {
+    return persone(record).map(function (p) {
+      return (p.nome || "") + " " + (p.cognome || "") + " (" + (p.email || "") + ")";
+    }).join(", ") || "—";
+  }
 
   var CHIAVE_SESSIONE = "trame_test_admin_key";
   try {
@@ -49,34 +65,52 @@
       })
       .then(function (righe) {
         statusEl.hidden = true;
-        tbody.innerHTML = "";
-        emptyEl.hidden = righe.length > 0;
-        righe.forEach(function (r) {
-          var tr = document.createElement("tr");
-          tr.innerHTML =
-            "<td>" + escapeHtml(r.tipoPagamento) + "</td>" +
-            "<td><code>" + escapeHtml(r.iscrizioneId) + "</code></td>" +
-            "<td>" + escapeHtml(r.stato) + "</td>" +
-            "<td>" + r.importoTotale.toFixed(2) + " €</td>" +
-            "<td><code>" + escapeHtml(r.stripePaymentIntentId || "—") + "</code></td>" +
-            "<td>" + new Date(r.createdAt).toLocaleString("it-IT") + "</td>" +
-            "<td></td>";
-          var tdAzioni = tr.lastElementChild;
-          if (r.stato === "confermato") {
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "btn btn--outline btn--small";
-            btn.textContent = "Segna come rimborsato";
-            btn.addEventListener("click", function () { segnaRimborsato(r, chiave); });
-            tdAzioni.appendChild(btn);
-          } else {
-            tdAzioni.textContent = "—";
-          }
-          tbody.appendChild(tr);
-        });
+        righeCorrenti = righe;
+        chiaveUsataPerCaricare = chiave;
+        renderizzaElenco();
       })
       .catch(function (err) { mostraStatus(err.message, true); });
   }
+
+  // Filtra per nome/cognome/email (case-insensitive, sottostringa) sulle
+  // righe già in memoria — nessuna nuova chiamata all'API.
+  function renderizzaElenco() {
+    var filtro = inputCerca.value.trim().toLowerCase();
+    var righe = !filtro ? righeCorrenti : righeCorrenti.filter(function (r) {
+      return persone(r).some(function (p) {
+        return ((p.nome || "") + " " + (p.cognome || "") + " " + (p.email || "")).toLowerCase().indexOf(filtro) !== -1;
+      });
+    });
+
+    tbody.innerHTML = "";
+    emptyEl.hidden = righe.length > 0;
+    righe.forEach(function (r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td>" + escapeHtml(testoPersone(r)) + "</td>" +
+        "<td>" + escapeHtml(r.tipoPagamento) + "</td>" +
+        "<td><code>" + escapeHtml(r.iscrizioneId) + "</code></td>" +
+        "<td>" + escapeHtml(r.stato) + "</td>" +
+        "<td>" + r.importoTotale.toFixed(2) + " €</td>" +
+        "<td><code>" + escapeHtml(r.stripePaymentIntentId || "—") + "</code></td>" +
+        "<td>" + new Date(r.createdAt).toLocaleString("it-IT") + "</td>" +
+        "<td></td>";
+      var tdAzioni = tr.lastElementChild;
+      if (r.stato === "confermato") {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "btn btn--outline btn--small";
+        btn.textContent = "Segna come rimborsato";
+        btn.addEventListener("click", function () { segnaRimborsato(r, chiaveUsataPerCaricare); });
+        tdAzioni.appendChild(btn);
+      } else {
+        tdAzioni.textContent = "—";
+      }
+      tbody.appendChild(tr);
+    });
+  }
+
+  inputCerca.addEventListener("input", renderizzaElenco);
 
   function segnaRimborsato(record, chiave) {
     if (!window.confirm("Segnare come rimborsata l'iscrizione " + record.iscrizioneId + "? " +

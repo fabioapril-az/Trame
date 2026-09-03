@@ -42,13 +42,17 @@
           <input type="password" id="chiave" style="flex:1; min-width:200px;">
           <button type="button" class="btn btn--primary btn--small" id="btn-carica">Carica elenco</button>
         </div>
+        <div class="admin-toolbar">
+          <label for="cerca-persona">Cerca per nome o email</label>
+          <input type="search" id="cerca-persona" placeholder="es. luigi rossi, a@b.it…" style="flex:1; min-width:200px;">
+        </div>
         <p class="form-note" id="status" role="alert" hidden></p>
 
         <div style="overflow-x:auto;">
           <table class="admin-table" id="tabella">
             <thead>
               <tr>
-                <th>Tipo</th><th>iscrizione_id</th><th>Stato</th><th>Importo</th>
+                <th>Persone</th><th>Tipo</th><th>iscrizione_id</th><th>Stato</th><th>Importo</th>
                 <th>payment_intent_id</th><th>Creato</th><th>Azioni</th>
               </tr>
             </thead>
