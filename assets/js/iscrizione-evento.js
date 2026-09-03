@@ -23,7 +23,9 @@
 // POST /api/eventi/{id}/iscriviti.
 
 (function () {
-  var eventoId = new URLSearchParams(window.location.search).get("id");
+  var paramsUrl = new URLSearchParams(window.location.search);
+  var eventoId = paramsUrl.get("id");
+  var pagamentoParam = paramsUrl.get("pagamento"); // "confermato"|"annullato", solo al ritorno da Stripe
 
   var titoloEl = document.getElementById("evento-titolo");
   var sottotitoloEl = document.getElementById("evento-sottotitolo");
@@ -126,6 +128,28 @@
         chiusoEl.textContent = "Le iscrizioni a questo evento non sono attualmente aperte.";
         return;
       }
+
+      // Ritorno da Stripe dopo un pagamento riuscito: nessun wizard, solo
+      // l'esito (l'URL è quello che il backend .NET genera nel redirect).
+      if (pagamentoParam === "confermato") {
+        esitoEl.hidden = false;
+        esitoEl.innerHTML = "<h3>Pagamento confermato!</h3><p>Ti aspettiamo all'evento. Riceverai conferma via email.</p>";
+        return;
+      }
+
+      // Prezzi Singolo/Gruppo/Aperitivo e "Modalità di partecipazione" sono
+      // alternativi (l'API .NET li rifiuta insieme): un evento con questi
+      // prezzi usa il wizard di pagamento, mai quello sopra.
+      var usaPrezziPagamento = evento.prezzoSingolo != null || evento.prezzoGruppoPersona != null || evento.prezzoAperitivoPersona != null;
+      if (usaPrezziPagamento) {
+        if (pagamentoParam === "annullato") {
+          document.getElementById("pagamento-annullato-nota").hidden = false;
+        }
+        inizializzaWizardPagamento(evento);
+        document.getElementById("wizard-pagamento").hidden = false;
+        return;
+      }
+
       wizardEl.hidden = false;
     })
     .catch(function (err) {
@@ -562,5 +586,159 @@
   function formattaData(isoDate) {
     var parti = isoDate.split("-");
     return parti[2] + "/" + parti[1] + "/" + parti[0];
+  }
+
+  // ================= Wizard di pagamento (Stripe) =================
+  // Attivo solo per eventi con prezzoSingolo/prezzoGruppoPersona/
+  // prezzoAperitivoPersona (vedi sopra) — nessuna verifica socio qui, lo
+  // sconto (se spetta) lo calcola il server persona per persona al submit.
+  // Stessa logica già validata in Fase 1 (test-pagamento.html/js).
+  function inizializzaWizardPagamento(evento) {
+    var pgModalita = document.getElementById("pg-modalita");
+    var pgCampoModalita = document.getElementById("pg-campo-modalita");
+    var pgCampoNumeroGruppo = document.getElementById("pg-campo-numero-gruppo");
+    var pgNumeroGruppo = document.getElementById("pg-numero-gruppo");
+    var pgBlocchiPersone = document.getElementById("pg-blocchi-persone");
+    var pgCampoAperitivo = document.getElementById("pg-campo-aperitivo");
+    var pgAperitivo = document.getElementById("pg-aperitivo");
+    var pgCampoAllergie = document.getElementById("pg-campo-allergie");
+    var pgAllergie = document.getElementById("pg-allergie");
+    var pgTotale = document.getElementById("pg-totale");
+    var pgStatus = document.getElementById("pg-status");
+    var pgBtnPaga = document.getElementById("pg-btn-paga");
+
+    function popolaSelectNumerico(select, min, max) {
+      select.innerHTML = "";
+      for (var n = min; n <= max; n++) {
+        var option = document.createElement("option");
+        option.value = n;
+        option.textContent = n;
+        select.appendChild(option);
+      }
+    }
+    popolaSelectNumerico(pgNumeroGruppo, 2, 6);
+    popolaSelectNumerico(pgAperitivo, 0, 6);
+
+    function modalitaAttiva() {
+      if (evento.prezzoSingolo != null && evento.prezzoGruppoPersona != null) {
+        return pgModalita.value;
+      }
+      return evento.prezzoSingolo != null ? "singolo" : "gruppo";
+    }
+
+    function leggiPersoneDaBlocchi(validare) {
+      var blocchi = pgBlocchiPersone.querySelectorAll(".admin-panel");
+      var persone = [];
+      for (var i = 0; i < blocchi.length; i++) {
+        var nome = blocchi[i].querySelector(".pg-persona-nome");
+        var cognome = blocchi[i].querySelector(".pg-persona-cognome");
+        var email = blocchi[i].querySelector(".pg-persona-email");
+        if (validare) {
+          if (!nome.reportValidity() || !cognome.reportValidity() || !email.reportValidity()) {
+            return null;
+          }
+        }
+        persone.push({ nome: nome.value.trim(), cognome: cognome.value.trim(), email: email.value.trim() });
+      }
+      if (validare) {
+        var viste = {};
+        for (var j = 0; j < persone.length; j++) {
+          var norm = persone[j].email.toLowerCase();
+          if (viste[norm]) {
+            pgStatus.textContent = "L'email " + persone[j].email + " è ripetuta su più persone: ogni persona richiede un'email diversa.";
+            pgStatus.hidden = false;
+            return null;
+          }
+          viste[norm] = true;
+        }
+      }
+      return persone;
+    }
+
+    function generaBlocchiPersone(n) {
+      var precedenti = leggiPersoneDaBlocchi(false) || [];
+      pgBlocchiPersone.innerHTML = "";
+      for (var i = 0; i < n; i++) {
+        var blocco = document.createElement("div");
+        blocco.className = "admin-panel";
+        blocco.style.cssText = "margin:12px 0; padding:14px;";
+        blocco.innerHTML =
+          "<p class=\"form-note\" style=\"margin-top:0;\">Persona " + (i + 1) + "</p>" +
+          "<div class=\"form-row\"><label>Nome</label><input type=\"text\" class=\"pg-persona-nome\" maxlength=\"100\" required></div>" +
+          "<div class=\"form-row\"><label>Cognome</label><input type=\"text\" class=\"pg-persona-cognome\" maxlength=\"100\" required></div>" +
+          "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"pg-persona-email\" maxlength=\"255\" required></div>";
+        if (precedenti[i]) {
+          blocco.querySelector(".pg-persona-nome").value = precedenti[i].nome;
+          blocco.querySelector(".pg-persona-cognome").value = precedenti[i].cognome;
+          blocco.querySelector(".pg-persona-email").value = precedenti[i].email;
+        }
+        pgBlocchiPersone.appendChild(blocco);
+      }
+    }
+
+    function aggiornaTotale() {
+      var modalita = modalitaAttiva();
+      var prezzoBase = modalita === "singolo" ? evento.prezzoSingolo : evento.prezzoGruppoPersona;
+      var n = modalita === "singolo" ? 1 : parseInt(pgNumeroGruppo.value, 10);
+      var totale = (prezzoBase || 0) * n;
+      var personeAperitivo = pgCampoAperitivo.hidden ? 0 : parseInt(pgAperitivo.value, 10);
+      if (personeAperitivo > 0) {
+        totale += evento.prezzoAperitivoPersona * personeAperitivo;
+      }
+      pgTotale.textContent = "Totale (senza eventuale sconto socio): " + totale.toFixed(2) + " €";
+    }
+
+    function aggiornaCampi() {
+      var entrambe = evento.prezzoSingolo != null && evento.prezzoGruppoPersona != null;
+      pgCampoModalita.hidden = !entrambe;
+      var modalita = modalitaAttiva();
+      pgCampoNumeroGruppo.hidden = modalita !== "gruppo";
+      pgCampoAperitivo.hidden = evento.prezzoAperitivoPersona == null;
+      pgCampoAllergie.hidden = evento.prezzoAperitivoPersona == null;
+      var n = modalita === "singolo" ? 1 : parseInt(pgNumeroGruppo.value, 10);
+      generaBlocchiPersone(n);
+      aggiornaTotale();
+    }
+
+    pgModalita.addEventListener("change", aggiornaCampi);
+    pgNumeroGruppo.addEventListener("change", aggiornaCampi);
+    pgAperitivo.addEventListener("change", aggiornaTotale);
+    aggiornaCampi();
+
+    function nuovoRichiestaId() {
+      return (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Date.now() + "-" + Math.random());
+    }
+
+    pgBtnPaga.addEventListener("click", function () {
+      pgStatus.hidden = true;
+      var persone = leggiPersoneDaBlocchi(true);
+      if (!persone) {
+        return;
+      }
+      var payload = {
+        richiestaId: nuovoRichiestaId(),
+        modalita: modalitaAttiva(),
+        persone: persone,
+        personeAperitivo: pgCampoAperitivo.hidden ? 0 : parseInt(pgAperitivo.value, 10),
+        allergieNote: pgCampoAllergie.hidden ? null : pgAllergie.value.trim()
+      };
+      var testoOriginale = pgBtnPaga.textContent;
+      pgBtnPaga.disabled = true;
+      pgBtnPaga.textContent = "Reindirizzamento a Stripe…";
+      window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+        .then(function (result) {
+          window.location.href = result.url;
+        })
+        .catch(function (err) {
+          pgBtnPaga.disabled = false;
+          pgBtnPaga.textContent = testoOriginale;
+          pgStatus.textContent = err.message;
+          pgStatus.hidden = false;
+        });
+    });
   }
 })();

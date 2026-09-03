@@ -86,4 +86,201 @@
     var parti = isoDate.split("-");
     return parti[2] + "/" + parti[1] + "/" + parti[0];
   }
+
+  // ================= Più tessere in un pagamento (Stripe) =================
+  // Alternativa al form sopra: 1-5 persone, un solo pagamento online. Non
+  // gestisce minorenni (deciso con l'utente): chi lo è resta sul form
+  // singolo qui sopra, con il consenso del genitore già previsto lì.
+
+  var params = new URLSearchParams(window.location.search);
+  var pagamentoParam = params.get("pagamento"); // "confermato"|"annullato", solo al ritorno da Stripe
+
+  var btnTabSingolo = document.getElementById("btn-tab-singolo");
+  var btnTabMultiplo = document.getElementById("btn-tab-multiplo");
+  var pannelloMultiplo = document.getElementById("pannello-multiplo");
+
+  function mostraTab(tab) {
+    form.hidden = tab !== "singolo";
+    pannelloMultiplo.hidden = tab !== "multiplo";
+    btnTabSingolo.className = "btn btn--small " + (tab === "singolo" ? "btn--primary" : "btn--outline");
+    btnTabMultiplo.className = "btn btn--small " + (tab === "multiplo" ? "btn--primary" : "btn--outline");
+  }
+  btnTabSingolo.addEventListener("click", function () { mostraTab("singolo"); });
+  btnTabMultiplo.addEventListener("click", function () { mostraTab("multiplo"); });
+
+  // Ritorno da Stripe: nessun form, solo l'esito.
+  if (pagamentoParam === "confermato") {
+    form.hidden = true;
+    pannelloMultiplo.hidden = true;
+    document.querySelector(".admin-toolbar").hidden = true;
+    mostraStato("Pagamento confermato! Riceverai a breve via email le tessere socio per tutte le persone iscritte.", "successo");
+  } else {
+    mostraTab("singolo");
+    if (pagamentoParam === "annullato") {
+      mostraStato("Pagamento annullato: puoi riprovare qui sotto.", "errore");
+      mostraTab("multiplo");
+    }
+  }
+
+  var quotaTessera = null;
+  window.trameFetch("/api/impostazioni")
+    .then(function (impostazioni) {
+      quotaTessera = (impostazioni && impostazioni.quotaIscrizioneSoci) || null;
+      aggiornaTotaleMultiplo();
+    })
+    .catch(function () { /* niente anteprima: il totale reale si vede comunque al pagamento */ });
+
+  var mtNumero = document.getElementById("mt-numero");
+  var mtBlocchi = document.getElementById("mt-blocchi-persone");
+  var mtConsenso = document.getElementById("mt-consenso");
+  var mtTotale = document.getElementById("mt-totale");
+  var mtStatus = document.getElementById("mt-status");
+  var mtBtnPaga = document.getElementById("mt-btn-paga");
+
+  for (var n = 1; n <= 5; n++) {
+    var option = document.createElement("option");
+    option.value = n;
+    option.textContent = n;
+    mtNumero.appendChild(option);
+  }
+
+  function leggiPersoneMultiplo(validare) {
+    var blocchi = mtBlocchi.querySelectorAll(".admin-panel");
+    var persone = [];
+    for (var i = 0; i < blocchi.length; i++) {
+      var campi = {
+        nome: blocchi[i].querySelector(".mt-nome"),
+        cognome: blocchi[i].querySelector(".mt-cognome"),
+        email: blocchi[i].querySelector(".mt-email"),
+        telefono: blocchi[i].querySelector(".mt-telefono"),
+        dataNascita: blocchi[i].querySelector(".mt-data-nascita"),
+        codiceFiscale: blocchi[i].querySelector(".mt-cf"),
+        indirizzo: blocchi[i].querySelector(".mt-indirizzo"),
+        citta: blocchi[i].querySelector(".mt-citta"),
+        cap: blocchi[i].querySelector(".mt-cap")
+      };
+      if (validare) {
+        var campiObbligatori = [campi.nome, campi.cognome, campi.email, campi.dataNascita, campi.codiceFiscale];
+        var tuttiValidi = campiObbligatori.every(function (c) { return c.reportValidity(); });
+        if (!tuttiValidi) {
+          return null;
+        }
+        if (campi.dataNascita.value && calcolaEta(campi.dataNascita.value) < 18) {
+          mtStatus.textContent = "La persona " + (i + 1) + " risulta minorenne: questo pagamento multiplo non la supporta, usa l'iscrizione singola qui sopra per lei.";
+          mtStatus.hidden = false;
+          return null;
+        }
+      }
+      persone.push({
+        nome: campi.nome.value.trim(),
+        cognome: campi.cognome.value.trim(),
+        email: campi.email.value.trim(),
+        telefono: campi.telefono.value.trim() || null,
+        dataNascita: campi.dataNascita.value,
+        codiceFiscale: campi.codiceFiscale.value.trim().toUpperCase(),
+        indirizzo: campi.indirizzo.value.trim() || null,
+        citta: campi.citta.value.trim() || null,
+        cap: campi.cap.value.trim() || null
+      });
+    }
+    if (validare) {
+      var emailViste = {};
+      for (var j = 0; j < persone.length; j++) {
+        var emailNorm = persone[j].email.toLowerCase();
+        if (emailViste[emailNorm]) {
+          mtStatus.textContent = "L'email " + persone[j].email + " è ripetuta su più persone: ogni tessera richiede un'email diversa.";
+          mtStatus.hidden = false;
+          return null;
+        }
+        emailViste[emailNorm] = true;
+      }
+    }
+    return persone;
+  }
+
+  function generaBlocchiMultiplo() {
+    var n = parseInt(mtNumero.value, 10);
+    var precedenti = leggiPersoneMultiplo(false) || [];
+    mtBlocchi.innerHTML = "";
+    for (var i = 0; i < n; i++) {
+      var blocco = document.createElement("div");
+      blocco.className = "admin-panel";
+      blocco.style.cssText = "margin:12px 0; padding:14px;";
+      blocco.innerHTML =
+        "<p class=\"form-note\" style=\"margin-top:0;\">Persona " + (i + 1) + "</p>" +
+        "<div class=\"form-row\"><label>Nome</label><input type=\"text\" class=\"mt-nome\" maxlength=\"100\" required></div>" +
+        "<div class=\"form-row\"><label>Cognome</label><input type=\"text\" class=\"mt-cognome\" maxlength=\"100\" required></div>" +
+        "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"mt-email\" maxlength=\"255\" required></div>" +
+        "<div class=\"form-row\"><label>Telefono (facoltativo)</label><input type=\"tel\" class=\"mt-telefono\" maxlength=\"20\"></div>" +
+        "<div class=\"form-row\"><label>Data di nascita</label><input type=\"date\" class=\"mt-data-nascita\" required></div>" +
+        "<div class=\"form-row\"><label>Codice fiscale</label><input type=\"text\" class=\"mt-cf\" maxlength=\"16\" required pattern=\"^[A-Za-z]{6}\\d{2}[A-EHLMPRSTabcdehlmprst]\\d{2}([A-Za-z]\\d{3}|\\d{4})[A-Za-z]$\"></div>" +
+        "<div class=\"form-row\"><label>Indirizzo (facoltativo)</label><input type=\"text\" class=\"mt-indirizzo\" maxlength=\"255\"></div>" +
+        "<div class=\"form-row\"><label>Città (facoltativo)</label><input type=\"text\" class=\"mt-citta\" maxlength=\"100\"></div>" +
+        "<div class=\"form-row\"><label>CAP (facoltativo)</label><input type=\"text\" class=\"mt-cap\" maxlength=\"10\"></div>";
+      if (precedenti[i]) {
+        blocco.querySelector(".mt-nome").value = precedenti[i].nome;
+        blocco.querySelector(".mt-cognome").value = precedenti[i].cognome;
+        blocco.querySelector(".mt-email").value = precedenti[i].email;
+        blocco.querySelector(".mt-telefono").value = precedenti[i].telefono || "";
+        blocco.querySelector(".mt-data-nascita").value = precedenti[i].dataNascita || "";
+        blocco.querySelector(".mt-cf").value = precedenti[i].codiceFiscale || "";
+        blocco.querySelector(".mt-indirizzo").value = precedenti[i].indirizzo || "";
+        blocco.querySelector(".mt-citta").value = precedenti[i].citta || "";
+        blocco.querySelector(".mt-cap").value = precedenti[i].cap || "";
+      }
+      mtBlocchi.appendChild(blocco);
+    }
+  }
+
+  function aggiornaTotaleMultiplo() {
+    var n = parseInt(mtNumero.value, 10);
+    if (quotaTessera == null) {
+      mtTotale.textContent = "Totale: calcolato al pagamento (quota non ancora caricata)";
+      return;
+    }
+    mtTotale.textContent = "Totale: " + (quotaTessera * n).toFixed(2) + " €";
+  }
+
+  mtNumero.addEventListener("change", function () { generaBlocchiMultiplo(); aggiornaTotaleMultiplo(); });
+  generaBlocchiMultiplo();
+
+  function nuovoRichiestaId() {
+    return (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Date.now() + "-" + Math.random());
+  }
+
+  mtBtnPaga.addEventListener("click", function () {
+    mtStatus.hidden = true;
+    if (!mtConsenso.checked) {
+      mtStatus.textContent = "Devi confermare di aver letto l'informativa privacy per procedere.";
+      mtStatus.hidden = false;
+      return;
+    }
+    var persone = leggiPersoneMultiplo(true);
+    if (!persone) {
+      return;
+    }
+    persone.forEach(function (p) {
+      p.consensoAccettato = true;
+      p.consensoVersione = CONSENSO_VERSIONE;
+    });
+
+    var testoOriginale = mtBtnPaga.textContent;
+    mtBtnPaga.disabled = true;
+    mtBtnPaga.textContent = "Reindirizzamento a Stripe…";
+
+    window.trameFetch("/api/soci/checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ richiestaId: nuovoRichiestaId(), persone: persone })
+    })
+      .then(function (result) {
+        window.location.href = result.url;
+      })
+      .catch(function (err) {
+        mtBtnPaga.disabled = false;
+        mtBtnPaga.textContent = testoOriginale;
+        mtStatus.textContent = err.message;
+        mtStatus.hidden = false;
+      });
+  });
 })();

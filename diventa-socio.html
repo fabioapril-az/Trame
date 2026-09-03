@@ -57,7 +57,12 @@
     <section class="section">
       <div class="container" style="max-width:640px;">
 
-        <form class="contact-form" id="socio-form">
+        <div class="admin-toolbar">
+          <button type="button" class="btn btn--primary btn--small" id="btn-tab-singolo">Iscrizione singola</button>
+          <button type="button" class="btn btn--outline btn--small" id="btn-tab-multiplo">Più tessere insieme (pagamento online)</button>
+        </div>
+
+        <form class="contact-form" id="socio-form" style="margin-top:20px;">
           <div class="form-row">
             <label for="nome">Nome</label>
             <input type="text" id="nome" name="nome" required maxlength="100">
@@ -110,6 +115,35 @@
           <button type="submit" class="btn btn--primary" id="submit-btn">Invia iscrizione</button>
           <p class="form-note" id="form-status" role="status" hidden></p>
         </form>
+
+        <!-- Pagamento online per più tessere insieme: alternativa al form
+             sopra, non per i minorenni (chi lo è usa l'iscrizione singola,
+             con il consenso del genitore già previsto lì). -->
+        <div id="pannello-multiplo" class="admin-panel" style="margin-top:20px;" hidden>
+          <h3>Più tessere in un solo pagamento (1-5)</h3>
+          <p class="form-note">Non adatto a chi è minorenne: usa l'iscrizione singola qui sopra per quella persona.</p>
+
+          <div class="form-row">
+            <label for="mt-numero">Numero tessere in questa iscrizione</label>
+            <select id="mt-numero"></select>
+          </div>
+
+          <div id="mt-blocchi-persone"></div>
+
+          <div class="form-row form-row--checkbox">
+            <label>
+              <input type="checkbox" id="mt-consenso" required>
+              Confermo di aver letto e accettato, per conto di tutte le persone indicate,
+              <a href="privacy.html" target="_blank" rel="noopener">l'informativa sul trattamento dei dati personali</a>.
+            </label>
+          </div>
+
+          <p class="form-note" id="mt-totale" style="font-weight:600;"></p>
+          <div class="admin-form__actions">
+            <button type="button" class="btn btn--primary" id="mt-btn-paga">Vai al pagamento</button>
+          </div>
+          <p class="form-note" id="mt-status" role="alert" hidden></p>
+        </div>
 
       </div>
     </section>
