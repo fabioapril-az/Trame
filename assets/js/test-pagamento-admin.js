@@ -26,6 +26,34 @@
     }).join(", ") || "—";
   }
 
+  function testoEventoOTessera(record) {
+    if (record.tipoPagamento === "evento") {
+      return (record.dati && record.dati.eventoTitolo) || "Evento";
+    }
+    return "Tessera associazione";
+  }
+
+  // Etichette leggibili per i valori che Stripe usa internamente
+  // (PaymentMethod.type) — se ne compare uno nuovo non ancora tradotto qui,
+  // si vede comunque il valore grezzo invece di sparire.
+  var ETICHETTE_METODO = {
+    card: "Carta",
+    paypal: "PayPal",
+    klarna: "Klarna",
+    satispay: "Satispay",
+    amazon_pay: "Amazon Pay",
+    link: "Link",
+    apple_pay: "Apple Pay",
+    google_pay: "Google Pay"
+  };
+
+  function testoMetodo(record) {
+    if (!record.metodoPagamento) {
+      return "—";
+    }
+    return ETICHETTE_METODO[record.metodoPagamento] || record.metodoPagamento;
+  }
+
   var CHIAVE_SESSIONE = "trame_test_admin_key";
   try {
     var salvata = window.sessionStorage.getItem(CHIAVE_SESSIONE);
@@ -87,13 +115,13 @@
     righe.forEach(function (r) {
       var tr = document.createElement("tr");
       tr.innerHTML =
+        "<td>" + escapeHtml(testoEventoOTessera(r)) + "</td>" +
         "<td>" + escapeHtml(testoPersone(r)) + "</td>" +
-        "<td>" + escapeHtml(r.tipoPagamento) + "</td>" +
-        "<td><code>" + escapeHtml(r.iscrizioneId) + "</code></td>" +
-        "<td>" + escapeHtml(r.stato) + "</td>" +
+        "<td>" + escapeHtml(testoMetodo(r)) + "</td>" +
         "<td>" + r.importoTotale.toFixed(2) + " €</td>" +
-        "<td><code>" + escapeHtml(r.stripePaymentIntentId || "—") + "</code></td>" +
+        "<td>" + escapeHtml(r.stato) + "</td>" +
         "<td>" + new Date(r.createdAt).toLocaleString("it-IT") + "</td>" +
+        "<td><code>" + escapeHtml(r.stripePaymentIntentId || "—") + "</code></td>" +
         "<td></td>";
       var tdAzioni = tr.lastElementChild;
       if (r.stato === "confermato") {

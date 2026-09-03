@@ -37,6 +37,7 @@ app.http("iscrizioni-test-admin-lista", {
           dati: entity.datiJson ? JSON.parse(entity.datiJson) : null,
           stripeSessionId: entity.stripeSessionId || null,
           stripePaymentIntentId: entity.stripePaymentIntentId || null,
+          metodoPagamento: entity.metodoPagamento || null,
           createdAt: entity.createdAt,
           updatedAt: entity.updatedAt
         });

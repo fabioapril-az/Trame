@@ -6,7 +6,9 @@
 // (il segreto stampato da quel comando va in STRIPE_WEBHOOK_SECRET_TEST).
 //
 // Eventi gestiti:
-// - checkout.session.completed  -> stato: confermato, salva payment_intent_id;
+// - checkout.session.completed  -> stato: confermato, salva payment_intent_id
+//   e metodoPagamento (letto dal PaymentIntent — la Checkout Session sa solo
+//   quali metodi erano proposti, non quale è stato usato davvero);
 //   per un'iscrizione EVENTO, incrementa il contatore eventi-da-rinnovo di
 //   ogni persona che risulta socia (matura/consuma lo sconto socio del
 //   PROSSIMO evento — vedi calcolaRigaEvento in pagamenti-test-shared.js).
@@ -60,11 +62,30 @@ app.http("stripe-webhook-test", {
 
       if (event.type === "checkout.session.completed") {
         const eraInAttesa = record.stato === STATI.IN_ATTESA;
+        const paymentIntentId = typeof session.payment_intent === "string" ? session.payment_intent : null;
+
+        // Il metodo usato davvero (card/paypal/klarna/satispay/...) vive sul
+        // PaymentIntent, non sulla Session: la Session elenca solo quelli
+        // proposti al cliente. Un errore qui non deve far fallire tutto il
+        // webhook — il record resta comunque confermato, solo senza questo
+        // dettaglio (mostrato come "—" in admin).
+        let metodoPagamento = null;
+        if (paymentIntentId) {
+          try {
+            const stripe = getStripe();
+            const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId, { expand: ["payment_method"] });
+            metodoPagamento = paymentIntent.payment_method && paymentIntent.payment_method.type;
+          } catch (err) {
+            context.warn("Impossibile recuperare il metodo di pagamento:", err);
+          }
+        }
+
         await tableClient.updateEntity({
           partitionKey: tipoPagamento,
           rowKey: iscrizioneId,
           stato: STATI.CONFERMATO,
-          stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : null,
+          stripePaymentIntentId: paymentIntentId,
+          metodoPagamento: metodoPagamento,
           updatedAt: new Date().toISOString()
         }, "Merge");
 
