@@ -1,10 +1,9 @@
-// Punto di ingresso delle Azure Functions (programming model v4).
-// Ogni file in ./functions registra le proprie route con app.http(...).
-// events.js rimosso prima: la gestione eventi è unificata sotto il
-// backend .NET (dbo.eventi). settings.js rimosso ora: le impostazioni del
-// sito sono passate anche loro al backend .NET (GET/PUT /api/impostazioni),
-// per far girare admin.html sotto un solo sistema di login invece di due
-// scollegati (ruolo "editor" di Static Web Apps + Azure AD App Roles).
-// Questo CMS Node.js/Table Storage separato non ha più funzioni registrate:
-// resta solo come scaffold vuoto dell'app Functions gestita dalla Static
-// Web App (api_location nel workflow), nessuna route esposta.
+// Non più il punto di ingresso: "main" in package.json ora punta
+// direttamente a src/functions/*.js (pattern standard del programming
+// model v4), che si autoregistrano con app.http(...) al require.
+// Questo file resta solo come nota storica — vedi src/functions/ per le
+// route reali. events.js e settings.js furono rimossi quando la gestione
+// eventi/impostazioni è passata al backend .NET (dbo.eventi, GET/PUT
+// /api/impostazioni). Le uniche route oggi in questo scaffold sono
+// l'ambiente di TEST per Stripe Checkout (src/functions/pagamenti-test-shared.js
+// e i file che lo usano): isolato apposta, non collegato ai dati reali.

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[TEST] Admin pagamenti — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">ambiente di test pagamenti</span>
+        </span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">[TEST] non pubblico</span>
+        <h1>Elenco iscrizioni di test</h1>
+        <p class="page-hero__subtitle">Il rimborso vero si fa dal Dashboard Stripe usando il payment_intent_id
+          qui sotto; il bottone "Segna come rimborsato" aggiorna solo lo stato del record di test.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="admin-toolbar">
+          <label for="chiave">Chiave admin di test (TEST_ADMIN_KEY)</label>
+          <input type="password" id="chiave" style="flex:1; min-width:200px;">
+          <button type="button" class="btn btn--primary btn--small" id="btn-carica">Carica elenco</button>
+        </div>
+        <div class="admin-toolbar">
+          <label for="cerca-persona">Cerca per nome o email</label>
+          <input type="search" id="cerca-persona" placeholder="es. luigi rossi, a@b.it…" style="flex:1; min-width:200px;">
+        </div>
+        <p class="form-note" id="status" role="alert" hidden></p>
+
+        <div style="overflow-x:auto;">
+          <table class="admin-table" id="tabella">
+            <thead>
+              <tr>
+                <th>Evento / Tessera</th><th>Persone</th><th>Allergie aperitivo</th><th>Metodo</th><th>Importo</th>
+                <th>Stato</th><th>Creato</th><th>payment_intent_id</th><th>Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="tabella-body"></tbody>
+          </table>
+        </div>
+        <p class="form-note" id="empty" hidden>Nessun record.</p>
+      </div>
+    </section>
+
+    <!-- Sconto socio sugli eventi: in Fase 2 questi due campi vivranno in
+         admin-soci.html sul backend .NET reale — qui simulano lo stesso
+         pannello nel nostro ambiente isolato, usati da calcolaRigaEvento
+         (api/src/functions/pagamenti-test-shared.js) ad ogni checkout. -->
+    <section class="section section--alt">
+      <div class="container" style="max-width:480px;">
+        <div class="section__head" style="text-align:left; margin:0 0 20px;">
+          <span class="section__eyebrow">[TEST]</span>
+          <h2 class="section__title">Sconto socio sugli eventi</h2>
+          <p class="section__subtitle">Dal 2° evento a cui un socio si iscrive, fino al numero massimo qui sotto (azzerato ad ogni rinnovo tessera in Fase 2 — qui non simulato).</p>
+        </div>
+        <div class="form-row">
+          <label for="sconto-euro">Importo sconto (€ a persona)</label>
+          <input type="number" id="sconto-euro" min="0" step="0.01">
+        </div>
+        <div class="form-row">
+          <label for="sconto-max-eventi">Numero massimo di eventi scontati</label>
+          <input type="number" id="sconto-max-eventi" min="0" step="1">
+        </div>
+        <div class="admin-form__actions">
+          <button type="button" class="btn btn--outline btn--small" id="btn-carica-sconto">Carica</button>
+          <button type="button" class="btn btn--primary btn--small" id="btn-salva-sconto">Salva</button>
+        </div>
+        <p class="form-note" id="sconto-status" role="alert" hidden></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — ambiente di test</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="assets/js/test-pagamento-admin.js"></script>
+</body>
+</html>
