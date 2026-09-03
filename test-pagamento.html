@@ -85,6 +85,12 @@
             <label for="ev-aperitivo">Persone solo aperitivo (0-6)</label>
             <select id="ev-aperitivo"></select>
           </div>
+          <!-- Nota unica per il gruppo aperitivo (non per persona, coerente
+               con l'aperitivo non nominale): facoltativa. -->
+          <div class="form-row" id="ev-campo-allergie" hidden>
+            <label for="ev-allergie">Allergie/intolleranze aperitivo (facoltativo)</label>
+            <textarea id="ev-allergie" rows="2" maxlength="500"></textarea>
+          </div>
 
           <p class="form-note" id="ev-totale" style="font-weight:600;"></p>
           <p class="form-note">Lo sconto socio (dal 2° evento, se spetta) viene verificato quando esci dal campo email di ciascuna persona — il server lo ricalcola comunque da zero al momento del pagamento.</p>

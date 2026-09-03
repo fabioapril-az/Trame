@@ -74,7 +74,8 @@ app.http("create-checkout-session-test", {
           eventoId: evento.id,
           eventoTitolo: evento.titolo,
           modalita: payload.modalita,
-          personeAperitivo: parseInt(payload.personeAperitivo, 10) || 0
+          personeAperitivo: parseInt(payload.personeAperitivo, 10) || 0,
+          aperitivoAllergie: (payload.aperitivoAllergie || "").trim() || null
         };
       } else {
         const { numeroTessere, persone, righe: righeTessera } = await calcolaRigheTessera(payload);

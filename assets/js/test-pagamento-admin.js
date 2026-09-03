@@ -47,6 +47,10 @@
     google_pay: "Google Pay"
   };
 
+  function testoAllergie(record) {
+    return (record.dati && record.dati.aperitivoAllergie) || "—";
+  }
+
   function testoMetodo(record) {
     if (!record.metodoPagamento) {
       return "—";
@@ -117,6 +121,7 @@
       tr.innerHTML =
         "<td>" + escapeHtml(testoEventoOTessera(r)) + "</td>" +
         "<td>" + escapeHtml(testoPersone(r)) + "</td>" +
+        "<td>" + escapeHtml(testoAllergie(r)) + "</td>" +
         "<td>" + escapeHtml(testoMetodo(r)) + "</td>" +
         "<td>" + r.importoTotale.toFixed(2) + " €</td>" +
         "<td>" + escapeHtml(r.stato) + "</td>" +

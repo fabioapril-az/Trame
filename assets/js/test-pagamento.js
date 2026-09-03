@@ -131,6 +131,8 @@
   var evBlocchiPersone = document.getElementById("ev-blocchi-persone");
   var evCampoAperitivo = document.getElementById("ev-campo-aperitivo");
   var evAperitivo = document.getElementById("ev-aperitivo");
+  var evCampoAllergie = document.getElementById("ev-campo-allergie");
+  var evAllergie = document.getElementById("ev-allergie");
   var evTotale = document.getElementById("ev-totale");
   var evStatus = document.getElementById("ev-status");
   var evBtnPaga = document.getElementById("ev-btn-paga");
@@ -199,6 +201,7 @@
     var modalita = modalitaAttiva();
     evCampoNumeroGruppo.hidden = modalita !== "gruppo";
     evCampoAperitivo.hidden = evento.prezzoAperitivoPersona == null;
+    evCampoAllergie.hidden = evento.prezzoAperitivoPersona == null;
 
     generaBlocchiEvento();
     aggiornaTotaleEvento();
@@ -255,7 +258,8 @@
       eventoId: evScelta.value,
       modalita: modalitaAttiva(),
       persone: persone,
-      personeAperitivo: evCampoAperitivo.hidden ? 0 : parseInt(evAperitivo.value, 10)
+      personeAperitivo: evCampoAperitivo.hidden ? 0 : parseInt(evAperitivo.value, 10),
+      aperitivoAllergie: evCampoAllergie.hidden ? null : evAllergie.value.trim()
     };
     avviaCheckout(payload, evBtnPaga, evStatus);
   });
