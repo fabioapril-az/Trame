@@ -312,6 +312,12 @@
   // ================= Comune: avvia il checkout di test =================
 
   function avviaCheckout(payload, pulsante, statusEl) {
+    // L'origine (es. https://progettotrame.org) dice al server dove
+    // reindirizzare dopo il pagamento: niente più Application Setting fissa
+    // da reimpostare per ogni ambiente, il server valida comunque contro un
+    // elenco di pattern permessi prima di fidarsene.
+    payload.origine = window.location.origin;
+
     var testoOriginale = pulsante.textContent;
     pulsante.disabled = true;
     pulsante.textContent = "Reindirizzamento a Stripe…";

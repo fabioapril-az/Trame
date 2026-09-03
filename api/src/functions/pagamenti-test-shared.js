@@ -220,8 +220,23 @@ function getStripe() {
   return require("stripe")(key);
 }
 
-function baseUrl() {
-  return (process.env.SITE_BASE_URL_TEST || "").replace(/\/+$/, "");
+// URL di base per i redirect Stripe (success_url/cancel_url): NON una
+// Application Setting fissa (richiederebbe reimpostarla ad ogni nuovo
+// ambiente di anteprima), ma l'origine mandata dal client
+// (window.location.origin), validata contro un elenco di pattern permessi
+// — così funziona da sola sia sull'URL stabile sia su ogni futura PR di
+// test, senza toccare configurazione.
+function baseUrlValida(origine) {
+  if (!origine) {
+    return null;
+  }
+  if (/^https:\/\/([a-z0-9-]+\.)*azurestaticapps\.net$/i.test(origine)) {
+    return origine;
+  }
+  if (origine === "https://progettotrame.org") {
+    return origine;
+  }
+  return null;
 }
 
 // --- Calcolo importi lato server: mai fidarsi del totale mandato dal
@@ -383,7 +398,7 @@ module.exports = {
   STATI,
   getTableClient,
   getStripe,
-  baseUrl,
+  baseUrlValida,
   calcolaRigaEvento,
   calcolaRigheTessera,
   leggiQuotaTessera,

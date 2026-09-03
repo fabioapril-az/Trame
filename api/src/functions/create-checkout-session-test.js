@@ -29,7 +29,7 @@ const {
   STATI,
   getTableClient,
   getStripe,
-  baseUrl,
+  baseUrlValida,
   calcolaRigaEvento,
   calcolaRigheTessera,
   totaleRighe,
@@ -51,6 +51,15 @@ app.http("create-checkout-session-test", {
     const tipoPagamento = payload && payload.tipoPagamento;
     if (tipoPagamento !== "evento" && tipoPagamento !== "tessera") {
       return { status: 400, jsonBody: { error: "tipoPagamento deve essere 'evento' o 'tessera'." } };
+    }
+
+    // Origine mandata dal client (window.location.origin), validata contro
+    // un elenco di pattern permessi — sostituisce una Application Setting
+    // fissa: funziona da sola su ogni ambiente (URL stabile o una futura PR
+    // di test) senza dover riconfigurare nulla.
+    const base = baseUrlValida(payload && payload.origine);
+    if (!base) {
+      return { status: 400, jsonBody: { error: "Origine della richiesta non riconosciuta." } };
     }
 
     // Generato dal client una sola volta per tentativo di pagamento (stesso
@@ -116,10 +125,6 @@ app.http("create-checkout-session-test", {
     let session;
     try {
       const stripe = getStripe();
-      const base = baseUrl();
-      if (!base) {
-        throw new Error("Manca SITE_BASE_URL_TEST nelle impostazioni della Function.");
-      }
       session = await stripe.checkout.sessions.create({
         mode: "payment",
         line_items: righe.map((r) => ({
