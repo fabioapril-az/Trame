@@ -271,7 +271,9 @@
     window.trameFetch("/api/soci/checkout-session", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ richiestaId: nuovoRichiestaId(), persone: persone })
+      // origine: usata dal backend (validata contro un allowlist) per
+      // costruire il redirect di ritorno da Stripe — campo obbligatorio.
+      body: JSON.stringify({ richiestaId: nuovoRichiestaId(), origine: window.location.origin, persone: persone })
     })
       .then(function (result) {
         window.location.href = result.url;

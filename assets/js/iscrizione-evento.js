@@ -725,6 +725,11 @@
       }
       var payload = {
         richiestaId: nuovoRichiestaId(),
+        // Il backend usa questa origine (validata contro un allowlist) per
+        // costruire il redirect di ritorno da Stripe — niente più dominio
+        // fisso, funziona da sola sia su produzione sia su ogni anteprima
+        // PR. Campo obbligatorio lato server.
+        origine: window.location.origin,
         modalita: modalitaAttiva(),
         persone: persone,
         personeAperitivo: pgCampoAperitivo.hidden ? 0 : parseInt(pgAperitivo.value, 10),
