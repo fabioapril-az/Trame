@@ -298,6 +298,7 @@
 
   function apriModificaEvento(evento) {
     stato.eventoCorrenteId = evento.id;
+    stato.eventoCorrenteTitolo = evento.titolo;
     document.getElementById("mod-ev-titolo").value = evento.titolo;
     impostaContenutoQuill(quillEditors["mod-ev-descrizione"], evento.descrizione);
     impostaContenutoQuill(quillEditors["mod-ev-testo-dettaglio"], evento.testoDettaglio);
@@ -393,13 +394,20 @@
           // nomeIscrizione/cognomeIscrizione: solo per chi si è iscritto al
           // solo evento senza essere socio (il nome di un socio vive già in
           // anagrafica, non viene richiesto di nuovo — vedi iscrizione-evento.js).
-          var nomeCompleto = (i.nomeIscrizione || i.cognomeIscrizione)
+          // Eccezione: la riga "aggiunta aperitivo" (persone extra non
+          // nominali) ha nomeIscrizione valorizzato dal backend con lo
+          // stesso testo di opzionePartecipazioneNome (es. "Aperitivo") solo
+          // come placeholder — non è un nome vero, non va mostrato come tale
+          // (la Modalità già lo indica).
+          var placeholderAperitivo = i.nomeIscrizione && i.nomeIscrizione === i.opzionePartecipazioneNome && !i.cognomeIscrizione;
+          var nomeCompleto = (!placeholderAperitivo && (i.nomeIscrizione || i.cognomeIscrizione))
             ? ((i.nomeIscrizione || "") + " " + (i.cognomeIscrizione || "")).trim()
             : null;
           var emailCella = nomeCompleto
             ? escapeHtml(nomeCompleto) + "<br><small>" + escapeHtml(i.emailIscrizione) + "</small>"
             : escapeHtml(i.emailIscrizione);
           tr.innerHTML =
+            "<td>" + escapeHtml(stato.eventoCorrenteTitolo || "—") + "</td>" +
             "<td>" + emailCella + "</td>" +
             "<td>" + escapeHtml(i.tipoIscrizione) + "</td>" +
             "<td>" + (i.numeroPersone || 1) + "</td>" +
@@ -407,6 +415,7 @@
             "<td>" + escapeHtml(STATO_ISCRIZIONE_LABELS[i.stato] || i.stato) + "</td>" +
             "<td>" + (i.importoPagato != null ? i.importoPagato + " €" : "—") + "</td>" +
             "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[i.metodoPagamento] || i.metodoPagamento || "—") + "</td>" +
+            "<td>" + escapeHtml(i.allergieNote || "—") + "</td>" +
             "<td>" + formattaData(i.dataIscrizione) + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
@@ -463,6 +472,7 @@
   // dall'utente come poco raggiungibile).
   function mostraIscrittiDiretti(evento) {
     stato.eventoCorrenteId = evento.id;
+    stato.eventoCorrenteTitolo = evento.titolo;
     document.getElementById("evento-dettaglio").hidden = true;
     caricaIscritti(evento.id).then(function () {
       document.getElementById("iscritti-tabella").scrollIntoView({ behavior: "smooth", block: "start" });
