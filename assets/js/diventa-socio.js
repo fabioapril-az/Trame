@@ -108,16 +108,26 @@
   btnTabSingolo.addEventListener("click", function () { mostraTab("singolo"); });
   btnTabMultiplo.addEventListener("click", function () { mostraTab("multiplo"); });
 
+  // Esito del ritorno da Stripe: elemento dedicato FUORI da form/
+  // pannello-multiplo (entrambi possono essere nascosti qui sotto — un
+  // messaggio scritto dentro uno dei due sparirebbe con lui).
+  var esitoEl = document.getElementById("pagamento-esito-status");
+  function mostraEsito(messaggio, tipo) {
+    esitoEl.textContent = messaggio;
+    esitoEl.hidden = false;
+    esitoEl.style.color = tipo === "errore" ? "var(--color-terracotta, #b5533c)" : "inherit";
+  }
+
   // Ritorno da Stripe: nessun form, solo l'esito.
   if (pagamentoParam === "confermato") {
     form.hidden = true;
     pannelloMultiplo.hidden = true;
     document.querySelector(".admin-toolbar").hidden = true;
-    mostraStato("Pagamento confermato! Riceverai a breve via email le tessere socio per tutte le persone iscritte.", "successo");
+    mostraEsito("Pagamento confermato! Riceverai a breve via email le tessere socio per tutte le persone iscritte.", "successo");
   } else {
     mostraTab("singolo");
     if (pagamentoParam === "annullato") {
-      mostraStato("Pagamento annullato: puoi riprovare qui sotto.", "errore");
+      mostraEsito("Pagamento annullato: puoi riprovare qui sotto.", "errore");
       mostraTab("multiplo");
     }
   }
