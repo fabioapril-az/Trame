@@ -419,7 +419,15 @@
             "<td>" + formattaData(i.dataIscrizione) + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
-            (i.stato === "confermata" ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>' : "") +
+            (i.stato === "confermata"
+              ? (i.checkoutEventoId
+                // Un solo pagamento Stripe può generare più righe (gruppo,
+                // o singolo+aperitivo): il rimborso è unico sul pagamento,
+                // quindi va applicato a tutte insieme in un click, non riga
+                // per riga (rischio di lasciarne indietro qualcuna).
+                ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa-gruppo">Rimborsa gruppo</button>'
+                : ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>')
+              : "") +
             (i.stato === "in_attesa_pagamento_manuale" ? ' <button type="button" class="btn btn--primary btn--small" data-action="conferma-manuale">Conferma pagamento ricevuto</button>' : "") +
             '</td>';
           tr.querySelector('[data-action="annulla"]').addEventListener("click", function () { annullaIscrizione(i.id); });
@@ -427,6 +435,10 @@
           var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
           if (btnRimborsa) {
             btnRimborsa.addEventListener("click", function () { segnaIscrizioneRimborsata(i.id); });
+          }
+          var btnRimborsaGruppo = tr.querySelector('[data-action="rimborsa-gruppo"]');
+          if (btnRimborsaGruppo) {
+            btnRimborsaGruppo.addEventListener("click", function () { segnaGruppoRimborsato(i.checkoutEventoId); });
           }
           var btnConfermaManuale = tr.querySelector('[data-action="conferma-manuale"]');
           if (btnConfermaManuale) {
@@ -442,11 +454,26 @@
   // Il rimborso vero si fa dal Dashboard Stripe (payment_intent_id non
   // mostrato qui ma disponibile lato backend): questa azione registra solo
   // che è avvenuto, nessun automatismo — stesso pattern validato in Fase 1.
+  // Usata solo per iscrizioni senza checkoutEventoId (non-Stripe, es. vecchio
+  // wizard o pagamento manuale): per quelle Stripe vedi segnaGruppoRimborsato.
   function segnaIscrizioneRimborsata(iscrizioneId) {
     if (!window.confirm("Segnare questa iscrizione come rimborsata? Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
       return;
     }
     apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId + "/rimborsato", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Un checkout Stripe (Gruppo, o Singolo+Aperitivo) genera più righe
+  // collegate dallo stesso checkoutEventoId: il rimborso vero è unico sul
+  // pagamento, quindi questa azione segna TUTTE le righe ancora "confermata"
+  // di quel checkout in una sola chiamata (il backend fa la transazione).
+  function segnaGruppoRimborsato(checkoutEventoId) {
+    if (!window.confirm("Segnare come rimborsato l'intero gruppo collegato a questo pagamento? Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/checkout/" + checkoutEventoId + "/rimborsato", { method: "POST" })
       .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
