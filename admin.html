@@ -123,8 +123,13 @@
                 <option value="viaggi">Viaggi</option>
               </select>
             </div>
+            <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
             <div class="form-row"><label for="ev-quota">Quota evento (€, facoltativa)</label><input type="number" id="ev-quota" min="0" step="0.01"></div>
-            <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
+            <div class="form-row">
+              <label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label>
+              <input type="number" id="ev-quota-iscrizione" min="0" step="0.01">
+              <p class="form-note">Se la Quota evento sopra include già il costo della tessera associativa, indica qui quanto ne rappresenta (es. evento che include l'iscrizione all'associazione). Campo solo informativo qui in admin: non è ancora mostrato sul sito pubblico.</p>
+            </div>
             <div class="form-row">
               <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
               <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti sia Singolo sia Gruppo, chi si iscrive sceglie tra i due; se ne imposti solo uno, si usa direttamente quello. L'aperitivo è sempre in aggiunta, mai scontato.</p>
@@ -138,6 +143,7 @@
               <div id="ev-opzioni-lista"></div>
               <button type="button" class="btn btn--outline btn--small" id="ev-opzioni-aggiungi">+ Aggiungi modalità</button>
             </div>
+            <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
             <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
             <div class="form-row"><label for="ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="ev-scadenza-iscrizione"></div>
             <div class="form-row"><label for="ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="ev-instagram" placeholder="https://instagram.com/..."></div>
@@ -214,8 +220,13 @@
                   <option value="viaggi">Viaggi</option>
                 </select>
               </div>
+              <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
               <div class="form-row"><label for="mod-ev-quota">Quota evento (€)</label><input type="number" id="mod-ev-quota" min="0" step="0.01"></div>
-              <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
+              <div class="form-row">
+                <label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label>
+                <input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01">
+                <p class="form-note">Se la Quota evento sopra include già il costo della tessera associativa, indica qui quanto ne rappresenta (es. evento che include l'iscrizione all'associazione). Campo solo informativo qui in admin: non è ancora mostrato sul sito pubblico.</p>
+              </div>
               <div class="form-row">
                 <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
                 <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti sia Singolo sia Gruppo, chi si iscrive sceglie tra i due; se ne imposti solo uno, si usa direttamente quello. L'aperitivo è sempre in aggiunta, mai scontato.</p>
@@ -229,6 +240,7 @@
                 <div id="mod-ev-opzioni-lista"></div>
                 <button type="button" class="btn btn--outline btn--small" id="mod-ev-opzioni-aggiungi">+ Aggiungi modalità</button>
               </div>
+              <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
               <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
               <div class="form-row"><label for="mod-ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="mod-ev-scadenza-iscrizione"></div>
               <div class="form-row"><label for="mod-ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="mod-ev-instagram" placeholder="https://instagram.com/..."></div>
