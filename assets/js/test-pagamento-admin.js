@@ -16,11 +16,11 @@
   var righeCorrenti = [];
   var chiaveUsataPerCaricare = null;
 
-  // Paginazione lato client (15 alla volta): con molte righe, scorrere a
+  // Paginazione lato client (10 alla volta): con molte righe, scorrere a
   // destra per vedere colonna/azioni obbligava a scendere fino in fondo
   // alla tabella, spostarsi a destra e poi risalire per il primo risultato
   // (segnalato dall'utente in test) — pagine più corte evitano il problema.
-  var DIMENSIONE_PAGINA = 15;
+  var DIMENSIONE_PAGINA = 10;
   var paginaCorrente = 1;
 
   function persone(record) {
@@ -114,7 +114,7 @@
 
   // Filtra per nome/cognome/email (case-insensitive, sottostringa) sulle
   // righe già in memoria — nessuna nuova chiamata all'API — poi mostra solo
-  // la pagina corrente (15 alla volta).
+  // la pagina corrente (10 alla volta).
   function renderizzaElenco() {
     var filtro = inputCerca.value.trim().toLowerCase();
     var righeFiltrate = !filtro ? righeCorrenti : righeCorrenti.filter(function (r) {
