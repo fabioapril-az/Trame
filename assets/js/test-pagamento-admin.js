@@ -16,6 +16,13 @@
   var righeCorrenti = [];
   var chiaveUsataPerCaricare = null;
 
+  // Paginazione lato client (15 alla volta): con molte righe, scorrere a
+  // destra per vedere colonna/azioni obbligava a scendere fino in fondo
+  // alla tabella, spostarsi a destra e poi risalire per il primo risultato
+  // (segnalato dall'utente in test) — pagine più corte evitano il problema.
+  var DIMENSIONE_PAGINA = 15;
+  var paginaCorrente = 1;
+
   function persone(record) {
     return (record.dati && Array.isArray(record.dati.persone)) ? record.dati.persone : [];
   }
@@ -99,23 +106,36 @@
         statusEl.hidden = true;
         righeCorrenti = righe;
         chiaveUsataPerCaricare = chiave;
+        paginaCorrente = 1;
         renderizzaElenco();
       })
       .catch(function (err) { mostraStatus(err.message, true); });
   }
 
   // Filtra per nome/cognome/email (case-insensitive, sottostringa) sulle
-  // righe già in memoria — nessuna nuova chiamata all'API.
+  // righe già in memoria — nessuna nuova chiamata all'API — poi mostra solo
+  // la pagina corrente (15 alla volta).
   function renderizzaElenco() {
     var filtro = inputCerca.value.trim().toLowerCase();
-    var righe = !filtro ? righeCorrenti : righeCorrenti.filter(function (r) {
+    var righeFiltrate = !filtro ? righeCorrenti : righeCorrenti.filter(function (r) {
       return persone(r).some(function (p) {
         return ((p.nome || "") + " " + (p.cognome || "") + " " + (p.email || "")).toLowerCase().indexOf(filtro) !== -1;
       });
     });
 
+    var totalePagine = Math.max(1, Math.ceil(righeFiltrate.length / DIMENSIONE_PAGINA));
+    if (paginaCorrente > totalePagine) {
+      paginaCorrente = totalePagine;
+    }
+    var inizio = (paginaCorrente - 1) * DIMENSIONE_PAGINA;
+    var righe = righeFiltrate.slice(inizio, inizio + DIMENSIONE_PAGINA);
+
     tbody.innerHTML = "";
-    emptyEl.hidden = righe.length > 0;
+    emptyEl.hidden = righeFiltrate.length > 0;
+    document.getElementById("pagina-label").textContent =
+      "Pagina " + paginaCorrente + " di " + totalePagine + " (" + righeFiltrate.length + " risultati)";
+    document.getElementById("btn-pagina-prec").disabled = paginaCorrente <= 1;
+    document.getElementById("btn-pagina-succ").disabled = paginaCorrente >= totalePagine;
     righe.forEach(function (r) {
       var tr = document.createElement("tr");
       tr.innerHTML =
@@ -143,7 +163,9 @@
     });
   }
 
-  inputCerca.addEventListener("input", renderizzaElenco);
+  inputCerca.addEventListener("input", function () { paginaCorrente = 1; renderizzaElenco(); });
+  document.getElementById("btn-pagina-prec").addEventListener("click", function () { paginaCorrente--; renderizzaElenco(); });
+  document.getElementById("btn-pagina-succ").addEventListener("click", function () { paginaCorrente++; renderizzaElenco(); });
 
   function segnaRimborsato(record, chiave) {
     if (!window.confirm("Segnare come rimborsata l'iscrizione " + record.iscrizioneId + "? " +
