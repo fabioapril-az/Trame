@@ -607,6 +607,14 @@
     var pgStatus = document.getElementById("pg-status");
     var pgBtnPaga = document.getElementById("pg-btn-paga");
 
+    // Assente sugli eventi creati prima di questo campo: di default attivo
+    // (comportamento di sempre). Se disattivato dall'admin (es. Stripe
+    // temporaneamente sospeso per questo evento), il bottone non promette
+    // un pagamento online: registra e basta, si paga a parte.
+    var pagamentoOnlineAttivo = evento.pagamentoOnlineAttivo !== false;
+    var testoBtnPaga = pagamentoOnlineAttivo ? "Vai al pagamento" : "Invia iscrizione";
+    pgBtnPaga.textContent = testoBtnPaga;
+
     function popolaSelectNumerico(select, min, max) {
       select.innerHTML = "";
       for (var n = min; n <= max; n++) {
@@ -722,20 +730,29 @@
         personeAperitivo: pgCampoAperitivo.hidden ? 0 : parseInt(pgAperitivo.value, 10),
         allergieNote: pgCampoAllergie.hidden ? null : pgAllergie.value.trim()
       };
-      var testoOriginale = pgBtnPaga.textContent;
       pgBtnPaga.disabled = true;
-      pgBtnPaga.textContent = "Reindirizzamento a Stripe…";
+      pgBtnPaga.textContent = pagamentoOnlineAttivo ? "Reindirizzamento a Stripe…" : "Invio in corso…";
       window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       })
         .then(function (result) {
-          window.location.href = result.url;
+          if (result && result.url) {
+            window.location.href = result.url;
+            return;
+          }
+          // Pagamento online disattivato per questo evento: nessun redirect,
+          // l'iscrizione è già registrata (stato "in attesa di pagamento
+          // manuale") — il pagamento va raccolto a parte.
+          document.getElementById("wizard-pagamento").hidden = true;
+          esitoEl.hidden = false;
+          esitoEl.innerHTML = "<h3>Iscrizione registrata!</h3>" +
+            "<p>Il pagamento online non è attivo per questo evento: ti contatteremo a breve per completare il pagamento.</p>";
         })
         .catch(function (err) {
           pgBtnPaga.disabled = false;
-          pgBtnPaga.textContent = testoOriginale;
+          pgBtnPaga.textContent = testoBtnPaga;
           pgStatus.textContent = err.message;
           pgStatus.hidden = false;
         });

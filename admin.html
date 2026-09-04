@@ -137,6 +137,9 @@
               <div class="form-row"><label for="ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="ev-prezzo-singolo" min="0" step="0.01"></div>
               <div class="form-row"><label for="ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="ev-prezzo-gruppo" min="0" step="0.01"></div>
               <div class="form-row"><label for="ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="ev-prezzo-aperitivo" min="0" step="0.01"></div>
+              <div class="form-row form-row--checkbox">
+                <label><input type="checkbox" id="ev-pagamento-online-attivo" checked> Pagamento online attivo (se disattivato, il form pubblico registra l'iscrizione senza passare da Stripe: il pagamento va raccolto a parte, es. PayPal diretto)</label>
+              </div>
             </div>
             <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
             <div class="form-row"><label for="ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="ev-scadenza-iscrizione"></div>
@@ -225,6 +228,9 @@
                 <div class="form-row"><label for="mod-ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="mod-ev-prezzo-singolo" min="0" step="0.01"></div>
                 <div class="form-row"><label for="mod-ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="mod-ev-prezzo-gruppo" min="0" step="0.01"></div>
                 <div class="form-row"><label for="mod-ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="mod-ev-prezzo-aperitivo" min="0" step="0.01"></div>
+                <div class="form-row form-row--checkbox">
+                  <label><input type="checkbox" id="mod-ev-pagamento-online-attivo" checked> Pagamento online attivo (se disattivato, il form pubblico registra l'iscrizione senza passare da Stripe: il pagamento va raccolto a parte, es. PayPal diretto)</label>
+                </div>
               </div>
               <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
               <div class="form-row"><label for="mod-ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="mod-ev-scadenza-iscrizione"></div>

@@ -198,7 +198,8 @@
       opzioniPartecipazione: leggiOpzioni(prefix + "opzioni-lista"),
       prezzoSingolo: prezzoSingolo ? parseFloat(prezzoSingolo) : null,
       prezzoGruppoPersona: prezzoGruppo ? parseFloat(prezzoGruppo) : null,
-      prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null
+      prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null,
+      pagamentoOnlineAttivo: document.getElementById(prefix + "pagamento-online-attivo").checked
     };
   }
 
@@ -317,6 +318,9 @@
     document.getElementById("mod-ev-prezzo-singolo").value = evento.prezzoSingolo != null ? evento.prezzoSingolo : "";
     document.getElementById("mod-ev-prezzo-gruppo").value = evento.prezzoGruppoPersona != null ? evento.prezzoGruppoPersona : "";
     document.getElementById("mod-ev-prezzo-aperitivo").value = evento.prezzoAperitivoPersona != null ? evento.prezzoAperitivoPersona : "";
+    // Assente sugli eventi creati prima di questo campo: di default attivo,
+    // coerente con "prima non esisteva l'alternativa, Stripe era l'unica via".
+    document.getElementById("mod-ev-pagamento-online-attivo").checked = evento.pagamentoOnlineAttivo !== false;
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax
       ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
@@ -371,7 +375,8 @@
 
   var STATO_ISCRIZIONE_LABELS = {
     confermata: "Confermata", in_attesa: "In attesa pagamento", annullata: "Annullata",
-    rimborso_richiesto: "Rimborso richiesto", rimborsato: "Rimborsato"
+    rimborso_richiesto: "Rimborso richiesto", rimborsato: "Rimborsato",
+    in_attesa_pagamento_manuale: "In attesa pagamento manuale"
   };
   var METODO_PAGAMENTO_LABELS = {
     card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
@@ -406,12 +411,17 @@
             '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
             (i.stato === "confermata" ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>' : "") +
+            (i.stato === "in_attesa_pagamento_manuale" ? ' <button type="button" class="btn btn--primary btn--small" data-action="conferma-manuale">Conferma pagamento ricevuto</button>' : "") +
             '</td>';
           tr.querySelector('[data-action="annulla"]').addEventListener("click", function () { annullaIscrizione(i.id); });
           tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaIscrizione(i.id); });
           var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
           if (btnRimborsa) {
             btnRimborsa.addEventListener("click", function () { segnaIscrizioneRimborsata(i.id); });
+          }
+          var btnConfermaManuale = tr.querySelector('[data-action="conferma-manuale"]');
+          if (btnConfermaManuale) {
+            btnConfermaManuale.addEventListener("click", function () { confermaPagamentoManuale(i.id); });
           }
           tbody.appendChild(tr);
         });
@@ -428,6 +438,18 @@
       return;
     }
     apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId + "/rimborsato", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Evento con "Pagamento online" disattivato (vedi checkbox in Modifica
+  // evento): l'iscritto risulta "in attesa pagamento manuale" finché la
+  // segreteria non incassa a parte (es. PayPal diretto) e conferma qui.
+  function confermaPagamentoManuale(iscrizioneId) {
+    if (!window.confirm("Confermare che il pagamento per questa iscrizione è stato ricevuto?")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId + "/conferma-pagamento-manuale", { method: "POST" })
       .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
