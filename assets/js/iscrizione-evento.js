@@ -36,6 +36,7 @@
 
   var inputEmail = document.getElementById("input-email");
   var eventoNonSociNota = document.getElementById("evento-non-soci-nota");
+  var wizardCondizioniCancellazione = document.getElementById("wizard-condizioni-cancellazione");
   var btnConfermaSoloEvento = document.getElementById("btn-conferma-solo-evento");
   var btnAssociati = document.getElementById("btn-associati");
   var verificaStatus = document.getElementById("verifica-status");
@@ -108,6 +109,13 @@
         // Senza "Conferma" (solo evento) come alternativa, "anche" non ha
         // senso: qui è l'unica azione possibile per chi non è socio.
         btnAssociati.textContent = "Voglio iscrivermi all'associazione";
+      }
+      // Testo libero facoltativo impostato in admin: mostrato qui (vecchio
+      // wizard) indipendentemente dalla modalità scelta più sotto — per il
+      // nuovo wizard con pagamento Stripe vedi inizializzaWizardPagamento.
+      if (evento.condizioniCancellazione) {
+        wizardCondizioniCancellazione.textContent = "Condizioni di cancellazione: " + evento.condizioniCancellazione;
+        wizardCondizioniCancellazione.hidden = false;
       }
       var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
       if (evento.quotaEvento) {
@@ -606,6 +614,15 @@
     var pgTotale = document.getElementById("pg-totale");
     var pgStatus = document.getElementById("pg-status");
     var pgBtnPaga = document.getElementById("pg-btn-paga");
+
+    // Testo libero facoltativo impostato in admin: mostrato prima di pagare,
+    // non sulla scheda pubblica dell'evento (segnalato dall'utente come
+    // informazione mancante).
+    var pgCondizioniCancellazione = document.getElementById("pg-condizioni-cancellazione");
+    if (evento.condizioniCancellazione) {
+      pgCondizioniCancellazione.textContent = "Condizioni di cancellazione: " + evento.condizioniCancellazione;
+      pgCondizioniCancellazione.hidden = false;
+    }
 
     // Assente sugli eventi creati prima di questo campo: di default attivo
     // (comportamento di sempre). Se disattivato dall'admin (es. Stripe
