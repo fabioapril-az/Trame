@@ -126,6 +126,17 @@
   var btnTabMultiplo = document.getElementById("btn-tab-multiplo");
   var pannelloMultiplo = document.getElementById("pannello-multiplo");
 
+  // "Iscrizione minorenne" nascosta al pubblico per ora (richiesta
+  // dell'utente): resta raggiungibile solo dalla segreteria (?admin=1). Con
+  // una sola scelta visibile non ha senso mostrare il toggle delle tab.
+  if (!modalitaAdmin) {
+    document.querySelector(".admin-toolbar").hidden = true;
+  } else {
+    // Solo per la segreteria la tab esiste ancora: la nota può rimandarci.
+    document.getElementById("mt-nota-minorenni").innerHTML =
+      "Non adatta a chi è minorenne: usa \"Iscrizione minorenne\" qui sopra per quella persona.";
+  }
+
   function mostraTab(tab) {
     form.hidden = tab !== "singolo";
     pannelloMultiplo.hidden = tab !== "multiplo";
@@ -210,7 +221,8 @@
           return null;
         }
         if (campi.dataNascita.value && calcolaEta(campi.dataNascita.value) < 18) {
-          mtStatus.textContent = "La persona " + (i + 1) + " risulta minorenne: questo pagamento multiplo non la supporta, usa \"Iscrizione minorenne\" qui sopra per lei.";
+          mtStatus.textContent = "La persona " + (i + 1) + " risulta minorenne: questo pagamento multiplo non la supporta" +
+            (modalitaAdmin ? ", usa \"Iscrizione minorenne\" qui sopra per lei." : ": contattaci per quella persona.");
           mtStatus.hidden = false;
           return null;
         }
