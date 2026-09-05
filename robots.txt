@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /admin-soci.html
+Disallow: /admin-pagamenti.html
+Disallow: /test-pagamento.html
+Disallow: /test-pagamento-ok.html
+Disallow: /test-pagamento-admin.html
