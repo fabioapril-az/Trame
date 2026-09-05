@@ -153,6 +153,11 @@
 
   document.getElementById("btn-crea-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("ev-");
+    if (opzioniEPrezziIncompatibili(payload)) {
+      mostraMessaggio(document.getElementById("crea-evento-status"),
+        "Non puoi usare insieme \"Modalità di partecipazione\" e i prezzi Singolo/Gruppo/Aperitivo: scegline uno dei due.", true);
+      return;
+    }
     apiFetchAuth("/api/eventi", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -169,6 +174,9 @@
     var quota = document.getElementById(prefix + "quota").value;
     var quotaIscrizione = document.getElementById(prefix + "quota-iscrizione").value;
     var posti = document.getElementById(prefix + "posti").value;
+    var prezzoSingolo = document.getElementById(prefix + "prezzo-singolo").value;
+    var prezzoGruppo = document.getElementById(prefix + "prezzo-gruppo").value;
+    var prezzoAperitivo = document.getElementById(prefix + "prezzo-aperitivo").value;
     return {
       titolo: document.getElementById(prefix + "titolo").value.trim(),
       descrizione: contenutoQuill(quillEditors[prefix + "descrizione"]),
@@ -187,8 +195,22 @@
       stato: document.getElementById(prefix + "stato").value,
       apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked,
       dettagliAttivi: document.getElementById(prefix + "dettagli-attivi").checked,
-      opzioniPartecipazione: leggiOpzioni(prefix + "opzioni-lista")
+      opzioniPartecipazione: leggiOpzioni(prefix + "opzioni-lista"),
+      prezzoSingolo: prezzoSingolo ? parseFloat(prezzoSingolo) : null,
+      prezzoGruppoPersona: prezzoGruppo ? parseFloat(prezzoGruppo) : null,
+      prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null,
+      pagamentoOnlineAttivo: document.getElementById(prefix + "pagamento-online-attivo").checked
     };
+  }
+
+  // "Modalità di partecipazione" e i 3 prezzi Singolo/Gruppo/Aperitivo sono
+  // alternativi (l'API .NET rifiuta con 422 se entrambi sono impostati sullo
+  // stesso evento) — controllato qui prima di inviare, per un messaggio
+  // chiaro invece del solo errore grezzo del backend.
+  function opzioniEPrezziIncompatibili(payload) {
+    var haOpzioni = payload.opzioniPartecipazione && payload.opzioniPartecipazione.length > 0;
+    var haPrezzi = payload.prezzoSingolo != null || payload.prezzoGruppoPersona != null || payload.prezzoAperitivoPersona != null;
+    return haOpzioni && haPrezzi;
   }
 
   // --- Modalità di partecipazione (facoltative, per evento) ---
@@ -276,6 +298,7 @@
 
   function apriModificaEvento(evento) {
     stato.eventoCorrenteId = evento.id;
+    stato.eventoCorrenteTitolo = evento.titolo;
     document.getElementById("mod-ev-titolo").value = evento.titolo;
     impostaContenutoQuill(quillEditors["mod-ev-descrizione"], evento.descrizione);
     impostaContenutoQuill(quillEditors["mod-ev-testo-dettaglio"], evento.testoDettaglio);
@@ -293,6 +316,12 @@
     document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
     document.getElementById("mod-ev-dettagli-attivi").checked = Boolean(evento.dettagliAttivi);
     impostaOpzioni("mod-ev-opzioni-lista", evento.opzioniPartecipazione);
+    document.getElementById("mod-ev-prezzo-singolo").value = evento.prezzoSingolo != null ? evento.prezzoSingolo : "";
+    document.getElementById("mod-ev-prezzo-gruppo").value = evento.prezzoGruppoPersona != null ? evento.prezzoGruppoPersona : "";
+    document.getElementById("mod-ev-prezzo-aperitivo").value = evento.prezzoAperitivoPersona != null ? evento.prezzoAperitivoPersona : "";
+    // Assente sugli eventi creati prima di questo campo: di default attivo,
+    // coerente con "prima non esisteva l'alternativa, Stripe era l'unica via".
+    document.getElementById("mod-ev-pagamento-online-attivo").checked = evento.pagamentoOnlineAttivo !== false;
     document.getElementById("mod-ev-stato").value = evento.stato;
     document.getElementById("evento-posti-info").textContent = evento.postiMax
       ? "Posti disponibili: " + evento.postiDisponibili + " / " + evento.postiMax
@@ -328,6 +357,11 @@
 
   document.getElementById("btn-salva-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("mod-ev-");
+    if (opzioniEPrezziIncompatibili(payload)) {
+      mostraMessaggio(document.getElementById("modifica-evento-status"),
+        "Non puoi usare insieme \"Modalità di partecipazione\" e i prezzi Singolo/Gruppo/Aperitivo: scegline uno dei due.", true);
+      return;
+    }
     apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -340,6 +374,16 @@
       .catch(function (err) { mostraMessaggio(document.getElementById("modifica-evento-status"), err.message, true); });
   });
 
+  var STATO_ISCRIZIONE_LABELS = {
+    confermata: "Confermata", in_attesa: "In attesa pagamento", annullata: "Annullata",
+    rimborso_richiesto: "Rimborso richiesto", rimborsato: "Rimborsato",
+    in_attesa_pagamento_manuale: "In attesa pagamento manuale"
+  };
+  var METODO_PAGAMENTO_LABELS = {
+    card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
+    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay"
+  };
+
   function caricaIscritti(eventoId) {
     return apiFetchAuth("/api/eventi/" + eventoId + "/iscritti")
       .then(function (iscritti) {
@@ -350,28 +394,99 @@
           // nomeIscrizione/cognomeIscrizione: solo per chi si è iscritto al
           // solo evento senza essere socio (il nome di un socio vive già in
           // anagrafica, non viene richiesto di nuovo — vedi iscrizione-evento.js).
-          var nomeCompleto = (i.nomeIscrizione || i.cognomeIscrizione)
+          // Eccezione: la riga "aggiunta aperitivo" (persone extra non
+          // nominali) ha nomeIscrizione valorizzato dal backend con lo
+          // stesso testo di opzionePartecipazioneNome (es. "Aperitivo") solo
+          // come placeholder — non è un nome vero, non va mostrato come tale
+          // (la Modalità già lo indica).
+          var placeholderAperitivo = i.nomeIscrizione && i.nomeIscrizione === i.opzionePartecipazioneNome && !i.cognomeIscrizione;
+          var nomeCompleto = (!placeholderAperitivo && (i.nomeIscrizione || i.cognomeIscrizione))
             ? ((i.nomeIscrizione || "") + " " + (i.cognomeIscrizione || "")).trim()
             : null;
           var emailCella = nomeCompleto
             ? escapeHtml(nomeCompleto) + "<br><small>" + escapeHtml(i.emailIscrizione) + "</small>"
             : escapeHtml(i.emailIscrizione);
           tr.innerHTML =
+            "<td>" + escapeHtml(stato.eventoCorrenteTitolo || "—") + "</td>" +
             "<td>" + emailCella + "</td>" +
             "<td>" + escapeHtml(i.tipoIscrizione) + "</td>" +
             "<td>" + (i.numeroPersone || 1) + "</td>" +
             "<td>" + escapeHtml(i.opzionePartecipazioneNome || "—") + "</td>" +
-            "<td>" + escapeHtml(i.stato) + "</td>" +
+            "<td>" + escapeHtml(STATO_ISCRIZIONE_LABELS[i.stato] || i.stato) + "</td>" +
             "<td>" + (i.importoPagato != null ? i.importoPagato + " €" : "—") + "</td>" +
+            "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[i.metodoPagamento] || i.metodoPagamento || "—") + "</td>" +
+            "<td>" + escapeHtml(i.allergieNote || "—") + "</td>" +
             "<td>" + formattaData(i.dataIscrizione) + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
-            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button></td>';
+            '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
+            (i.stato === "confermata"
+              ? (i.checkoutEventoId
+                // Un solo pagamento Stripe può generare più righe (gruppo,
+                // o singolo+aperitivo): il rimborso è unico sul pagamento,
+                // quindi va applicato a tutte insieme in un click, non riga
+                // per riga (rischio di lasciarne indietro qualcuna).
+                ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa-gruppo">Rimborsa gruppo</button>'
+                : ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>')
+              : "") +
+            (i.stato === "in_attesa_pagamento_manuale" ? ' <button type="button" class="btn btn--primary btn--small" data-action="conferma-manuale">Conferma pagamento ricevuto</button>' : "") +
+            '</td>';
           tr.querySelector('[data-action="annulla"]').addEventListener("click", function () { annullaIscrizione(i.id); });
           tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaIscrizione(i.id); });
+          var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
+          if (btnRimborsa) {
+            btnRimborsa.addEventListener("click", function () { segnaIscrizioneRimborsata(i.id); });
+          }
+          var btnRimborsaGruppo = tr.querySelector('[data-action="rimborsa-gruppo"]');
+          if (btnRimborsaGruppo) {
+            btnRimborsaGruppo.addEventListener("click", function () { segnaGruppoRimborsato(i.checkoutEventoId); });
+          }
+          var btnConfermaManuale = tr.querySelector('[data-action="conferma-manuale"]');
+          if (btnConfermaManuale) {
+            btnConfermaManuale.addEventListener("click", function () { confermaPagamentoManuale(i.id); });
+          }
           tbody.appendChild(tr);
         });
         document.getElementById("iscritti-tabella").hidden = false;
       })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Il rimborso vero si fa dal Dashboard Stripe (payment_intent_id non
+  // mostrato qui ma disponibile lato backend): questa azione registra solo
+  // che è avvenuto, nessun automatismo — stesso pattern validato in Fase 1.
+  // Usata solo per iscrizioni senza checkoutEventoId (non-Stripe, es. vecchio
+  // wizard o pagamento manuale): per quelle Stripe vedi segnaGruppoRimborsato.
+  function segnaIscrizioneRimborsata(iscrizioneId) {
+    if (!window.confirm("Segnare questa iscrizione come rimborsata? Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId + "/rimborsato", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Un checkout Stripe (Gruppo, o Singolo+Aperitivo) genera più righe
+  // collegate dallo stesso checkoutEventoId: il rimborso vero è unico sul
+  // pagamento, quindi questa azione segna TUTTE le righe ancora "confermata"
+  // di quel checkout in una sola chiamata (il backend fa la transazione).
+  function segnaGruppoRimborsato(checkoutEventoId) {
+    if (!window.confirm("Segnare come rimborsato l'intero gruppo collegato a questo pagamento? Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/checkout/" + checkoutEventoId + "/rimborsato", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Evento con "Pagamento online" disattivato (vedi checkbox in Modifica
+  // evento): l'iscritto risulta "in attesa pagamento manuale" finché la
+  // segreteria non incassa a parte (es. PayPal diretto) e conferma qui.
+  function confermaPagamentoManuale(iscrizioneId) {
+    if (!window.confirm("Confermare che il pagamento per questa iscrizione è stato ricevuto?")) {
+      return;
+    }
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + iscrizioneId + "/conferma-pagamento-manuale", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
 
@@ -384,6 +499,7 @@
   // dall'utente come poco raggiungibile).
   function mostraIscrittiDiretti(evento) {
     stato.eventoCorrenteId = evento.id;
+    stato.eventoCorrenteTitolo = evento.titolo;
     document.getElementById("evento-dettaglio").hidden = true;
     caricaIscritti(evento.id).then(function () {
       document.getElementById("iscritti-tabella").scrollIntoView({ behavior: "smooth", block: "start" });

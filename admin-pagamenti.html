@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagamenti — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container admin-header">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">pagamenti</span>
+        </span>
+      </a>
+      <div class="admin-header__user">
+        <span id="auth-user-label">Non collegato</span>
+        <button type="button" class="btn btn--primary btn--small" id="btn-login">Accedi</button>
+        <button type="button" class="btn btn--outline btn--small" id="btn-logout" hidden>Esci</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Area riservata</span>
+        <h1>Pagamenti</h1>
+        <p class="page-hero__subtitle">Tutti i pagamenti — iscrizioni evento e tessere/rinnovi — in un unico elenco,
+          filtrabile per mese, anno ed evento. Riservato a Segretario, Presidente, Vicepresidente/Tesoriere e Admin.</p>
+        <p class="page-hero__subtitle">
+          <a href="admin.html">vai a Impostazioni ed eventi →</a> ·
+          <a href="admin-soci.html">vai a Libro Soci →</a>
+        </p>
+      </div>
+    </section>
+
+    <div class="container">
+      <p class="form-note" id="auth-gate-note">Accedi con il tuo account Microsoft per continuare.</p>
+    </div>
+
+    <div id="area-riservata" hidden>
+      <section class="section">
+        <div class="container">
+          <div class="section__head" style="text-align:left; margin:0 0 30px;">
+            <span class="section__eyebrow">Elenco</span>
+            <h2 class="section__title">Tutti i pagamenti</h2>
+          </div>
+
+          <div class="admin-toolbar">
+            <select id="pag-filtro-tipo">
+              <option value="">Eventi + Tessere</option>
+              <option value="evento">Solo eventi</option>
+              <option value="tessera">Solo tessere</option>
+            </select>
+            <select id="pag-filtro-evento">
+              <option value="">Tutti gli eventi</option>
+            </select>
+            <select id="pag-filtro-mese">
+              <option value="">Tutti i mesi</option>
+              <option value="1">Gennaio</option>
+              <option value="2">Febbraio</option>
+              <option value="3">Marzo</option>
+              <option value="4">Aprile</option>
+              <option value="5">Maggio</option>
+              <option value="6">Giugno</option>
+              <option value="7">Luglio</option>
+              <option value="8">Agosto</option>
+              <option value="9">Settembre</option>
+              <option value="10">Ottobre</option>
+              <option value="11">Novembre</option>
+              <option value="12">Dicembre</option>
+            </select>
+            <input type="number" id="pag-filtro-anno" placeholder="Anno (es. 2026)" style="width:140px;">
+            <button type="button" class="btn btn--outline btn--small" id="btn-cerca-pagamenti">Filtra</button>
+            <button type="button" class="btn btn--outline btn--small" id="btn-reset-pagamenti">Azzera filtri</button>
+          </div>
+
+          <div style="overflow-x:auto;">
+            <table class="admin-table" id="pagamenti-tabella">
+              <thead>
+                <tr>
+                  <th>Tipo</th><th>Riferimento</th><th>Nome</th><th>Email</th><th>Persone</th>
+                  <th>Modalità</th><th>Stato</th><th>Importo</th><th>Metodo</th><th>Allergie</th><th>Data</th>
+                </tr>
+              </thead>
+              <tbody id="pagamenti-tabella-body"></tbody>
+            </table>
+          </div>
+          <p class="form-note" id="pagamenti-empty" hidden>Nessun pagamento trovato per questi filtri.</p>
+          <div class="admin-toolbar" id="pagamenti-paginazione">
+            <button type="button" class="btn btn--outline btn--small" id="btn-pagina-prec">← Precedente</button>
+            <span id="pagamenti-pagina-label"></span>
+            <button type="button" class="btn btn--outline btn--small" id="btn-pagina-succ">Successiva →</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@5.19.0/lib/msal-browser.min.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/msal-auth.js"></script>
+  <script src="assets/js/admin-pagamenti.js"></script>
+</body>
+</html>

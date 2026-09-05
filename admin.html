@@ -40,6 +40,8 @@
         <p class="page-hero__subtitle">Per il Libro Soci, tessere e rinnovi:
           <a href="admin-soci.html">vai a Gestione soci →</a> (richiede un accesso separato, riservato a
           Segretario/Presidente/Tesoriere/Admin).</p>
+        <p class="page-hero__subtitle">Per vedere tutti i pagamenti (eventi + tessere) in un unico elenco filtrabile:
+          <a href="admin-pagamenti.html">vai a Pagamenti →</a></p>
         <p class="form-note" id="admin-auth-gate-note">Accedi con il tuo account Microsoft (ruolo Presidente/Admin) per gestire impostazioni ed eventi.</p>
       </div>
     </section>
@@ -123,22 +125,32 @@
                 <option value="viaggi">Viaggi</option>
               </select>
             </div>
+            <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
             <div class="form-row"><label for="ev-quota">Quota evento (€, facoltativa)</label><input type="number" id="ev-quota" min="0" step="0.01"></div>
-            <div class="form-row"><label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label><input type="number" id="ev-quota-iscrizione" min="0" step="0.01"></div>
+            <div class="form-row">
+              <label for="ev-quota-iscrizione">Quota iscrizione associativa inclusa (€, facoltativa)</label>
+              <input type="number" id="ev-quota-iscrizione" min="0" step="0.01">
+              <p class="form-note">Se la Quota evento sopra include già il costo della tessera associativa, indica qui quanto ne rappresenta (es. evento che include l'iscrizione all'associazione). Campo solo informativo qui in admin: non è ancora mostrato sul sito pubblico.</p>
+            </div>
+            <div class="form-row">
+              <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
+              <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti sia Singolo sia Gruppo, chi si iscrive sceglie tra i due; se ne imposti solo uno, si usa direttamente quello. L'aperitivo è sempre in aggiunta, mai scontato.</p>
+              <div class="form-row"><label for="ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="ev-prezzo-singolo" min="0" step="0.01"></div>
+              <div class="form-row"><label for="ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="ev-prezzo-gruppo" min="0" step="0.01"></div>
+              <div class="form-row"><label for="ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="ev-prezzo-aperitivo" min="0" step="0.01"></div>
+            </div>
             <div class="form-row">
               <label>Modalità di partecipazione (facoltative)</label>
-              <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non aggiungi nessuna modalità, l'evento resta a quota unica come sopra.</p>
+              <p class="form-note">Usa questa sezione <strong>solo se i 3 prezzi qui sopra non bastano</strong> (es. più di due modi di partecipare a prezzi diversi). Più opzioni a scelta singola con prezzo a persona, nessuno sconto per chi si iscrive in più persone, nessun pagamento online — è il sistema più vecchio, alternativo ai prezzi Singolo/Gruppo/Aperitivo: non compilare entrambi sullo stesso evento. Se non aggiungi nessuna modalità, l'evento resta a quota unica come sopra.</p>
               <div id="ev-opzioni-lista"></div>
               <button type="button" class="btn btn--outline btn--small" id="ev-opzioni-aggiungi">+ Aggiungi modalità</button>
             </div>
+            <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
             <div class="form-row"><label for="ev-posti">Posti massimi (facoltativo)</label><input type="number" id="ev-posti" min="1"></div>
             <div class="form-row"><label for="ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="ev-scadenza-iscrizione"></div>
             <div class="form-row"><label for="ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="ev-instagram" placeholder="https://instagram.com/..."></div>
             <div class="form-row"><label for="ev-facebook">Link Facebook di questo evento (facoltativo)</label><input type="url" id="ev-facebook" placeholder="https://facebook.com/..."></div>
             <div class="form-row"><label for="ev-galleria">Link galleria fotografica di questo evento (facoltativo)</label><input type="url" id="ev-galleria" placeholder="https://..."></div>
-            <div class="form-row form-row--checkbox">
-              <label><input type="checkbox" id="ev-aperto-non-soci"> Aperto anche ai non soci (l'iscrizione all'evento non richiede di associarsi)</label>
-            </div>
             <div class="form-row">
               <label for="ev-stato">Stato</label>
               <select id="ev-stato">
@@ -149,6 +161,12 @@
                 <option value="annullato">Annullato</option>
               </select>
               <p class="form-note">"Annunciato"/"Bozza" non richiedono una data: lasciala vuota per "Data da definire".</p>
+            </div>
+            <div class="form-row form-row--checkbox">
+              <label><input type="checkbox" id="ev-aperto-non-soci"> Aperto anche ai non soci (l'iscrizione all'evento non richiede di associarsi)</label>
+            </div>
+            <div class="form-row form-row--checkbox">
+              <label><input type="checkbox" id="ev-pagamento-online-attivo" checked> Pagamento online attivo (se disattivato, il form pubblico registra l'iscrizione senza passare da Stripe: il pagamento va raccolto a parte, es. PayPal diretto)</label>
             </div>
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="ev-dettagli-attivi" checked> Pagina dettaglio attiva sul sito (se disattivata, "Dettagli" non è raggiungibile nemmeno con link diretto)</label>
@@ -204,25 +222,32 @@
                   <option value="viaggi">Viaggi</option>
                 </select>
               </div>
+              <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
               <div class="form-row"><label for="mod-ev-quota">Quota evento (€)</label><input type="number" id="mod-ev-quota" min="0" step="0.01"></div>
-              <div class="form-row"><label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label><input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01"></div>
+              <div class="form-row">
+                <label for="mod-ev-quota-iscrizione">Quota iscrizione inclusa (€)</label>
+                <input type="number" id="mod-ev-quota-iscrizione" min="0" step="0.01">
+                <p class="form-note">Se la Quota evento sopra include già il costo della tessera associativa, indica qui quanto ne rappresenta (es. evento che include l'iscrizione all'associazione). Campo solo informativo qui in admin: non è ancora mostrato sul sito pubblico.</p>
+              </div>
+              <div class="form-row">
+                <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
+                <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti sia Singolo sia Gruppo, chi si iscrive sceglie tra i due; se ne imposti solo uno, si usa direttamente quello. L'aperitivo è sempre in aggiunta, mai scontato.</p>
+                <div class="form-row"><label for="mod-ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="mod-ev-prezzo-singolo" min="0" step="0.01"></div>
+                <div class="form-row"><label for="mod-ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="mod-ev-prezzo-gruppo" min="0" step="0.01"></div>
+                <div class="form-row"><label for="mod-ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="mod-ev-prezzo-aperitivo" min="0" step="0.01"></div>
+              </div>
               <div class="form-row">
                 <label>Modalità di partecipazione (facoltative)</label>
-                <p class="form-note">Se ci sono più modi di partecipare a prezzi diversi (es. "Evento completo"/"Solo aperitivo"), aggiungili qui: chi si iscrive potrà scegliere. Prezzo sempre a persona, nessuno sconto per chi si iscrive in più persone. Se non c'è nessuna modalità, l'evento resta a quota unica come sopra.</p>
+                <p class="form-note">Usa questa sezione <strong>solo se i 3 prezzi qui sopra non bastano</strong> (es. più di due modi di partecipare a prezzi diversi). Più opzioni a scelta singola con prezzo a persona, nessuno sconto per chi si iscrive in più persone, nessun pagamento online — è il sistema più vecchio, alternativo ai prezzi Singolo/Gruppo/Aperitivo: non compilare entrambi sullo stesso evento. Se non c'è nessuna modalità, l'evento resta a quota unica come sopra.</p>
                 <div id="mod-ev-opzioni-lista"></div>
                 <button type="button" class="btn btn--outline btn--small" id="mod-ev-opzioni-aggiungi">+ Aggiungi modalità</button>
               </div>
+              <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
               <div class="form-row"><label for="mod-ev-posti">Posti massimi</label><input type="number" id="mod-ev-posti" min="1"></div>
               <div class="form-row"><label for="mod-ev-scadenza-iscrizione">Iscrizioni entro il (facoltativo)</label><input type="date" id="mod-ev-scadenza-iscrizione"></div>
               <div class="form-row"><label for="mod-ev-instagram">Link Instagram di questo evento (facoltativo)</label><input type="url" id="mod-ev-instagram" placeholder="https://instagram.com/..."></div>
               <div class="form-row"><label for="mod-ev-facebook">Link Facebook di questo evento (facoltativo)</label><input type="url" id="mod-ev-facebook" placeholder="https://facebook.com/..."></div>
               <div class="form-row"><label for="mod-ev-galleria">Link galleria fotografica di questo evento (facoltativo)</label><input type="url" id="mod-ev-galleria" placeholder="https://..."></div>
-              <div class="form-row form-row--checkbox">
-                <label><input type="checkbox" id="mod-ev-aperto-non-soci"> Aperto anche ai non soci (l'iscrizione all'evento non richiede di associarsi)</label>
-              </div>
-              <div class="form-row form-row--checkbox">
-                <label><input type="checkbox" id="mod-ev-dettagli-attivi"> Pagina dettaglio attiva sul sito (se disattivata, "Dettagli" non è raggiungibile nemmeno con link diretto)</label>
-              </div>
               <div class="form-row">
                 <label for="mod-ev-stato">Stato</label>
                 <select id="mod-ev-stato">
@@ -233,6 +258,15 @@
                   <option value="annullato">Annullato</option>
                 </select>
                 <p class="form-note">"Annunciato"/"Bozza" non richiedono una data: lasciala vuota per "Data da definire".</p>
+              </div>
+              <div class="form-row form-row--checkbox">
+                <label><input type="checkbox" id="mod-ev-aperto-non-soci"> Aperto anche ai non soci (l'iscrizione all'evento non richiede di associarsi)</label>
+              </div>
+              <div class="form-row form-row--checkbox">
+                <label><input type="checkbox" id="mod-ev-pagamento-online-attivo" checked> Pagamento online attivo (se disattivato, il form pubblico registra l'iscrizione senza passare da Stripe: il pagamento va raccolto a parte, es. PayPal diretto)</label>
+              </div>
+              <div class="form-row form-row--checkbox">
+                <label><input type="checkbox" id="mod-ev-dettagli-attivi"> Pagina dettaglio attiva sul sito (se disattivata, "Dettagli" non è raggiungibile nemmeno con link diretto)</label>
               </div>
               <p class="form-note" id="evento-posti-info"></p>
               <div class="admin-form__actions">
@@ -259,7 +293,7 @@
 
             <div style="overflow-x:auto;">
               <table class="admin-table" id="iscritti-tabella" hidden>
-                <thead><tr><th>Email</th><th>Tipo</th><th>Persone</th><th>Modalità</th><th>Stato</th><th>Importo</th><th>Data</th><th>Azioni</th></tr></thead>
+                <thead><tr><th>Evento</th><th>Email</th><th>Tipo</th><th>Persone</th><th>Modalità</th><th>Stato</th><th>Importo</th><th>Metodo</th><th>Allergie</th><th>Data</th><th>Azioni</th></tr></thead>
                 <tbody id="iscritti-tabella-body"></tbody>
               </table>
             </div>

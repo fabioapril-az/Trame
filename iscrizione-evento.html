@@ -166,6 +166,50 @@
 
         </div>
 
+        <!-- Wizard di pagamento (Stripe): mostrato AL POSTO del wizard sopra
+             per gli eventi che usano i nuovi prezzi Singolo/Gruppo/Aperitivo
+             (mutuamente esclusivi con "Modalità di partecipazione" — un
+             evento usa l'uno o l'altro sistema, mai entrambi). Nessuna
+             verifica socio qui: chiunque può iscriversi pagando, lo sconto
+             socio (se spetta) lo calcola il server persona per persona. -->
+        <div id="wizard-pagamento" hidden>
+          <p class="form-note" id="pagamento-annullato-nota" role="alert" hidden>Pagamento annullato: puoi riprovare qui sotto.</p>
+          <div class="admin-panel">
+            <h3>Iscrizione con pagamento online</h3>
+
+            <div class="form-row" id="pg-campo-modalita" hidden>
+              <label for="pg-modalita">Modalità</label>
+              <select id="pg-modalita">
+                <option value="singolo">Singolo</option>
+                <option value="gruppo">Gruppo (2-6 persone)</option>
+              </select>
+            </div>
+            <div class="form-row" id="pg-campo-numero-gruppo" hidden>
+              <label for="pg-numero-gruppo">Per quante persone (2-6)?</label>
+              <select id="pg-numero-gruppo"></select>
+            </div>
+
+            <div id="pg-blocchi-persone"></div>
+
+            <div class="form-row" id="pg-campo-aperitivo" hidden>
+              <label for="pg-aperitivo">Persone solo aperitivo (0-6)</label>
+              <select id="pg-aperitivo"></select>
+            </div>
+            <div class="form-row" id="pg-campo-allergie" hidden>
+              <label for="pg-allergie">Allergie/intolleranze aperitivo (facoltativo)</label>
+              <textarea id="pg-allergie" rows="2" maxlength="500"></textarea>
+            </div>
+
+            <p class="form-note" id="pg-totale" style="font-weight:600;"></p>
+            <p class="form-note">Lo sconto socio (dal 2° evento, se spetta) viene applicato automaticamente al pagamento, in base all'email inserita per ciascuna persona.</p>
+
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="pg-btn-paga">Vai al pagamento</button>
+            </div>
+            <p class="form-note" id="pg-status" role="alert" hidden></p>
+          </div>
+        </div>
+
         <div id="esito-finale" class="admin-panel" hidden></div>
 
       </div>

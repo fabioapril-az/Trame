@@ -37,6 +37,8 @@
         <h1>Libro Soci</h1>
         <p class="page-hero__subtitle">Riservato a Segretario, Presidente, Vicepresidente/Tesoriere e Admin.
           Per la gestione eventi: <a href="admin.html">vai a Impostazioni ed eventi →</a></p>
+        <p class="page-hero__subtitle">Per vedere tutti i pagamenti (eventi + tessere) in un unico elenco filtrabile:
+          <a href="admin-pagamenti.html">vai a Pagamenti →</a></p>
       </div>
     </section>
 
@@ -73,7 +75,7 @@
               <thead>
                 <tr>
                   <th>Nome</th><th>Email</th><th>Telefono</th><th>N. tessera</th>
-                  <th>Scadenza</th><th>Stato</th><th>Azioni</th>
+                  <th>Scadenza</th><th>Stato</th><th>Metodo</th><th>Azioni</th>
                 </tr>
               </thead>
               <tbody id="soci-tabella-body"></tbody>
@@ -183,6 +185,15 @@
             <div class="form-row">
               <label for="is-vantaggi">Testo vantaggi (facoltativo)</label>
               <textarea id="is-vantaggi" rows="5"></textarea>
+            </div>
+            <div class="form-row">
+              <label for="is-sconto-euro">Sconto socio sugli eventi (€ a persona)</label>
+              <input type="number" id="is-sconto-euro" min="0" step="0.01">
+              <p class="form-note">Dal 2° evento a cui un socio si iscrive, fino al numero massimo qui sotto. Si azzera ad ogni rinnovo tessera. Mai sull'aperitivo.</p>
+            </div>
+            <div class="form-row">
+              <label for="is-sconto-max-eventi">Numero massimo di eventi scontati</label>
+              <input type="number" id="is-sconto-max-eventi" min="0" step="1">
             </div>
             <button type="submit" class="btn btn--primary">Salva</button>
             <p class="form-note" id="iscrizione-soci-status" role="status" hidden></p>
