@@ -185,8 +185,29 @@
     .then(function (impostazioni) {
       quotaTessera = (impostazioni && impostazioni.quotaIscrizioneSoci) || null;
       aggiornaTotaleMultiplo();
+      mostraInfoTessera(impostazioni);
     })
     .catch(function () { /* niente anteprima: il totale reale si vede comunque al pagamento */ });
+
+  // Quota/vantaggi in cima alla pagina: prima si vedevano solo nel prompt
+  // "vuoi diventare socio?" di iscrizione-evento.js, mai su questa pagina
+  // stessa (segnalato dall'utente) — stessi campi già configurati in
+  // admin-soci.html, nessuna modifica lato backend necessaria.
+  function mostraInfoTessera(impostazioni) {
+    var quotaEl = document.getElementById("tessera-info-quota");
+    var vantaggiEl = document.getElementById("tessera-info-vantaggi");
+    var haQuota = impostazioni && impostazioni.quotaIscrizioneSoci != null;
+    var haVantaggi = impostazioni && impostazioni.testoVantaggiIscrizione;
+    if (haQuota) {
+      quotaEl.textContent = "Quota associativa: " + Number(impostazioni.quotaIscrizioneSoci).toFixed(2) + " € (12 mesi)";
+      quotaEl.hidden = false;
+    }
+    if (haVantaggi) {
+      vantaggiEl.textContent = impostazioni.testoVantaggiIscrizione;
+      vantaggiEl.hidden = false;
+    }
+    document.getElementById("tessera-info").hidden = !haQuota && !haVantaggi;
+  }
 
   var mtNumero = document.getElementById("mt-numero");
   var mtBlocchi = document.getElementById("mt-blocchi-persone");
