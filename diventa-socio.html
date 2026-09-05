@@ -58,11 +58,11 @@
       <div class="container" style="max-width:640px;">
 
         <div class="admin-toolbar">
-          <button type="button" class="btn btn--primary btn--small" id="btn-tab-singolo">Iscrizione singola</button>
-          <button type="button" class="btn btn--outline btn--small" id="btn-tab-multiplo">Più tessere insieme (pagamento online)</button>
+          <button type="button" class="btn btn--primary btn--small" id="btn-tab-multiplo">Iscrizione socio</button>
+          <button type="button" class="btn btn--outline btn--small" id="btn-tab-singolo">Iscrizione minorenne (con consenso genitore)</button>
         </div>
 
-        <!-- Esito del ritorno da Stripe (tab "Più tessere insieme"): va FUORI
+        <!-- Esito del ritorno da Stripe (tab "Iscrizione socio"): va FUORI
              da form/pannello-multiplo perché entrambi vengono nascosti per
              mostrare solo l'esito — un messaggio scritto dentro uno dei due
              sparirebbe insieme al contenitore (bug reale, trovato in test). -->
@@ -90,6 +90,8 @@
             <input type="date" id="data-nascita" name="dataNascita" required>
             <p class="form-note" id="minorenne-note" hidden>Se sei minorenne, l'iscrizione richiede anche il consenso
               di un genitore/tutore: dopo l'invio del modulo ti indicheremo come procedere.</p>
+            <p class="form-note" id="maggiorenne-note" hidden>Questo modulo è riservato ai minorenni: se sei
+              maggiorenne, usa "Iscrizione socio" qui sopra per iscriverti con pagamento online.</p>
           </div>
           <div class="form-row">
             <label for="codice-fiscale">Codice fiscale</label>
@@ -122,12 +124,13 @@
           <p class="form-note" id="form-status" role="status" hidden></p>
         </form>
 
-        <!-- Pagamento online per più tessere insieme: alternativa al form
-             sopra, non per i minorenni (chi lo è usa l'iscrizione singola,
-             con il consenso del genitore già previsto lì). -->
+        <!-- Iscrizione socio con pagamento online (Stripe): il percorso
+             standard per chi è maggiorenne, da 1 a 5 persone in un solo
+             pagamento. Non per i minorenni (chi lo è usa l'iscrizione
+             minorenne, con il consenso del genitore previsto lì). -->
         <div id="pannello-multiplo" class="admin-panel" style="margin-top:20px;" hidden>
-          <h3>Più tessere in un solo pagamento (1-5)</h3>
-          <p class="form-note">Non adatto a chi è minorenne: usa l'iscrizione singola qui sopra per quella persona.</p>
+          <h3>Iscrizione socio</h3>
+          <p class="form-note">Non adatta a chi è minorenne: usa "Iscrizione minorenne" qui sopra per quella persona.</p>
 
           <div class="form-row">
             <label for="mt-numero">Numero tessere in questa iscrizione</label>

@@ -9,6 +9,14 @@
   var statusEl = document.getElementById("form-status");
   var dataNascitaInput = document.getElementById("data-nascita");
   var minorenneNote = document.getElementById("minorenne-note");
+  var maggiorenneNote = document.getElementById("maggiorenne-note");
+
+  // "?admin=1": link "+ Registra nuovo socio" da admin-soci.html. La
+  // segreteria registra così anche maggiorenni che hanno già pagato offline
+  // (contanti, bonifico) — solo per il pubblico dal sito il modulo classico
+  // è riservato ai minorenni (pagamento online obbligatorio per tutti gli
+  // altri casi).
+  var modalitaAdmin = new URLSearchParams(window.location.search).get("admin") === "1";
 
   function calcolaEta(dataNascita) {
     var oggi = new Date();
@@ -21,12 +29,21 @@
     return eta;
   }
 
+  // Questo form resta solo per i minorenni (consenso genitore, mai gestito
+  // da Stripe): un maggiorenne va instradato alla tab "Iscrizione socio",
+  // che paga online — coerente col fatto che ogni iscrizione fatta dal sito
+  // passa da un pagamento online, salvo questa eccezione dei minorenni.
   dataNascitaInput.addEventListener("change", function () {
     if (!dataNascitaInput.value) {
       minorenneNote.hidden = true;
+      maggiorenneNote.hidden = true;
+      submitBtn.disabled = false;
       return;
     }
-    minorenneNote.hidden = calcolaEta(dataNascitaInput.value) >= 18;
+    var maggiorenne = calcolaEta(dataNascitaInput.value) >= 18;
+    minorenneNote.hidden = maggiorenne;
+    maggiorenneNote.hidden = !maggiorenne || modalitaAdmin;
+    submitBtn.disabled = maggiorenne && !modalitaAdmin;
   });
 
   function mostraStato(messaggio, tipo) {
@@ -38,6 +55,15 @@
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     statusEl.hidden = true;
+
+    // Guardia anche qui, non solo sul bottone disabilitato al cambio data
+    // (difesa in profondità): questo modulo non deve creare iscrizioni di
+    // maggiorenni senza pagamento online, salvo la registrazione manuale
+    // della segreteria (?admin=1, vedi sopra).
+    if (!modalitaAdmin && dataNascitaInput.value && calcolaEta(dataNascitaInput.value) >= 18) {
+      mostraStato("Questo modulo è riservato ai minorenni: usa \"Iscrizione socio\" qui sopra.", "errore");
+      return;
+    }
 
     var payload = {
       nome: document.getElementById("nome").value.trim(),
@@ -87,10 +113,11 @@
     return parti[2] + "/" + parti[1] + "/" + parti[0];
   }
 
-  // ================= Più tessere in un pagamento (Stripe) =================
-  // Alternativa al form sopra: 1-5 persone, un solo pagamento online. Non
-  // gestisce minorenni (deciso con l'utente): chi lo è resta sul form
-  // singolo qui sopra, con il consenso del genitore già previsto lì.
+  // ================= Iscrizione socio con pagamento online (Stripe) =======
+  // Percorso standard per i maggiorenni (1-5 persone in un solo pagamento,
+  // tab predefinita). Non gestisce minorenni (deciso con l'utente): chi lo
+  // è usa "Iscrizione minorenne" qui sopra, l'unica eccezione senza
+  // pagamento online, con il consenso del genitore già previsto lì.
 
   var params = new URLSearchParams(window.location.search);
   var pagamentoParam = params.get("pagamento"); // "confermato"|"annullato", solo al ritorno da Stripe
@@ -124,11 +151,18 @@
     pannelloMultiplo.hidden = true;
     document.querySelector(".admin-toolbar").hidden = true;
     mostraEsito("Pagamento confermato! Riceverai a breve via email le tessere socio per tutte le persone iscritte.", "successo");
-  } else {
+  } else if (modalitaAdmin) {
+    // Segreteria da admin-soci.html: parte dal modulo classico (registra a
+    // mano chi ha già pagato offline), ma entrambe le tab restano scelte
+    // valide — è lei a sapere quale usare caso per caso.
     mostraTab("singolo");
+  } else {
+    // "Iscrizione socio" (pagamento online) è il percorso standard per i
+    // maggiorenni, quindi la tab predefinita — "Iscrizione minorenne" resta
+    // un'eccezione da scegliere esplicitamente.
+    mostraTab("multiplo");
     if (pagamentoParam === "annullato") {
       mostraEsito("Pagamento annullato: puoi riprovare qui sotto.", "errore");
-      mostraTab("multiplo");
     }
   }
 
@@ -176,7 +210,7 @@
           return null;
         }
         if (campi.dataNascita.value && calcolaEta(campi.dataNascita.value) < 18) {
-          mtStatus.textContent = "La persona " + (i + 1) + " risulta minorenne: questo pagamento multiplo non la supporta, usa l'iscrizione singola qui sopra per lei.";
+          mtStatus.textContent = "La persona " + (i + 1) + " risulta minorenne: questo pagamento multiplo non la supporta, usa \"Iscrizione minorenne\" qui sopra per lei.";
           mtStatus.hidden = false;
           return null;
         }
