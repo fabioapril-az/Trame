@@ -199,7 +199,8 @@
       prezzoSingolo: prezzoSingolo ? parseFloat(prezzoSingolo) : null,
       prezzoGruppoPersona: prezzoGruppo ? parseFloat(prezzoGruppo) : null,
       prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null,
-      pagamentoOnlineAttivo: document.getElementById(prefix + "pagamento-online-attivo").checked
+      pagamentoOnlineAttivo: document.getElementById(prefix + "pagamento-online-attivo").checked,
+      condizioniCancellazione: document.getElementById(prefix + "condizioni-cancellazione").value.trim() || null
     };
   }
 
@@ -308,6 +309,7 @@
     document.getElementById("mod-ev-categoria").value = evento.categoria || "";
     document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
     document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
+    document.getElementById("mod-ev-condizioni-cancellazione").value = evento.condizioniCancellazione || "";
     document.getElementById("mod-ev-posti").value = evento.postiMax || "";
     document.getElementById("mod-ev-scadenza-iscrizione").value = evento.scadenzaIscrizione || "";
     document.getElementById("mod-ev-instagram").value = evento.instagramUrl || "";
