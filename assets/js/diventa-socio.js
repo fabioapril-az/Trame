@@ -249,9 +249,14 @@
     for (var i = 0; i < n; i++) {
       var blocco = document.createElement("div");
       blocco.className = "admin-panel";
-      blocco.style.cssText = "margin:12px 0; padding:14px;";
+      // Bordo/sfondo/numero in evidenza: senza, i blocchi si confondevano
+      // l'uno nell'altro quando le persone sono più di una (.admin-panel di
+      // per sé non ha alcun bordo — segnalato dall'utente).
+      blocco.style.cssText = "margin:16px 0; padding:16px; border:1px solid var(--color-line); " +
+        "border-radius:10px; background:var(--color-cream-alt);";
       blocco.innerHTML =
-        "<p class=\"form-note\" style=\"margin-top:0;\">Persona " + (i + 1) + "</p>" +
+        "<h4 style=\"margin:0 0 14px; padding-bottom:8px; font-size:1.05rem; " +
+        "color:var(--color-terracotta-dark); border-bottom:1px solid var(--color-line);\">Persona " + (i + 1) + "</h4>" +
         "<div class=\"form-row\"><label>Nome</label><input type=\"text\" class=\"mt-nome\" maxlength=\"100\" required></div>" +
         "<div class=\"form-row\"><label>Cognome</label><input type=\"text\" class=\"mt-cognome\" maxlength=\"100\" required></div>" +
         "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"mt-email\" maxlength=\"255\" required></div>" +
