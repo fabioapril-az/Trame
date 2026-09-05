@@ -128,12 +128,15 @@
 
   // "Iscrizione minorenne" nascosta al pubblico per ora (richiesta
   // dell'utente): resta raggiungibile solo dalla segreteria (?admin=1). Con
-  // una sola scelta visibile non ha senso mostrare il toggle delle tab.
+  // una sola scelta visibile non ha senso mostrare il toggle delle tab, né
+  // la nota che parla di minorenni (nessuna alternativa da indicare).
+  var notaMinorenni = document.getElementById("mt-nota-minorenni");
   if (!modalitaAdmin) {
     document.querySelector(".admin-toolbar").hidden = true;
+    notaMinorenni.hidden = true;
   } else {
     // Solo per la segreteria la tab esiste ancora: la nota può rimandarci.
-    document.getElementById("mt-nota-minorenni").innerHTML =
+    notaMinorenni.innerHTML =
       "Non adatta a chi è minorenne: usa \"Iscrizione minorenne\" qui sopra per quella persona.";
   }
 
