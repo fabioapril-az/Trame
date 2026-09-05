@@ -52,6 +52,15 @@
     <section class="section">
       <div class="container" style="max-width:640px;">
 
+        <!-- Quota/vantaggi: prima non comparivano da nessuna parte su questa
+             pagina (si vedevano solo nel prompt "vuoi diventare socio?"
+             dentro iscrizione-evento.html, mai qui) — segnalato dall'utente.
+             Stessi campi/endpoint già configurati in admin-soci.html. -->
+        <div class="admin-panel" id="tessera-info" hidden style="margin-bottom:20px;">
+          <p class="form-note" id="tessera-info-quota" style="font-weight:600;" hidden></p>
+          <p class="form-note" id="tessera-info-vantaggi" hidden></p>
+        </div>
+
         <div class="admin-toolbar">
           <button type="button" class="btn btn--primary btn--small" id="btn-tab-multiplo">Iscrizione socio</button>
           <button type="button" class="btn btn--outline btn--small" id="btn-tab-singolo">Iscrizione minorenne (con consenso genitore)</button>
