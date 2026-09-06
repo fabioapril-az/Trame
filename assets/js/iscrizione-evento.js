@@ -23,6 +23,28 @@
 // POST /api/eventi/{id}/iscriviti.
 
 (function () {
+  function escapeHtml(value) {
+    var div = document.createElement("div");
+    div.textContent = value == null ? "" : String(value);
+    return div.innerHTML;
+  }
+
+  // condizioniCancellazione arriva dall'editor Quill di admin.html (HTML),
+  // quindi va sanitizzato prima di inserirlo con innerHTML — stesso pattern
+  // di events.js/evento-dettaglio.js, duplicato qui per la stessa ragione
+  // (nessun modulo condiviso in questo sito).
+  function sanitizzaHtml(html) {
+    if (!window.DOMPurify) {
+      var div = document.createElement("div");
+      div.innerHTML = html;
+      return escapeHtml(div.textContent);
+    }
+    return window.DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "s", "span", "ol", "ul", "li", "a"],
+      ALLOWED_ATTR: ["href", "target", "rel", "class", "data-list"]
+    });
+  }
+
   var paramsUrl = new URLSearchParams(window.location.search);
   var eventoId = paramsUrl.get("id");
   var pagamentoParam = paramsUrl.get("pagamento"); // "confermato"|"annullato", solo al ritorno da Stripe
@@ -114,7 +136,7 @@
       // wizard) indipendentemente dalla modalità scelta più sotto — per il
       // nuovo wizard con pagamento Stripe vedi inizializzaWizardPagamento.
       if (evento.condizioniCancellazione) {
-        wizardCondizioniCancellazione.textContent = "Condizioni di cancellazione: " + evento.condizioniCancellazione;
+        wizardCondizioniCancellazione.innerHTML = "<strong>Condizioni di cancellazione:</strong> " + sanitizzaHtml(evento.condizioniCancellazione);
         wizardCondizioniCancellazione.hidden = false;
       }
       var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
@@ -620,7 +642,7 @@
     // informazione mancante).
     var pgCondizioniCancellazione = document.getElementById("pg-condizioni-cancellazione");
     if (evento.condizioniCancellazione) {
-      pgCondizioniCancellazione.textContent = "Condizioni di cancellazione: " + evento.condizioniCancellazione;
+      pgCondizioniCancellazione.innerHTML = "<strong>Condizioni di cancellazione:</strong> " + sanitizzaHtml(evento.condizioniCancellazione);
       pgCondizioniCancellazione.hidden = false;
     }
 
