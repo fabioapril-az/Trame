@@ -136,7 +136,7 @@
       // wizard) indipendentemente dalla modalità scelta più sotto — per il
       // nuovo wizard con pagamento Stripe vedi inizializzaWizardPagamento.
       if (evento.condizioniCancellazione) {
-        wizardCondizioniCancellazione.innerHTML = "<strong>Condizioni di cancellazione:</strong> " + sanitizzaHtml(evento.condizioniCancellazione);
+        wizardCondizioniCancellazione.innerHTML = "<strong>Politica di cancellazione e rimborsi:</strong> " + sanitizzaHtml(evento.condizioniCancellazione);
         wizardCondizioniCancellazione.hidden = false;
       }
       var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
@@ -642,7 +642,7 @@
     // informazione mancante).
     var pgCondizioniCancellazione = document.getElementById("pg-condizioni-cancellazione");
     if (evento.condizioniCancellazione) {
-      pgCondizioniCancellazione.innerHTML = "<strong>Condizioni di cancellazione:</strong> " + sanitizzaHtml(evento.condizioniCancellazione);
+      pgCondizioniCancellazione.innerHTML = "<strong>Politica di cancellazione e rimborsi:</strong> " + sanitizzaHtml(evento.condizioniCancellazione);
       pgCondizioniCancellazione.hidden = false;
     }
 
