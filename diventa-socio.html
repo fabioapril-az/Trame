@@ -49,16 +49,19 @@
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" style="padding-top:30px;">
       <div class="container" style="max-width:640px;">
 
         <!-- Quota/vantaggi: prima non comparivano da nessuna parte su questa
              pagina (si vedevano solo nel prompt "vuoi diventare socio?"
              dentro iscrizione-evento.html, mai qui) — segnalato dall'utente.
-             Stessi campi/endpoint già configurati in admin-soci.html. -->
+             Stessi campi/endpoint già configurati in admin-soci.html.
+             padding-top ridotto sulla sezione: senza, restava un grande
+             vuoto tra il sottotitolo dell'hero e questo blocco (segnalato
+             dall'utente) — 90px di default più i 60px dell'hero sopra. -->
         <div class="admin-panel" id="tessera-info" hidden style="margin-bottom:20px;">
-          <p class="form-note" id="tessera-info-quota" style="font-weight:600;" hidden></p>
-          <p class="form-note" id="tessera-info-vantaggi" hidden></p>
+          <p class="form-note" id="tessera-info-quota" style="font-weight:600; font-size:1rem;" hidden></p>
+          <p class="form-note" id="tessera-info-vantaggi" style="white-space:pre-line; font-size:0.95rem;" hidden></p>
         </div>
 
         <div class="admin-toolbar">
