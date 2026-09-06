@@ -288,10 +288,12 @@
             '<td>' +
             '<button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="iscritti">Iscritti</button> ' +
+            '<button type="button" class="btn btn--outline btn--small" data-action="interessati">Interessati</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
             '</td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModificaEvento(ev); });
           tr.querySelector('[data-action="iscritti"]').addEventListener("click", function () { mostraIscrittiDiretti(ev); });
+          tr.querySelector('[data-action="interessati"]').addEventListener("click", function () { mostraInteressatiDiretti(ev); });
           tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaEvento(ev); });
           tbody.appendChild(tr);
         });
@@ -509,6 +511,36 @@
     document.getElementById("evento-dettaglio").hidden = true;
     caricaIscritti(evento.id).then(function () {
       document.getElementById("iscritti-tabella").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  // Chi ha lasciato l'email su "Informami quando partirà" (eventi in stato
+  // Annunciato, senza data/dettagli definitivi ancora) — solo consultazione,
+  // nessuna azione: la segreteria notifica a mano quando l'evento si
+  // concretizza.
+  function caricaInteressati(eventoId) {
+    return apiFetchAuth("/api/eventi/" + eventoId + "/interessati")
+      .then(function (interessati) {
+        var tbody = document.getElementById("interessati-tabella-body");
+        tbody.innerHTML = "";
+        interessati.forEach(function (i) {
+          var tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + escapeHtml(i.email) + "</td>" +
+            "<td>" + (i.consensoNewsletter ? "Sì" : "No") + "</td>" +
+            "<td>" + escapeHtml(i.data || "—") + "</td>";
+          tbody.appendChild(tr);
+        });
+        document.getElementById("interessati-empty").hidden = interessati.length > 0;
+        document.getElementById("interessati-tabella").hidden = false;
+      })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  function mostraInteressatiDiretti(evento) {
+    document.getElementById("evento-dettaglio").hidden = true;
+    caricaInteressati(evento.id).then(function () {
+      document.getElementById("interessati-tabella").scrollIntoView({ behavior: "smooth", block: "start" });
     });
   }
 

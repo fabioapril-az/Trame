@@ -161,15 +161,15 @@
       : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(event.categoria) + "</span>";
 
     // "annunciato": pubblicato in anteprima, niente iscrizioni ancora aperte
-    // — nessun bottone Prenota (non semplicemente disabilitato: proprio
-    // assente, a differenza di "chiuso"/tutto esaurito).
+    // — al posto di Prenota, un bottone per lasciare l'email e ricevere un
+    // avviso quando l'evento avrà data/luogo definitivi (richiesta utente).
     var annunciato = event.stato === "annunciato";
     var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
     var nonPrenotabile = event.stato !== "aperto" || postiEsauriti;
     var etichettaNonPrenotabile = event.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
 
     var azionePrenota = annunciato
-      ? ""
+      ? '<a href="interesse-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Informami quando parte →</a>'
       : (nonPrenotabile
         ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
         : '<a href="iscrizione-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Prenota →</a>');
