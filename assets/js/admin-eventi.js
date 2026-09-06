@@ -66,6 +66,10 @@
   inizializzaEditor("ev-testo-dettaglio", false);
   inizializzaEditor("mod-ev-descrizione", true);
   inizializzaEditor("mod-ev-testo-dettaglio", true);
+  // Niente immagini qui, solo grassetto/elenchi: non serve un evento già
+  // salvato per usarlo (a differenza di descrizione/testoDettaglio sopra).
+  inizializzaEditor("ev-condizioni-cancellazione", false);
+  inizializzaEditor("mod-ev-condizioni-cancellazione", false);
 
   function contenutoQuill(quill) {
     return quill.getText().trim() === "" ? null : quill.root.innerHTML;
@@ -199,7 +203,8 @@
       prezzoSingolo: prezzoSingolo ? parseFloat(prezzoSingolo) : null,
       prezzoGruppoPersona: prezzoGruppo ? parseFloat(prezzoGruppo) : null,
       prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null,
-      pagamentoOnlineAttivo: document.getElementById(prefix + "pagamento-online-attivo").checked
+      pagamentoOnlineAttivo: document.getElementById(prefix + "pagamento-online-attivo").checked,
+      condizioniCancellazione: contenutoQuill(quillEditors[prefix + "condizioni-cancellazione"])
     };
   }
 
@@ -308,6 +313,7 @@
     document.getElementById("mod-ev-categoria").value = evento.categoria || "";
     document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
     document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";
+    impostaContenutoQuill(quillEditors["mod-ev-condizioni-cancellazione"], evento.condizioniCancellazione);
     document.getElementById("mod-ev-posti").value = evento.postiMax || "";
     document.getElementById("mod-ev-scadenza-iscrizione").value = evento.scadenzaIscrizione || "";
     document.getElementById("mod-ev-instagram").value = evento.instagramUrl || "";
