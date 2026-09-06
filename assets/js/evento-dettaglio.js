@@ -237,9 +237,11 @@
         var prenotaEl = document.getElementById("evento-prenota");
         var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
         if (event.stato === "annunciato") {
-          // Pubblicato in anteprima: niente bottone Prenota, non solo
-          // disabilitato — le iscrizioni non sono ancora aperte.
-          prenotaEl.hidden = true;
+          // Pubblicato in anteprima, niente iscrizioni ancora aperte: al
+          // posto di Prenota, si può lasciare l'email per un avviso quando
+          // l'evento avrà data/luogo definitivi (richiesta utente).
+          prenotaEl.textContent = "Informami quando parte →";
+          prenotaEl.href = "interesse-evento.html?id=" + event.id;
         } else if (event.stato !== "aperto") {
           disabilitaBottone(prenotaEl, "Iscrizioni chiuse");
         } else if (postiEsauriti) {

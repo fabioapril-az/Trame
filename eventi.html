@@ -52,6 +52,12 @@
     <section class="section">
       <div class="container">
 
+        <!-- Filtro per categoria: prima raggiungibile solo con un link
+             esterno (eventi.html#yoga, dalle card "Le nostre trame" in
+             home/footer), non da qui — segnalato dall'utente. Riusa la
+             stessa logica di filtro via hash già esistente in events.js. -->
+        <div class="events-filter" id="eventi-filtro-categoria" role="group" aria-label="Filtra per categoria"></div>
+
         <!-- data-empty-categoria: quando si arriva filtrati su una categoria
              (eventi.html#yoga, link dalle card "Le nostre trame" in home) e
              quella categoria non ha ancora eventi, si mostra questo invece

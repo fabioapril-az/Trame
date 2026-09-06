@@ -161,15 +161,15 @@
       : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(event.categoria) + "</span>";
 
     // "annunciato": pubblicato in anteprima, niente iscrizioni ancora aperte
-    // — nessun bottone Prenota (non semplicemente disabilitato: proprio
-    // assente, a differenza di "chiuso"/tutto esaurito).
+    // — al posto di Prenota, un bottone per lasciare l'email e ricevere un
+    // avviso quando l'evento avrà data/luogo definitivi (richiesta utente).
     var annunciato = event.stato === "annunciato";
     var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
     var nonPrenotabile = event.stato !== "aperto" || postiEsauriti;
     var etichettaNonPrenotabile = event.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
 
     var azionePrenota = annunciato
-      ? ""
+      ? '<a href="interesse-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Informami quando parte →</a>'
       : (nonPrenotabile
         ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
         : '<a href="iscrizione-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Prenota →</a>');
@@ -223,6 +223,12 @@
   }
 
   function fillMount(mount, allEvents, categoriaFiltro) {
+    // Svuotato ad ogni chiamata: prima fillMount girava una sola volta per
+    // pagina, ora il filtro per categoria la richiama più volte per
+    // rifiltrare senza ricaricare la pagina — senza questo, le card
+    // si accumulerebbero invece di sostituirsi (bug reale, trovato
+    // costruendo il filtro).
+    mount.innerHTML = "";
     var statuses = (mount.getAttribute("data-status") || "aperto").split(",").map(function (s) { return s.trim(); });
     var max = parseInt(mount.getAttribute("data-max"), 10);
     var comingSoonId = mount.getAttribute("data-coming-soon");
@@ -312,21 +318,55 @@
   // succede nulla). Aggiorna titolo/sottotitolo per riflettere la
   // categoria scelta, invece di lasciare l'intestazione generica "Tante
   // categorie, un filo comune" su una pagina che ne mostra solo una.
+  // Ripristina l'intestazione originale quando il filtro torna a "Tutti"
+  // (prima restava bloccata sull'ultima categoria scelta, mai vista finché
+  // il filtro arrivava solo da un link esterno con reload della pagina).
+  var titoloOriginale = null;
+  var sottotitoloOriginale = null;
   function aggiornaIntestazionePerCategoria(categoriaFiltro) {
-    if (!categoriaFiltro) return;
     var titoloEl = document.getElementById("eventi-titolo");
     var sottotitoloEl = document.getElementById("eventi-sottotitolo");
-    if (titoloEl) {
-      titoloEl.textContent = categoryLabel(categoriaFiltro);
+    if (!titoloEl || !sottotitoloEl) return;
+    if (titoloOriginale == null) {
+      titoloOriginale = titoloEl.textContent;
+      sottotitoloOriginale = sottotitoloEl.textContent;
     }
-    if (sottotitoloEl) {
-      sottotitoloEl.textContent = "";
-      sottotitoloEl.appendChild(document.createTextNode("Solo gli eventi e i corsi di questa categoria. "));
-      var link = document.createElement("a");
-      link.href = "eventi.html";
-      link.textContent = "Vedi tutte le categorie →";
-      sottotitoloEl.appendChild(link);
+    if (!categoriaFiltro) {
+      titoloEl.textContent = titoloOriginale;
+      sottotitoloEl.textContent = sottotitoloOriginale;
+      return;
     }
+    titoloEl.textContent = categoryLabel(categoriaFiltro);
+    sottotitoloEl.textContent = "";
+    sottotitoloEl.appendChild(document.createTextNode("Solo gli eventi e i corsi di questa categoria. "));
+    var link = document.createElement("a");
+    link.href = "eventi.html";
+    link.textContent = "Vedi tutte le categorie →";
+    sottotitoloEl.appendChild(link);
+  }
+
+  // Bottoni filtro (solo su eventi.html, unica pagina col contenitore
+  // #eventi-filtro-categoria — in home, dove events.js gira anche per "In
+  // programma", non esiste: qui non succede nulla). Prima il filtro per
+  // categoria era raggiungibile solo da un link esterno (eventi.html#yoga,
+  // dalle card "Le nostre trame" in home/footer), non dalla pagina eventi
+  // stessa — segnalato dall'utente.
+  function creaBottoniFiltro(contenitore, categoriaAttiva, onScegli) {
+    contenitore.innerHTML = "";
+    var tutti = document.createElement("button");
+    tutti.type = "button";
+    tutti.className = "btn btn--small " + (categoriaAttiva ? "btn--outline" : "btn--primary");
+    tutti.textContent = "Tutti";
+    tutti.addEventListener("click", function () { onScegli(null); });
+    contenitore.appendChild(tutti);
+    Object.keys(CATEGORY_LABELS).forEach(function (categoria) {
+      var bottone = document.createElement("button");
+      bottone.type = "button";
+      bottone.className = "btn btn--small " + (categoriaAttiva === categoria ? "btn--primary" : "btn--outline");
+      bottone.textContent = CATEGORY_LABELS[categoria];
+      bottone.addEventListener("click", function () { onScegli(categoria); });
+      contenitore.appendChild(bottone);
+    });
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -366,6 +406,26 @@
           loadingEl.remove();
         }
         events = events || [];
+
+        function renderizza(categoria) {
+          categoriaFiltro = categoria;
+          // replaceState invece di location.hash=: quest'ultimo fa
+          // scorrere la pagina se esistesse un elemento con quell'id, e
+          // aggiunge una voce nella cronologia ad ogni click sui bottoni
+          // (indesiderato per un filtro, non per una navigazione vera).
+          var nuovoHash = categoria ? "#" + categoria : window.location.pathname;
+          window.history.replaceState(null, "", nuovoHash);
+          aggiornaIntestazionePerCategoria(categoriaFiltro);
+          mounts.forEach(function (mount) { fillMount(mount, events, categoriaFiltro); });
+          if (filtroEl) {
+            creaBottoniFiltro(filtroEl, categoriaFiltro, renderizza);
+          }
+        }
+
+        var filtroEl = document.getElementById("eventi-filtro-categoria");
+        if (filtroEl) {
+          creaBottoniFiltro(filtroEl, categoriaFiltro, renderizza);
+        }
         mounts.forEach(function (mount) {
           fillMount(mount, events, categoriaFiltro);
         });

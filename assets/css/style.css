@@ -947,6 +947,13 @@ p {
   color: var(--color-white);
 }
 
+.events-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 34px;
+}
+
 .events-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

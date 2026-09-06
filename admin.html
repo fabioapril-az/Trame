@@ -307,6 +307,17 @@
                 <tbody id="iscritti-tabella-body"></tbody>
               </table>
             </div>
+
+            <!-- "Informami quando partirà", solo consultazione (vedi
+                 admin-eventi.js: nessuna azione, la segreteria notifica a
+                 mano). -->
+            <div style="overflow-x:auto;">
+              <table class="admin-table" id="interessati-tabella" hidden>
+                <thead><tr><th>Email</th><th>Newsletter</th><th>Data</th></tr></thead>
+                <tbody id="interessati-tabella-body"></tbody>
+              </table>
+              <p class="form-note" id="interessati-empty" hidden>Nessuno ha ancora lasciato l'email per questo evento.</p>
+            </div>
           </div>
         </div>
       </div>
