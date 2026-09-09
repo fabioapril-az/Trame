@@ -750,6 +750,12 @@
       pgTotale.textContent = "Totale (senza eventuale sconto socio): " + totale.toFixed(2) + " €";
     }
 
+    // Ripopolata solo quando il minimo cambia davvero (2 per "gruppo", 1 per
+    // "aperitivo"), non ad ogni aggiornaCampi(): altrimenti anche il change
+    // della select stessa la faceva ripartire dal primo valore, annullando
+    // la scelta appena fatta (bug reale, segnalato dall'utente).
+    var numeroGruppoMinAttuale = null;
+
     function aggiornaCampi() {
       var opzioni = modalitaDisponibili();
       pgCampoModalita.hidden = opzioni.length <= 1;
@@ -765,7 +771,11 @@
       var mostraGruppo = modalita !== "singolo"; // "gruppo" o "aperitivo"
       pgCampoNumeroGruppo.hidden = !mostraGruppo;
       if (mostraGruppo) {
-        popolaSelectNumerico(pgNumeroGruppo, modalita === "aperitivo" ? 1 : 2, 6);
+        var minRichiesto = modalita === "aperitivo" ? 1 : 2;
+        if (numeroGruppoMinAttuale !== minRichiesto) {
+          popolaSelectNumerico(pgNumeroGruppo, minRichiesto, 6);
+          numeroGruppoMinAttuale = minRichiesto;
+        }
       }
       pgCampoAperitivo.hidden = evento.prezzoAperitivoPersona == null || modalita === "aperitivo";
       pgCampoAllergie.hidden = evento.prezzoAperitivoPersona == null;
