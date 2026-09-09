@@ -663,14 +663,22 @@
         select.appendChild(option);
       }
     }
-    popolaSelectNumerico(pgNumeroGruppo, 2, 6);
     popolaSelectNumerico(pgAperitivo, 0, 6);
 
+    // Quali modalità offrire dipende da quali prezzi ha l'evento — "Solo
+    // aperitivo" per chi vuole unirsi solo al dopo evento, senza
+    // partecipare a quello principale (richiesta utente).
+    var ETICHETTE_MODALITA = { singolo: "Singolo", gruppo: "Gruppo (2-6 persone)", aperitivo: "Solo aperitivo (1-6 persone)" };
+    function modalitaDisponibili() {
+      var opzioni = [];
+      if (evento.prezzoSingolo != null) opzioni.push("singolo");
+      if (evento.prezzoGruppoPersona != null) opzioni.push("gruppo");
+      if (evento.prezzoAperitivoPersona != null) opzioni.push("aperitivo");
+      return opzioni;
+    }
     function modalitaAttiva() {
-      if (evento.prezzoSingolo != null && evento.prezzoGruppoPersona != null) {
-        return pgModalita.value;
-      }
-      return evento.prezzoSingolo != null ? "singolo" : "gruppo";
+      var opzioni = modalitaDisponibili();
+      return opzioni.length > 1 ? pgModalita.value : opzioni[0];
     }
 
     function leggiPersoneDaBlocchi(validare) {
@@ -727,9 +735,14 @@
 
     function aggiornaTotale() {
       var modalita = modalitaAttiva();
-      var prezzoBase = modalita === "singolo" ? evento.prezzoSingolo : evento.prezzoGruppoPersona;
+      var prezzoBase = modalita === "singolo" ? evento.prezzoSingolo
+        : modalita === "gruppo" ? evento.prezzoGruppoPersona
+        : evento.prezzoAperitivoPersona; // "aperitivo"
       var n = modalita === "singolo" ? 1 : parseInt(pgNumeroGruppo.value, 10);
       var totale = (prezzoBase || 0) * n;
+      // Aggiunta aperitivo: nascosta (quindi ignorata) quando la modalità
+      // primaria è già "aperitivo", per non contare le stesse persone due
+      // volte — vedi nota sul campo in iscrizione-evento.html.
       var personeAperitivo = pgCampoAperitivo.hidden ? 0 : parseInt(pgAperitivo.value, 10);
       if (personeAperitivo > 0) {
         totale += evento.prezzoAperitivoPersona * personeAperitivo;
@@ -737,12 +750,34 @@
       pgTotale.textContent = "Totale (senza eventuale sconto socio): " + totale.toFixed(2) + " €";
     }
 
+    // Ripopolata solo quando il minimo cambia davvero (2 per "gruppo", 1 per
+    // "aperitivo"), non ad ogni aggiornaCampi(): altrimenti anche il change
+    // della select stessa la faceva ripartire dal primo valore, annullando
+    // la scelta appena fatta (bug reale, segnalato dall'utente).
+    var numeroGruppoMinAttuale = null;
+
     function aggiornaCampi() {
-      var entrambe = evento.prezzoSingolo != null && evento.prezzoGruppoPersona != null;
-      pgCampoModalita.hidden = !entrambe;
+      var opzioni = modalitaDisponibili();
+      pgCampoModalita.hidden = opzioni.length <= 1;
+      if (opzioni.length > 1 && !pgModalita.options.length) {
+        opzioni.forEach(function (valore) {
+          var option = document.createElement("option");
+          option.value = valore;
+          option.textContent = ETICHETTE_MODALITA[valore];
+          pgModalita.appendChild(option);
+        });
+      }
       var modalita = modalitaAttiva();
-      pgCampoNumeroGruppo.hidden = modalita !== "gruppo";
-      pgCampoAperitivo.hidden = evento.prezzoAperitivoPersona == null;
+      var mostraGruppo = modalita !== "singolo"; // "gruppo" o "aperitivo"
+      pgCampoNumeroGruppo.hidden = !mostraGruppo;
+      if (mostraGruppo) {
+        var minRichiesto = modalita === "aperitivo" ? 1 : 2;
+        if (numeroGruppoMinAttuale !== minRichiesto) {
+          popolaSelectNumerico(pgNumeroGruppo, minRichiesto, 6);
+          numeroGruppoMinAttuale = minRichiesto;
+        }
+      }
+      pgCampoAperitivo.hidden = evento.prezzoAperitivoPersona == null || modalita === "aperitivo";
       pgCampoAllergie.hidden = evento.prezzoAperitivoPersona == null;
       var n = modalita === "singolo" ? 1 : parseInt(pgNumeroGruppo.value, 10);
       generaBlocchiPersone(n);
