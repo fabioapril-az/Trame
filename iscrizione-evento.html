@@ -178,22 +178,27 @@
           <div class="admin-panel">
             <h3>Iscrizione con pagamento online</h3>
 
+            <!-- Opzioni popolate via JS: dipendono da quali prezzi ha
+                 l'evento (Singolo/Gruppo/solo Aperitivo) — vedi
+                 modalitaDisponibili() in iscrizione-evento.js. -->
             <div class="form-row" id="pg-campo-modalita" hidden>
               <label for="pg-modalita">Modalità</label>
-              <select id="pg-modalita">
-                <option value="singolo">Singolo</option>
-                <option value="gruppo">Gruppo (2-6 persone)</option>
-              </select>
+              <select id="pg-modalita"></select>
             </div>
             <div class="form-row" id="pg-campo-numero-gruppo" hidden>
-              <label for="pg-numero-gruppo">Per quante persone (2-6)?</label>
+              <label for="pg-numero-gruppo">Per quante persone?</label>
               <select id="pg-numero-gruppo"></select>
             </div>
 
             <div id="pg-blocchi-persone"></div>
 
+            <!-- Aggiunta aperitivo per chi partecipa già all'evento
+                 (Singolo/Gruppo): non c'entra con la modalità "Solo
+                 aperitivo" sopra, che è un'iscrizione a sé — nascosta
+                 quando quella è già la modalità scelta (altrimenti si
+                 conterebbero le stesse persone due volte). -->
             <div class="form-row" id="pg-campo-aperitivo" hidden>
-              <label for="pg-aperitivo">Persone solo aperitivo (0-6)</label>
+              <label for="pg-aperitivo">Persone solo aperitivo, in aggiunta (0-6)</label>
               <select id="pg-aperitivo"></select>
             </div>
             <div class="form-row" id="pg-campo-allergie" hidden>
