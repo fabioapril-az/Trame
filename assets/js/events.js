@@ -211,16 +211,30 @@
     return article;
   }
 
-  function ordinaAnnunciati(events) {
-    // Gli "annunciato" possono non avere ancora una data: quelli con una
-    // data già nota vanno prima (dal più vicino), quelli ancora del tutto
-    // da definire in coda — l'API non lo garantisce (i NULL SQL finiscono
-    // in fondo solo per costruzione della query, non per scelta esplicita).
+  // Ordine di presentazione, deciso qui e non lasciato all'API: la stessa
+  // singola chiamata GET /api/eventi alimenta sia gli eventi in programma
+  // sia l'archivio dei passati, che vogliono direzioni opposte (i prossimi
+  // dal più vicino, i passati dal più recente), quindi nessun ORDER BY
+  // lato server può accontentare entrambi. Confermato dal backend: la
+  // query è `ORDER BY data_evento DESC`, unica per la lista pubblica e per
+  // quella amministrativa (dove "più recente in cima" è invece corretto).
+  //
+  // Gli eventi senza data vanno sempre in coda, in entrambe le direzioni:
+  // è il caso tipico degli "annunciato", pubblicati in anteprima prima di
+  // avere un calendario. Il confronto finale su id è un tiebreaker
+  // esplicito, non un vezzo: l'API non ha nessuna chiave secondaria, quindi
+  // due eventi con la stessa data (o due senza data) arrivano in un ordine
+  // che dipende dal piano di esecuzione e può cambiare senza preavviso.
+  function ordinaPerData(events, discendente) {
     return events.slice().sort(function (a, b) {
-      if (!a.dataEvento && !b.dataEvento) return 0;
+      if (!a.dataEvento && !b.dataEvento) return (a.id || 0) - (b.id || 0);
       if (!a.dataEvento) return 1;
       if (!b.dataEvento) return -1;
-      return a.dataEvento < b.dataEvento ? -1 : a.dataEvento > b.dataEvento ? 1 : 0;
+      if (a.dataEvento !== b.dataEvento) {
+        var cmp = a.dataEvento < b.dataEvento ? -1 : 1;
+        return discendente ? -cmp : cmp;
+      }
+      return (a.id || 0) - (b.id || 0);
     });
   }
 
@@ -245,9 +259,9 @@
     var events = [];
     statuses.forEach(function (status) {
       var gruppo = allEvents.filter(function (event) { return event.stato === status; });
-      if (status === "annunciato") {
-        gruppo = ordinaAnnunciati(gruppo);
-      }
+      // Un archivio si legge dal più recente, un calendario dal più vicino:
+      // solo "chiuso" va in ordine decrescente.
+      gruppo = ordinaPerData(gruppo, status === "chiuso");
       events = events.concat(gruppo);
     });
 
