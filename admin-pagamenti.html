@@ -83,7 +83,13 @@
             <input type="number" id="pag-filtro-anno" placeholder="Anno (es. 2026)" style="width:140px;">
             <button type="button" class="btn btn--outline btn--small" id="btn-cerca-pagamenti">Filtra</button>
             <button type="button" class="btn btn--outline btn--small" id="btn-reset-pagamenti">Azzera filtri</button>
+            <button type="button" class="btn btn--primary btn--small" id="btn-esporta-csv">Esporta CSV</button>
           </div>
+          <!-- Detto esplicitamente perché non è ovvio: l'export non si
+               limita ai 10 pagamenti a schermo, scarica tutte le pagine. -->
+          <p class="form-note">L'export CSV contiene tutti i pagamenti che corrispondono ai filtri attivi, non solo quelli
+            della pagina visualizzata. Il file si apre in Excel con le colonne già separate.</p>
+          <p class="form-note" id="export-status" role="status" hidden></p>
 
           <div style="overflow-x:auto;">
             <table class="admin-table" id="pagamenti-tabella">
