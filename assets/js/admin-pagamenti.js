@@ -168,6 +168,19 @@
   // 200 è il massimo accettato dall'API. Attenzione, confermato dal backend:
   // NON è un clamp — chiedere più di 200 non riporta a 200, fa cadere su 20.
   // Quindi questo valore non va alzato senza cambiare anche il server.
+  //
+  // È anche la soglia oltre la quale questo export smette di essere esatto, e
+  // chi tocca questa costante è la persona che deve saperlo. Finché un filtro
+  // produce meno di 200 righe l'export è una chiamata sola, quindi legge un
+  // istante solo. Sopra le 200 diventa più chiamate, e una riga che arriva a
+  // metà ciclo si inserisce in cima all'ordinamento per data spostando tutte
+  // le pagine successive di una posizione: una riga verrebbe letta due volte
+  // e un'altra saltata, con il conteggio finale che torna e nessun controllo
+  // in grado di accorgersene. Non è rimediabile da qui: la chiave che rende
+  // univoca una riga il backend la usa solo per ordinare e non la espone.
+  // Concordato con loro: quando ci si avvicina a quella soglia si passa a un
+  // endpoint di export lato server, che legge tutto con una query sola,
+  // invece di esporre la chiave e deduplicare qui.
   var DIMENSIONE_EXPORT = 200;
   var MAX_PAGINE_EXPORT = 200; // Paracadute: senza, un `totale` incoerente con le righe restituite darebbe un ciclo infinito.
 
