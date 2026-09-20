@@ -165,6 +165,9 @@
   // pagina da 10 a schermo: un export che si fermasse alla pagina visibile
   // sarebbe una trappola, perché somiglia a un export completo.
 
+  // 200 è il massimo accettato dall'API. Attenzione, confermato dal backend:
+  // NON è un clamp — chiedere più di 200 non riporta a 200, fa cadere su 20.
+  // Quindi questo valore non va alzato senza cambiare anche il server.
   var DIMENSIONE_EXPORT = 200;
   var MAX_PAGINE_EXPORT = 200; // Paracadute: senza, un `totale` incoerente con le righe restituite darebbe un ciclo infinito.
 
@@ -241,11 +244,20 @@
   }
 
   // Scarica una pagina dopo l'altra fino a coprire il totale dichiarato
-  // dall'API. La dimensione pagina non è data per scontata: se il server
-  // applicasse un tetto massimo silenzioso (chiedo 200, me ne dà 50) e poi
-  // calcolasse l'offset sul valore richiesto, le pagine successive
-  // salterebbero righe e l'export perderebbe dati senza dire niente. Perciò
-  // dalla prima risposta deduco la dimensione REALE e proseguo con quella.
+  // dall'API. La dimensione pagina non è data per scontata: si usa quella
+  // che il server dichiara di aver applicato (`dimensionePagina` in
+  // risposta) e, se non ci fosse, la si deduce dalle righe ricevute. Serve
+  // perché se il server riducesse la dimensione senza dirlo e calcolasse
+  // l'offset sul valore richiesto, le pagine successive salterebbero righe e
+  // l'export perderebbe dati in silenzio.
+  //
+  // Il presupposto di tutto questo è che la paginazione partizioni davvero
+  // le righe. Non era vero: l'endpoint ordinava per data senza chiave
+  // univoca, e in produzione esistono iscrizioni con data identica al
+  // secondo, quindi la stessa riga poteva comparire su due pagine e un'altra
+  // essere saltata. Il backend ha aggiunto un tiebreaker deterministico
+  // (segnalato mentre questo export veniva scritto). Il controllo finale sul
+  // conteggio resta comunque, come rete.
   function scaricaTuttePagine(filtri, onProgresso) {
     var righe = [];
     var coda = queryFiltri(filtri);
@@ -258,9 +270,9 @@
           var totale = result.totale || 0;
           if (onProgresso) onProgresso(righe.length, totale);
 
-          var dimensioneReale = numero === 1 && ricevute.length && ricevute.length < dimensione
-            ? ricevute.length
-            : dimensione;
+          var dimensioneReale = result.dimensionePagina > 0
+            ? result.dimensionePagina
+            : (numero === 1 && ricevute.length && ricevute.length < dimensione ? ricevute.length : dimensione);
 
           if (!ricevute.length || righe.length >= totale || numero >= MAX_PAGINE_EXPORT) {
             return { righe: righe, totale: totale, completo: righe.length >= totale };
