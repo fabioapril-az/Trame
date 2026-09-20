@@ -261,21 +261,39 @@
   function scaricaTuttePagine(filtri, onProgresso) {
     var righe = [];
     var coda = queryFiltri(filtri);
+    // Il totale della PRIMA pagina è il riferimento per tutto l'export, e i
+    // valori delle pagine successive vengono ignorati. Il conteggio arriva da
+    // una query separata, rifatta a ogni chiamata e senza snapshot condiviso
+    // con quella che restituisce le righe: se durante l'export venisse
+    // confermato un pagamento (un webhook Stripe che arriva proprio allora),
+    // confrontarsi con il totale aggiornato farebbe dichiarare incompleto un
+    // export che invece è coerente con lo stato in cui è partito.
+    var totaleIniziale = null;
+    var totaleUltimo = null;
 
     function pagina(numero, dimensione) {
       return apiFetchAuth("/api/pagamenti?pagina=" + numero + "&dimensionePagina=" + dimensione + coda)
         .then(function (result) {
           var ricevute = result.risultati || [];
           righe = righe.concat(ricevute);
-          var totale = result.totale || 0;
-          if (onProgresso) onProgresso(righe.length, totale);
+          totaleUltimo = result.totale || 0;
+          if (totaleIniziale == null) totaleIniziale = totaleUltimo;
+          if (onProgresso) onProgresso(righe.length, totaleIniziale);
 
           var dimensioneReale = result.dimensionePagina > 0
             ? result.dimensionePagina
             : (numero === 1 && ricevute.length && ricevute.length < dimensione ? ricevute.length : dimensione);
 
-          if (!ricevute.length || righe.length >= totale || numero >= MAX_PAGINE_EXPORT) {
-            return { righe: righe, totale: totale, completo: righe.length >= totale };
+          if (!ricevute.length || righe.length >= totaleIniziale || numero >= MAX_PAGINE_EXPORT) {
+            return {
+              righe: righe,
+              totale: totaleIniziale,
+              completo: righe.length >= totaleIniziale,
+              // Righe arrivate mentre l'export era in corso: è
+              // un'informazione, non un errore — l'export resta valido, solo
+              // non le contiene.
+              nuoveDurante: Math.max(0, totaleUltimo - totaleIniziale),
+            };
           }
           return pagina(numero + 1, dimensioneReale);
         });
@@ -312,14 +330,18 @@
         URL.revokeObjectURL(url);
 
         // Se il conteggio non torna lo diciamo invece di tacere: meglio un
-        // export dichiarato incompleto che un file che sembra completo.
-        mostraMessaggio(
-          exportStatus,
-          esito.completo
-            ? "Esportati " + esito.righe.length + " pagamenti con i filtri attivi."
-            : "Attenzione: esportate " + esito.righe.length + " righe su " + esito.totale + " dichiarate dall'API. Export incompleto.",
-          !esito.completo
-        );
+        // export dichiarato incompleto che un file che sembra completo. Le
+        // righe arrivate DURANTE l'export sono invece un'informazione, non un
+        // errore: il file è coerente con il momento in cui è partito.
+        var messaggio = esito.completo
+          ? "Esportati " + esito.righe.length + " pagamenti con i filtri attivi."
+          : "Attenzione: esportate " + esito.righe.length + " righe su " + esito.totale +
+            " attese. Export incompleto, da rifare prima di usarlo.";
+        if (esito.completo && esito.nuoveDurante > 0) {
+          messaggio += " Nel frattempo sono arrivati " + esito.nuoveDurante +
+            " nuovi pagamenti, non inclusi: rilancia l'export per averli.";
+        }
+        mostraMessaggio(exportStatus, messaggio, !esito.completo);
       })
       .catch(function (err) {
         mostraMessaggio(exportStatus, "Export non riuscito: " + err.message, true);
