@@ -51,7 +51,11 @@
       mostraEsito(
         '<span class="verifica-card__icon" aria-hidden="true">' + icona + "</span>" +
         "<h2>" + etichettaStato + "</h2>" +
-        "<p><strong>" + escapeHtml(result.nomeCognome) + "</strong></p>" +
+        // Il nome non si mostra più: l'endpoint è pubblico e senza login, e
+        // restituire il nominativo rendeva il Libro Soci ricostruibile
+        // camminando i numeri di tessera, che sono progressivi. Chi ha la
+        // tessera in mano il nome ce l'ha stampato davanti: qui serve solo
+        // sapere se quel numero corrisponde a una tessera valida.
         "<p>Numero tessera: " + escapeHtml(numero) + "</p>" +
         "<p>Valida fino al " + formattaData(result.dataScadenza) + "</p>"
       );
