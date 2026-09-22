@@ -177,9 +177,19 @@
   // Endpoint pubblico (nessun login richiesto per un socio che scarica la
   // propria tessera): da qui basta un fetch semplice, senza token.
   function scaricaTessera(socio) {
-    // ?numeroTessera= obbligatorio (fix sicurezza: prima l'id nudo, sequenziale,
-    // era enumerabile da chiunque senza alcun controllo).
-    fetch(window.TRAME_CONFIG.apiBaseUrl + "/api/soci/" + socio.id + "/tessera?numeroTessera=" + encodeURIComponent(socio.numeroTessera))
+    // ?token= obbligatorio: un valore casuale a 128 bit per socio, che arriva
+    // nelle righe di GET /api/soci. Il numero tessera NON apre più il PDF —
+    // era una sequenza prevedibile (PT-AAAA-NNNN) e l'endpoint è pubblico,
+    // quindi chiunque poteva scaricare la tessera di chiunque camminando i
+    // numeri. Il numero resta in tabella, ma solo da mostrare a schermo.
+    if (!socio.tokenTessera) {
+      window.alert(
+        "Questo socio non ha un token tessera nei dati caricati: premi Cerca per " +
+        "ricaricare l'elenco e riprova."
+      );
+      return;
+    }
+    fetch(window.TRAME_CONFIG.apiBaseUrl + "/api/soci/" + socio.id + "/tessera?token=" + encodeURIComponent(socio.tokenTessera))
       .then(function (res) {
         if (!res.ok) throw new Error("Download tessera non riuscito (" + res.status + ").");
         return res.blob();
