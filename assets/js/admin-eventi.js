@@ -387,10 +387,17 @@
     rimborso_richiesto: "Rimborso richiesto", rimborsato: "Rimborsato",
     in_attesa_pagamento_manuale: "In attesa pagamento manuale"
   };
+  // "bonifico" e "contante" non arrivano da Stripe ma da un pagamento
+  // registrato a mano dalla segreteria: mancavano qui (c'erano solo nella
+  // pagina Pagamenti), quindi si sarebbero visti grezzi in questa tabella.
   var METODO_PAGAMENTO_LABELS = {
     card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
-    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay"
+    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay",
+    bonifico: "Bonifico", contante: "Contante"
   };
+  // Il valore a DB è "non_socio": senza etichetta la colonna Tipo mostrava
+  // l'underscore così com'era (segnalato dall'utente su uno screenshot).
+  var TIPO_ISCRIZIONE_LABELS = { socio: "Socio", non_socio: "Non socio" };
 
   function caricaIscritti(eventoId) {
     return apiFetchAuth("/api/eventi/" + eventoId + "/iscritti")
@@ -417,7 +424,7 @@
           tr.innerHTML =
             "<td>" + escapeHtml(stato.eventoCorrenteTitolo || "—") + "</td>" +
             "<td>" + emailCella + "</td>" +
-            "<td>" + escapeHtml(i.tipoIscrizione) + "</td>" +
+            "<td>" + escapeHtml(TIPO_ISCRIZIONE_LABELS[i.tipoIscrizione] || i.tipoIscrizione) + "</td>" +
             "<td>" + (i.numeroPersone || 1) + "</td>" +
             "<td>" + escapeHtml(i.opzionePartecipazioneNome || "—") + "</td>" +
             "<td>" + escapeHtml(STATO_ISCRIZIONE_LABELS[i.stato] || i.stato) + "</td>" +
