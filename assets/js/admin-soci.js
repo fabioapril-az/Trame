@@ -82,9 +82,13 @@
 
   // --- Libro Soci ---
 
+  // I primi otto valori li scrive Stripe da sé; "bonifico" e "contante"
+  // arrivano solo da un incasso registrato a mano (rinnovo o quota) e senza
+  // etichetta si vedevano grezzi in tabella.
   var METODO_PAGAMENTO_LABELS = {
     card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
-    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay"
+    amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay",
+    bonifico: "Bonifico", contante: "Contante"
   };
 
   function cercaSoci() {
@@ -113,6 +117,11 @@
             "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[s.metodoPagamento] || s.metodoPagamento || "—") + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
+            // Registrare la quota è un'azione diversa dal rinnovo (vedi il
+            // commento sul pannello in admin-soci.html): sul socio
+            // cancellato il server risponde 409, quindi il bottone non si
+            // offre affatto.
+            (s.stato !== "cancellato" ? '<button type="button" class="btn btn--outline btn--small" data-action="quota">Registra quota</button> ' : "") +
             '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="storico">Storico</button> ' +
             (s.metodoPagamento ? '<button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button> ' : "") +
@@ -125,6 +134,10 @@
           var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
           if (btnRimborsa) {
             btnRimborsa.addEventListener("click", function () { segnaSocioRimborsato(s); });
+          }
+          var btnQuota = tr.querySelector('[data-action="quota"]');
+          if (btnQuota) {
+            btnQuota.addEventListener("click", function () { apriQuota(s); });
           }
           if (s.stato === "cancellato") {
             tr.querySelector('[data-action="elimina"]').disabled = true;
@@ -296,6 +309,68 @@
         cercaSoci();
       })
       .catch(function (err) { mostraMessaggio(document.getElementById("rinnovo-status"), err.message, true); });
+  });
+
+  // --- Quota tessera (prima quota di un socio censito a mano) ---
+
+  // Il 403 su queste azioni non è un errore del dato ma un permesso che
+  // manca: chi registra incassi deve avere il ruolo che il backend richiede
+  // per scrivere soldi. Detto così invece di lasciare passare il messaggio
+  // generico, che manderebbe a cercare un problema nei campi compilati.
+  function messaggioErrore(err) {
+    if (err.status === 403) {
+      return "Non hai il permesso di registrare pagamenti: serve il ruolo che autorizza la gestione degli incassi.";
+    }
+    return err.message;
+  }
+
+  function apriQuota(socio) {
+    stato.quotaSocioId = socio.id;
+    document.getElementById("quota-socio-label").textContent =
+      "Socio: " + socio.nome + " " + socio.cognome + " — tessera n. " + socio.numeroTessera;
+    document.getElementById("qta-data").value = new Date().toISOString().slice(0, 10);
+    document.getElementById("qta-metodo").value = "";
+    document.getElementById("qta-importo").value = "";
+    document.getElementById("qta-riferimento").value = "";
+    document.getElementById("quota-status").hidden = true;
+    document.getElementById("pannello-quota").hidden = false;
+    document.getElementById("pannello-quota").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("btn-annulla-quota").addEventListener("click", function () {
+    document.getElementById("pannello-quota").hidden = true;
+  });
+
+  document.getElementById("btn-salva-quota").addEventListener("click", function () {
+    var statusEl = document.getElementById("quota-status");
+    var metodo = document.getElementById("qta-metodo").value;
+    var data = document.getElementById("qta-data").value;
+    var importoVal = document.getElementById("qta-importo").value;
+
+    // Tutti e tre obbligatori lato server. Controllati anche qui perché un
+    // campo dimenticato torni come "manca questo" sul posto, invece che come
+    // errore di validazione dopo il giro di rete. Importo: si controlla la
+    // stringa vuota, non il valore — 0 è un importo valido.
+    if (!metodo) { mostraMessaggio(statusEl, "Scegli il metodo di pagamento.", true); return; }
+    if (!data) { mostraMessaggio(statusEl, "Indica la data dell'incasso.", true); return; }
+    if (importoVal === "") { mostraMessaggio(statusEl, "Indica l'importo (0 se la quota è omaggio).", true); return; }
+
+    var payload = {
+      metodoPagamento: metodo,
+      importo: parseFloat(importoVal),
+      dataPagamento: data,
+      riferimentoPagamento: document.getElementById("qta-riferimento").value.trim() || null
+    };
+    apiFetchAuth("/api/soci/" + stato.quotaSocioId + "/quota", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function () {
+        document.getElementById("pannello-quota").hidden = true;
+        cercaSoci();
+      })
+      .catch(function (err) { mostraMessaggio(statusEl, messaggioErrore(err), true); });
   });
 
   // Il rimborso vero si fa dal Dashboard Stripe: questa azione registra solo
