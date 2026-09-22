@@ -38,7 +38,35 @@ I permessi si danno assegnando **ruoli** a una persona. Una persona può averne 
 | **GestionePagamenti** | Solo la cassa: registra e corregge incassi, senza accedere all'anagrafica |
 | **Admin** | Amministrazione tecnica del sistema. Non è una carica del direttivo |
 
-> **Nota sul ruolo GestionePagamenti.** Oggi ha senso solo **in aggiunta** a una carica. Da solo autorizza a registrare un incasso ma non a leggere gli elenchi da cui si raggiunge il socio o l'iscritto: chi lo avesse soltanto lui aprirebbe il Libro Soci e troverebbe una tabella vuota. È un limite noto, in corso di sistemazione. Fino ad allora, non assegnarlo da solo.
+> **Nota sul ruolo GestionePagamenti.** Oggi va assegnato **in aggiunta** a una carica. Chi lo avesse soltanto lui è autorizzato a registrare gli incassi, ma le pagine descritte in questa guida non sono fatte per lui: aprendo il Libro Soci o la pagina Pagamenti troverebbe una tabella vuota, perché quelle mostrano anche dati che a lui non competono e il sistema glieli nega. La parte che gli serve — un elenco ridotto con solo nome, tessera e stato dell'incasso — esiste già nel sistema ma non ha ancora una pagina. Fino ad allora, assegna questo ruolo solo a chi ha già una carica.
+
+### Chi può fare cosa, azione per azione
+
+Le pagine mostrano gli stessi pulsanti a tutti (vedi sotto il perché). Questa è la tabella di chi viene effettivamente autorizzato.
+
+| Azione | Presidente | Segretario | VicePresidente | Solo cassa |
+|---|---|---|---|---|
+| Creare, modificare, eliminare un evento | sì | **no** | **no** | no |
+| Immagine di un evento | sì | **no** | **no** | no |
+| Salvare le impostazioni (link social, quota associativa, sconti) | sì | **no** | **no** | no |
+| Vedere gli iscritti e gli interessati di un evento | sì | sì | sì | no |
+| Annullare o eliminare un'iscrizione, segnare rimborsi | sì | sì | **no** | no |
+| Cercare i soci, vedere lo storico di un socio | sì | sì | sì | no |
+| Modificare o eliminare un socio, export CSV, scadenze | sì | sì | **no** | no |
+| Rinnovare una tessera | sì | sì | sì | **no** |
+| Registrare o correggere un incasso (quota, pagamento iscrizione) | sì | sì | sì | sì |
+| Confermare un pagamento manuale | sì | sì | sì | sì |
+| Vedere la pagina Pagamenti | sì | sì | sì | **no** |
+| Scaricare la tessera di un socio | sì | sì | sì | no |
+
+Il ruolo **Admin** può fare tutto: è amministrazione tecnica, non una carica.
+
+Le caselle che sorprendono di più, e che vale la pena sapere prima di sbatterci contro:
+
+- **Gli eventi li gestiscono solo Presidente e Admin.** Segretario e Vicepresidente vedono la pagina e i pulsanti, ma non possono creare né modificare un evento.
+- **Anche le impostazioni sono di Presidente e Admin**, comprese la quota associativa e lo sconto socio, che pure riguardano solo i soci. È un limite noto: il permesso vale per l'intera schermata, non campo per campo. Un Segretario che deve cambiare la quota la fa cambiare al Presidente.
+- **Il Vicepresidente/tesoriere vede tutto e incassa, ma non modifica l'anagrafica.** Può rinnovare e registrare incassi, non può modificare o eliminare un socio, né esportare l'elenco, né annullare un'iscrizione.
+- **Chi tiene solo la cassa non può rinnovare**, ed è voluto: il rinnovo sposta la scadenza della tessera, quindi cambia l'anagrafica. Per registrare i soldi di una tessera c'è *Registra quota*.
 
 ### Come si assegna un ruolo a una persona
 
@@ -183,7 +211,7 @@ Compilato il modulo, il socio compare in elenco con il suo numero di tessera. **
 ### Le azioni su ogni riga
 
 - **Modifica** — dati di contatto: nome, cognome, telefono, indirizzo, città, CAP.
-- **Rinnova** — rinnovo annuale della tessera. Registra l'incasso **e insieme** sposta la scadenza, riporta il socio ad attivo, azzera i promemoria e il contatore degli eventi scontati. Da usare **solo per un rinnovo vero**.
+- **Rinnova** — rinnovo annuale della tessera. Registra l'incasso **e insieme** sposta la scadenza, riporta il socio ad attivo, azzera i promemoria e il contatore degli eventi scontati. Da usare **solo per un rinnovo vero**. Non è disponibile a chi ha solo il ruolo della cassa, proprio perché cambia l'anagrafica.
 - **Registra quota** — registra un incasso senza toccare nient'altro. È quello che serve per la prima quota. Vedi capitolo 6.
 - **Scarica tessera** — genera il PDF della tessera.
 - **Storico** — tutte le modifiche fatte su quel socio: data e ora, cosa è cambiato da cosa a cosa, e **chi** l'ha fatto. È la sede in cui si chiarisce un dubbio su un dato, invece di andare a memoria.
@@ -256,5 +284,6 @@ Sotto il pulsante compare l'esito. Se dice che l'export è **incompleto**, non u
 | Hai appena ricevuto un ruolo ma non cambia niente | Esci e rientra |
 | "Si è verificato un errore imprevisto" | Non è colpa di quello che hai scritto. Riprova una volta; se si ripete, segnalalo a chi cura il sito indicando **cosa stavi facendo** |
 | La tabella dei soci è vuota e sai che i soci ci sono | Probabilmente hai solo il ruolo della cassa, che non dà accesso all'anagrafica (capitolo 2) |
+| Un pulsante c'è ma a te dà errore e a un collega funziona | Avete ruoli diversi: guarda la tabella del capitolo 2 |
 
 Per qualunque segnalazione, la cosa più utile da riportare è: quale pagina, quale pulsante, e cosa è comparso a schermo.
