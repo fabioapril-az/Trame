@@ -127,6 +127,47 @@
             <p class="form-note" id="rinnovo-status" role="alert" hidden></p>
           </div>
 
+          <!-- Pannello quota tessera (prima quota, non rinnovo).
+               Deliberatamente separato da "Rinnova": quello, oltre a
+               registrare l'incasso, ricalcola la scadenza, riporta lo stato
+               ad attivo, azzera i due flag di promemoria e il contatore
+               eventi frequentati. Usarlo per registrare la prima quota di un
+               socio censito a mano falserebbe cinque dati per scriverne uno. -->
+          <div id="pannello-quota" class="contact-form admin-panel" hidden>
+            <h3>Registra quota tessera</h3>
+            <p class="form-note" id="quota-socio-label"></p>
+            <p class="form-note">Per un socio inserito a mano che ha pagato la quota fuori dal sito (contanti, bonifico,
+              Satispay, PayPal diretto). Registra solo l'incasso sulla tessera <strong>corrente</strong>: non sposta la
+              scadenza e non cambia lo stato del socio — per quello serve "Rinnova". Se la quota è già registrata, salvare
+              di nuovo la <strong>corregge</strong> invece di aggiungere un secondo incasso.</p>
+            <div class="form-row"><label for="qta-data">Data dell'incasso</label><input type="date" id="qta-data"></div>
+            <div class="form-row">
+              <label for="qta-metodo">Metodo di pagamento</label>
+              <!-- Esattamente i quattro metodi ammessi dal vincolo sul
+                   database (CK_iscrizioni_metodo). "Carta" non c'è
+                   volutamente: è un valore che scrive Stripe sui pagamenti
+                   online, e il server rifiuterebbe la scelta. -->
+              <select id="qta-metodo">
+                <option value="">— scegli —</option>
+                <option value="contante">Contante</option>
+                <option value="bonifico">Bonifico</option>
+                <option value="satispay">Satispay</option>
+                <option value="paypal">PayPal</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="qta-importo">Importo (€)</label>
+              <input type="number" id="qta-importo" min="0" step="0.01">
+              <p class="form-note">0 è ammesso, per tracciare una quota omaggio senza far sparire l'incasso dai conti.</p>
+            </div>
+            <div class="form-row"><label for="qta-riferimento">Riferimento pagamento (facoltativo)</label><input type="text" id="qta-riferimento" maxlength="100"></div>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-salva-quota">Registra quota</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-quota">Annulla</button>
+            </div>
+            <p class="form-note" id="quota-status" role="alert" hidden></p>
+          </div>
+
           <!-- Pannello storico/audit -->
           <div id="pannello-storico" class="admin-panel" hidden>
             <h3>Storico modifiche</h3>

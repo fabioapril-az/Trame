@@ -444,6 +444,16 @@
                 : ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>')
               : "") +
             (i.stato === "in_attesa_pagamento_manuale" ? ' <button type="button" class="btn btn--primary btn--small" data-action="conferma-manuale">Conferma pagamento ricevuto</button>' : "") +
+            // Solo sulle righe senza checkout Stripe. Su una riga pagata
+            // online l'importo e il metodo veri sono quelli del checkout, che
+            // hanno la precedenza in lettura: scrivere qui un valore a mano
+            // non cambierebbe nulla di visibile, cioè sarebbe un bottone che
+            // finge di funzionare. Un errore su un pagamento Stripe si
+            // rimedia col rimborso, non riscrivendo l'importo.
+            (!i.checkoutEventoId
+              ? ' <button type="button" class="btn btn--outline btn--small" data-action="pagamento">' +
+                (i.metodoPagamento ? "Correggi pagamento" : "Registra pagamento") + "</button>"
+              : "") +
             '</td>';
           tr.querySelector('[data-action="annulla"]').addEventListener("click", function () { annullaIscrizione(i.id); });
           tr.querySelector('[data-action="elimina"]').addEventListener("click", function () { eliminaIscrizione(i.id); });
@@ -458,6 +468,10 @@
           var btnConfermaManuale = tr.querySelector('[data-action="conferma-manuale"]');
           if (btnConfermaManuale) {
             btnConfermaManuale.addEventListener("click", function () { confermaPagamentoManuale(i.id); });
+          }
+          var btnPagamento = tr.querySelector('[data-action="pagamento"]');
+          if (btnPagamento) {
+            btnPagamento.addEventListener("click", function () { apriPagamentoIscrizione(i, nomeCompleto); });
           }
           tbody.appendChild(tr);
         });
@@ -504,6 +518,78 @@
       .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
+
+  // --- Pagamento di una singola iscrizione (registrazione o correzione) ---
+
+  // I quattro metodi che il server accetta per un incasso registrato a mano,
+  // cioè quelli nella tendina del pannello. I valori Stripe (card, link,
+  // apple_pay…) restano fuori: li scrive Stripe e il vincolo sul database li
+  // rifiuta qui. Serve per non pre-selezionare un valore che il salvataggio
+  // farebbe poi respingere.
+  var METODI_MANUALI = ["contante", "bonifico", "satispay", "paypal"];
+
+  // Il 403 qui non è un problema del dato ma un permesso che manca: chi
+  // registra incassi deve avere il ruolo che il backend richiede per
+  // scrivere soldi. Il messaggio generico manderebbe a cercare l'errore nei
+  // campi compilati.
+  function messaggioErrorePagamento(err) {
+    if (err.status === 403) {
+      return "Non hai il permesso di registrare pagamenti: serve il ruolo che autorizza la gestione degli incassi.";
+    }
+    return err.message;
+  }
+
+  function apriPagamentoIscrizione(iscrizione, nomeCompleto) {
+    stato.pagamentoIscrizioneId = iscrizione.id;
+    document.getElementById("pag-isc-label").textContent =
+      "Iscrizione di " + (nomeCompleto || iscrizione.emailIscrizione) +
+      " — " + (iscrizione.numeroPersone || 1) + (iscrizione.numeroPersone > 1 ? " persone" : " persona") +
+      (iscrizione.importoPagato != null ? " — importo attuale " + iscrizione.importoPagato + " €" : " — nessun importo registrato");
+    document.getElementById("pag-isc-data").value = new Date().toISOString().slice(0, 10);
+    document.getElementById("pag-isc-metodo").value =
+      METODI_MANUALI.indexOf(iscrizione.metodoPagamento) !== -1 ? iscrizione.metodoPagamento : "";
+    document.getElementById("pag-isc-importo").value =
+      iscrizione.importoPagato != null ? iscrizione.importoPagato : "";
+    document.getElementById("pag-isc-riferimento").value = "";
+    document.getElementById("pagamento-iscrizione-status").hidden = true;
+    document.getElementById("pannello-pagamento-iscrizione").hidden = false;
+    document.getElementById("pannello-pagamento-iscrizione").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("btn-annulla-pagamento-iscrizione").addEventListener("click", function () {
+    document.getElementById("pannello-pagamento-iscrizione").hidden = true;
+  });
+
+  document.getElementById("btn-salva-pagamento-iscrizione").addEventListener("click", function () {
+    var statusEl = document.getElementById("pagamento-iscrizione-status");
+    var metodo = document.getElementById("pag-isc-metodo").value;
+    var data = document.getElementById("pag-isc-data").value;
+    var importoVal = document.getElementById("pag-isc-importo").value;
+
+    // Tutti e tre obbligatori lato server: controllati anche qui perché un
+    // campo dimenticato torni come "manca questo" sul posto. Sull'importo si
+    // controlla la stringa vuota e non il valore, perché 0 è valido.
+    if (!metodo) { mostraMessaggio(statusEl, "Scegli il metodo di pagamento.", true); return; }
+    if (!data) { mostraMessaggio(statusEl, "Indica la data dell'incasso.", true); return; }
+    if (importoVal === "") { mostraMessaggio(statusEl, "Indica l'importo (0 se l'ingresso è gratuito).", true); return; }
+
+    var payload = {
+      metodoPagamento: metodo,
+      importoPagato: parseFloat(importoVal),
+      dataPagamento: data,
+      riferimentoPagamento: document.getElementById("pag-isc-riferimento").value.trim() || null
+    };
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/iscritti/" + stato.pagamentoIscrizioneId + "/pagamento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    })
+      .then(function () {
+        document.getElementById("pannello-pagamento-iscrizione").hidden = true;
+        caricaIscritti(stato.eventoCorrenteId);
+      })
+      .catch(function (err) { mostraMessaggio(statusEl, messaggioErrorePagamento(err), true); });
+  });
 
   document.getElementById("btn-vedi-iscritti").addEventListener("click", function () {
     caricaIscritti(stato.eventoCorrenteId);

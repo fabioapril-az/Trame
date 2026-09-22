@@ -310,6 +310,46 @@
               </table>
             </div>
 
+            <!-- Registrazione/correzione dell'incasso di una singola
+                 iscrizione. Non cambia lo stato dell'iscrizione: serve sia a
+                 registrare un pagamento ricevuto fuori dal sito, sia a
+                 correggere una riga già confermata con l'importo o il metodo
+                 sbagliato. -->
+            <div id="pannello-pagamento-iscrizione" class="contact-form admin-panel" hidden>
+              <h3>Registra pagamento iscrizione</h3>
+              <p class="form-note" id="pag-isc-label"></p>
+              <p class="form-note">Per un'iscrizione pagata fuori dal sito (contanti, bonifico, Satispay, PayPal diretto)
+                o per correggere un importo sbagliato. Non cambia lo stato dell'iscrizione — per quello usa i bottoni
+                sulla riga. Resta scritto nello storico chi ha registrato cosa e quando.</p>
+              <div class="form-row"><label for="pag-isc-data">Data dell'incasso</label><input type="date" id="pag-isc-data"></div>
+              <div class="form-row">
+                <label for="pag-isc-metodo">Metodo di pagamento</label>
+                <!-- Gli stessi quattro valori del pannello quota in
+                     admin-soci.html, ammessi dal vincolo sul database.
+                     "Carta" non c'è volutamente: la scrive Stripe sui
+                     pagamenti online e il server la rifiuterebbe qui. -->
+                <select id="pag-isc-metodo">
+                  <option value="">— scegli —</option>
+                  <option value="contante">Contante</option>
+                  <option value="bonifico">Bonifico</option>
+                  <option value="satispay">Satispay</option>
+                  <option value="paypal">PayPal</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="pag-isc-importo">Importo (€)</label>
+                <input type="number" id="pag-isc-importo" min="0" step="0.01">
+                <p class="form-note">È l'importo totale incassato per questa riga. 0 è ammesso, per tracciare un ingresso
+                  gratuito invece di lasciarlo vuoto.</p>
+              </div>
+              <div class="form-row"><label for="pag-isc-riferimento">Riferimento pagamento (facoltativo)</label><input type="text" id="pag-isc-riferimento" maxlength="100"></div>
+              <div class="admin-form__actions">
+                <button type="button" class="btn btn--primary" id="btn-salva-pagamento-iscrizione">Salva pagamento</button>
+                <button type="button" class="btn btn--outline" id="btn-annulla-pagamento-iscrizione">Annulla</button>
+              </div>
+              <p class="form-note" id="pagamento-iscrizione-status" role="alert" hidden></p>
+            </div>
+
             <!-- "Informami quando partirà", solo consultazione (vedi
                  admin-eventi.js: nessuna azione, la segreteria notifica a
                  mano). -->
