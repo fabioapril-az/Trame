@@ -65,7 +65,7 @@ Le caselle che sorprendono di più, e che vale la pena sapere prima di sbatterci
 
 - **Gli eventi li gestiscono solo Presidente e Admin.** Segretario e Vicepresidente vedono la pagina e i pulsanti, ma non possono creare né modificare un evento.
 - **Anche le impostazioni sono di Presidente e Admin**, comprese la quota associativa e lo sconto socio, che pure riguardano solo i soci. È un limite noto: il permesso vale per l'intera schermata, non campo per campo. Un Segretario che deve cambiare la quota la fa cambiare al Presidente.
-- **Il Vicepresidente/tesoriere vede tutto e incassa, ma non modifica l'anagrafica.** Può rinnovare e registrare incassi, non può modificare o eliminare un socio, né esportare l'elenco, né annullare un'iscrizione.
+- **Il Vicepresidente/tesoriere vede il Libro Soci, gli iscritti e i pagamenti, e incassa, ma non modifica l'anagrafica.** Può rinnovare e registrare incassi, non può modificare o eliminare un socio, né esportare l'elenco, né annullare un'iscrizione, né caricare l'elenco delle tessere in scadenza.
 - **Chi tiene solo la cassa non può rinnovare**, ed è voluto: il rinnovo sposta la scadenza della tessera, quindi cambia l'anagrafica. Per registrare i soldi di una tessera c'è *Registra quota*.
 
 ### Come si assegna un ruolo a una persona
