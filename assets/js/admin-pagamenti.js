@@ -100,6 +100,26 @@
     bonifico: "Bonifico", contante: "Contante"
   };
 
+  // Sulle righe di tipo tessera l'API non manda sempre uno stato del pagamento:
+  // per le tessere comprate col checkout Stripe manda lo stato CORRENTE del
+  // socio, che è un'altra cosa. Lasciarlo passare significa scrivere "scaduto"
+  // accanto a un incasso realmente avvenuto, appena quel socio arriva a
+  // scadenza — un dato falso su una vista contabile. Qui l'unica lettura sensata
+  // è quella del pagamento: una riga tessera esiste solo se un incasso c'è
+  // stato, quindi qualunque valore del ciclo di vita della tessera vale
+  // "Confermata", che è ciò che l'API manda già per le quote e i rinnovi.
+  // Volutamente non si nasconde la colonna: una cella vuota si legge come dato
+  // mancante, ed è peggio di un valore corretto.
+  var STATI_CICLO_VITA_SOCIO = ["attivo", "scaduto", "decaduto", "cancellato"];
+
+  function statoLeggibile(p) {
+    var stato = p.stato;
+    if (p.tipo === "tessera" && STATI_CICLO_VITA_SOCIO.indexOf(stato) !== -1) {
+      stato = "confermata";
+    }
+    return STATO_LABELS[stato] || stato;
+  }
+
   // Filtri attivi in questo momento, letti una volta sola: li usano sia la
   // ricerca sia l'export CSV, che deve esportare esattamente ciò che l'utente
   // ha davanti — leggerli in due punti diversi è il modo classico per farli
@@ -142,7 +162,7 @@
             "<td>" + escapeHtml(p.email) + "</td>" +
             "<td>" + (p.numeroPersone || 1) + "</td>" +
             "<td>" + escapeHtml(p.opzionePartecipazioneNome || "—") + "</td>" +
-            "<td>" + escapeHtml(STATO_LABELS[p.stato] || p.stato) + "</td>" +
+            "<td>" + escapeHtml(statoLeggibile(p)) + "</td>" +
             "<td>" + (p.importoPagato != null ? p.importoPagato + " €" : "—") + "</td>" +
             "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[p.metodoPagamento] || p.metodoPagamento || "—") + "</td>" +
             "<td>" + escapeHtml(p.allergieNote || "—") + "</td>" +
@@ -224,7 +244,7 @@
     { testata: "Email", valore: function (p) { return p.email; } },
     { testata: "Persone", valore: function (p) { return p.numeroPersone || 1; } },
     { testata: "Modalita", valore: function (p) { return p.opzionePartecipazioneNome; } },
-    { testata: "Stato", valore: function (p) { return STATO_LABELS[p.stato] || p.stato; } },
+    { testata: "Stato", valore: function (p) { return statoLeggibile(p); } },
     // Senza il simbolo €, così la colonna resta sommabile.
     { testata: "Importo", valore: function (p) { return importoCsv(p.importoPagato); }, grezzo: true },
     { testata: "Metodo", valore: function (p) { return METODO_PAGAMENTO_LABELS[p.metodoPagamento] || p.metodoPagamento; } },

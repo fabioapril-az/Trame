@@ -91,6 +91,11 @@
     bonifico: "Bonifico", contante: "Contante"
   };
 
+  function metodoLeggibile(metodo) {
+    if (!metodo) return "—";
+    return METODO_PAGAMENTO_LABELS[metodo] || metodo;
+  }
+
   function cercaSoci() {
     var ricerca = document.getElementById("soci-ricerca").value.trim();
     var filtroStato = document.getElementById("soci-filtro-stato").value;
@@ -114,7 +119,13 @@
             "<td>" + escapeHtml(s.numeroTessera) + "</td>" +
             "<td>" + formattaData(s.dataScadenza) + "</td>" +
             '<td><span class="status-badge status-badge--' + escapeHtml(s.stato) + '">' + escapeHtml(s.stato) + "</span></td>" +
-            "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[s.metodoPagamento] || s.metodoPagamento || "—") + "</td>" +
+            // Colonna "Metodo": per chi la legge vuol dire "come ha pagato", e
+            // le due sorgenti rispondono a quella domanda per due insiemi
+            // disgiunti di soci. metodoPagamento copre solo le tessere comprate
+            // col checkout Stripe, quindi da solo lasciava vuota la riga di ogni
+            // socio che ha pagato fuori dal sito — il dato c'era, mancava qui.
+            // L'unione è sicura perché nessun socio ha entrambi valorizzati.
+            "<td>" + escapeHtml(metodoLeggibile(s.metodoPagamento || s.ultimoIncassoMetodo)) + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
             // Registrare la quota è un'azione diversa dal rinnovo (vedi il
@@ -124,7 +135,22 @@
             (s.stato !== "cancellato" ? '<button type="button" class="btn btn--outline btn--small" data-action="quota">Registra quota</button> ' : "") +
             '<button type="button" class="btn btn--outline btn--small" data-action="tessera">Scarica tessera</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="storico">Storico</button> ' +
-            (s.metodoPagamento ? '<button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button> ' : "") +
+            // Il cancello è "questo socio ha pagato qualcosa", e i pagamenti
+            // arrivano da due posti che non si sovrappongono: metodoPagamento
+            // esiste solo per le tessere comprate col checkout Stripe (che non
+            // scrive fra gli incassi registrati a mano), ultimoIncassoMetodo
+            // solo per quote e rinnovi registrati a mano. Guardarne uno solo
+            // escluderebbe in blocco metà dei soci — con `ultimoIncassoMetodo`
+            // da solo, proprio i quattro che hanno pagato online, cioè quelli
+            // per cui un rimborso è più probabile. Chi non ha pagato nulla non
+            // ha nessuno dei due, e resta senza pulsante.
+            // Già rimborsato: niente "segna" (sarebbe una seconda pressione a
+            // vuoto), ma l'annullamento, perché il flag si preme per errore.
+            (s.rimborsato
+              ? '<button type="button" class="btn btn--outline btn--small" data-action="annulla-rimborso">Annulla rimborso</button> '
+              : (s.metodoPagamento || s.ultimoIncassoMetodo)
+                ? '<button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button> '
+                : "") +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button></td>';
           tr.querySelector('[data-action="modifica"]').addEventListener("click", function () { apriModifica(s); });
           tr.querySelector('[data-action="rinnova"]').addEventListener("click", function () { apriRinnovo(s); });
@@ -134,6 +160,10 @@
           var btnRimborsa = tr.querySelector('[data-action="rimborsa"]');
           if (btnRimborsa) {
             btnRimborsa.addEventListener("click", function () { segnaSocioRimborsato(s); });
+          }
+          var btnAnnullaRimborso = tr.querySelector('[data-action="annulla-rimborso"]');
+          if (btnAnnullaRimborso) {
+            btnAnnullaRimborso.addEventListener("click", function () { annullaRimborsoSocio(s); });
           }
           var btnQuota = tr.querySelector('[data-action="quota"]');
           if (btnQuota) {
@@ -394,6 +424,20 @@
       return;
     }
     apiFetchAuth("/api/soci/" + socio.id + "/rimborsato", { method: "POST" })
+      .then(function () { cercaSoci(); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Togliere il contrassegno, per il caso concreto in cui è stato messo sul
+  // socio sbagliato. Non è un rimborso annullato presso il gateway: come la
+  // POST, qui si scrive soltanto cosa risulta a noi. Le due direzioni lasciano
+  // due voci di storico distinguibili, quindi resta scritto chi ha fatto cosa.
+  function annullaRimborsoSocio(socio) {
+    if (!window.confirm("Togliere il contrassegno di rimborso dalla tessera di " + socio.nome + " " +
+      socio.cognome + "? Serve se era stato messo per errore: non annulla un rimborso già fatto su Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/soci/" + socio.id + "/rimborsato", { method: "DELETE" })
       .then(function () { cercaSoci(); })
       .catch(function (err) { window.alert(err.message); });
   }
