@@ -119,6 +119,17 @@
             <input type="text" id="cap" name="cap" maxlength="10">
           </div>
 
+          <!-- Facoltativa, a differenza del consenso sotto: oggi alimenta solo
+               una lista consultata a mano dalla segreteria, non un invio
+               automatico (stesso campo consensoNewsletter già usato da
+               interesse-evento.html). -->
+          <div class="form-row form-row--checkbox">
+            <label>
+              <input type="checkbox" id="newsletter">
+              <span>Vuoi ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</span>
+            </label>
+          </div>
+
           <div class="form-row form-row--checkbox">
             <label>
               <input type="checkbox" id="consenso" name="consenso" required>
@@ -145,6 +156,15 @@
           </div>
 
           <div id="mt-blocchi-persone"></div>
+
+          <!-- Come mt-consenso: una sola scelta vale per tutte le persone di
+               questa iscrizione, non una per persona. Facoltativa. -->
+          <div class="form-row form-row--checkbox">
+            <label>
+              <input type="checkbox" id="mt-newsletter">
+              <span>Volete ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</span>
+            </label>
+          </div>
 
           <div class="form-row form-row--checkbox">
             <label>

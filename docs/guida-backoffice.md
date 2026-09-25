@@ -215,7 +215,7 @@ Compilato il modulo, il socio compare in elenco con il suo numero di tessera. **
 - **Registra quota** — registra un incasso senza toccare nient'altro. È quello che serve per la prima quota. Vedi capitolo 6.
 - **Scarica tessera** — genera il PDF della tessera.
 - **Storico** — tutte le modifiche fatte su quel socio: data e ora, cosa è cambiato da cosa a cosa, e **chi** l'ha fatto. È la sede in cui si chiarisce un dubbio su un dato, invece di andare a memoria.
-- **Segna come rimborsato** — come per gli eventi: il rimborso vero si fa prima da Stripe, questo lo registra.
+- **Segna come rimborsato** — come per gli eventi: il rimborso vero si fa prima da Stripe (o aprendo la cassa, se aveva pagato in contanti), questo lo registra. Compare solo sui soci di cui risulta un pagamento. Dopo averlo premuto, al suo posto compare **Annulla rimborso**, che serve se il contrassegno è finito sul socio sbagliato: non annulla il rimborso vero, toglie solo quello che risulta a noi. Entrambe le operazioni restano nello Storico con il nome di chi le ha fatte.
 - **Elimina** — non cancella niente per davvero: mette il socio in stato *cancellato*, e da quel momento non si può più rinnovare né iscrivere a eventi. Tessere, rinnovi e storico restano.
 
 ### Tessere in scadenza

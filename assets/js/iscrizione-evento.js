@@ -23,6 +23,8 @@
 // POST /api/eventi/{id}/iscriviti.
 
 (function () {
+  var CONSENSO_VERSIONE = "1.0"; // versione dell'informativa privacy corrente (privacy.html)
+
   function escapeHtml(value) {
     var div = document.createElement("div");
     div.textContent = value == null ? "" : String(value);
@@ -74,6 +76,10 @@
   var opzionePrezzoTotale = document.getElementById("opzione-prezzo-totale");
   var campoNomeSoloEvento = document.getElementById("campo-nome-solo-evento");
   var campoCognomeSoloEvento = document.getElementById("campo-cognome-solo-evento");
+  var campoNewsletterSoloEvento = document.getElementById("campo-newsletter-solo-evento");
+  var campoConsensoSoloEvento = document.getElementById("campo-consenso-solo-evento");
+  var inputSeConsenso = document.getElementById("se-consenso");
+  var inputSeNewsletter = document.getElementById("se-newsletter");
   var inputSoloEventoNome = document.getElementById("se-nome");
   var inputSoloEventoCognome = document.getElementById("se-cognome");
 
@@ -83,6 +89,8 @@
   var rinnovoAzioniFacoltative = document.getElementById("rinnovo-facoltativo-azioni");
   var btnSaltaRinnovo = document.getElementById("btn-salta-rinnovo");
   var stepConferma = document.getElementById("step-conferma");
+  var campoNewsletterSocio = document.getElementById("campo-newsletter-socio");
+  var inputScNewsletter = document.getElementById("sc-newsletter");
   var btnConferma = document.getElementById("btn-conferma");
   var confermaStatus = document.getElementById("conferma-status");
   var invioInCorso = document.getElementById("invio-in-corso");
@@ -278,6 +286,8 @@
     btnConfermaSoloEvento.hidden = !visibile;
     campoNomeSoloEvento.hidden = !visibile;
     campoCognomeSoloEvento.hidden = !visibile;
+    campoNewsletterSoloEvento.hidden = !visibile;
+    campoConsensoSoloEvento.hidden = !visibile;
   }
 
   // Il testo del bottone cambia in "Invio in corso…" mentre la richiesta è
@@ -322,6 +332,7 @@
     btnAssociati.disabled = true;
     stepRinnovo.hidden = true;
     stepConferma.hidden = true;
+    campoNewsletterSocio.hidden = true;
     stepInteresse.hidden = true;
     verificaStatus.textContent = "Verifica in corso…";
     verificaStatus.hidden = false;
@@ -348,6 +359,11 @@
         // confondendo a cosa servisse "Conferma").
         btnAssociati.hidden = true;
         mostraCampiSoloEvento(false);
+
+        // null = non gli è mai stato chiesto: si mostra la domanda. true/false
+        // = ha già risposto (sì o no): non si richiede di nuovo.
+        campoNewsletterSocio.hidden = result.consensoNewsletter !== null;
+        inputScNewsletter.checked = false;
 
         if (stato.richiedeRinnovo) {
           rinnovoTitolo.textContent = "La tua tessera è scaduta";
@@ -414,6 +430,9 @@
       return;
     }
     if (!inputSoloEventoNome.reportValidity() || !inputSoloEventoCognome.reportValidity()) {
+      return;
+    }
+    if (!inputSeConsenso.reportValidity()) {
       return;
     }
     if (stato.opzioniPartecipazione.length && (!inputNumeroPersone.reportValidity() || !inputOpzione.reportValidity())) {
@@ -504,7 +523,8 @@
         citta: document.getElementById("ia-citta").value.trim() || null,
         cap: document.getElementById("ia-cap").value.trim() || null,
         consensoAccettato: document.getElementById("ia-consenso").checked,
-        consensoVersione: "1.0"
+        consensoVersione: CONSENSO_VERSIONE,
+        consensoNewsletter: document.getElementById("ia-newsletter").checked
       })
     })
       .then(function (esito) {
@@ -555,6 +575,23 @@
     if (soloEvento) {
       payload.nome = inputSoloEventoNome.value.trim();
       payload.cognome = inputSoloEventoCognome.value.trim();
+      // Solo qui: un socio già noto ha accettato l'informativa quando si è
+      // iscritto, e i campi non sono nemmeno mostrati fuori da questo passo.
+      payload.consensoAccettato = inputSeConsenso.checked;
+      payload.consensoVersione = CONSENSO_VERSIONE;
+      // TODO(backend): oggi non c'è ancora una colonna dove salvarlo per un
+      // non-socio (dbo.iscrizioni_eventi non ha consenso_newsletter): il
+      // valore viene accettato dal modello ma non scritto da nessuna parte.
+      // Lasciato qui perché il giorno in cui la colonna arriva non serve
+      // toccare il frontend.
+      payload.consensoNewsletter = inputSeNewsletter.checked;
+    }
+
+    // Socio già noto: si chiede solo se GET /api/soci/verifica aveva detto
+    // consensoNewsletter: null (mai chiesto) — altrimenti niente, per non
+    // richiedere una risposta già data.
+    if (!soloEvento && !campoNewsletterSocio.hidden) {
+      payload.consensoNewsletter = inputScNewsletter.checked;
     }
 
     if (!soloEvento && (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo))) {
