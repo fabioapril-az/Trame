@@ -77,7 +77,8 @@
       cap: document.getElementById("cap").value.trim() || null,
       consensoAccettato: document.getElementById("consenso").checked,
       consensoVersione: CONSENSO_VERSIONE,
-      consensoCanale: "web"
+      consensoCanale: "web",
+      consensoNewsletter: document.getElementById("newsletter").checked
     };
 
     submitBtn.disabled = true;
@@ -212,6 +213,7 @@
   var mtNumero = document.getElementById("mt-numero");
   var mtBlocchi = document.getElementById("mt-blocchi-persone");
   var mtConsenso = document.getElementById("mt-consenso");
+  var mtNewsletter = document.getElementById("mt-newsletter");
   var mtTotale = document.getElementById("mt-totale");
   var mtStatus = document.getElementById("mt-status");
   var mtBtnPaga = document.getElementById("mt-btn-paga");
@@ -344,9 +346,11 @@
     if (!persone) {
       return;
     }
+    var newsletter = mtNewsletter.checked;
     persone.forEach(function (p) {
       p.consensoAccettato = true;
       p.consensoVersione = CONSENSO_VERSIONE;
+      p.consensoNewsletter = newsletter;
     });
 
     var testoOriginale = mtBtnPaga.textContent;

@@ -504,7 +504,8 @@
         citta: document.getElementById("ia-citta").value.trim() || null,
         cap: document.getElementById("ia-cap").value.trim() || null,
         consensoAccettato: document.getElementById("ia-consenso").checked,
-        consensoVersione: "1.0"
+        consensoVersione: "1.0",
+        consensoNewsletter: document.getElementById("ia-newsletter").checked
       })
     })
       .then(function (esito) {
