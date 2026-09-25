@@ -23,6 +23,8 @@
 // POST /api/eventi/{id}/iscriviti.
 
 (function () {
+  var CONSENSO_VERSIONE = "1.0"; // versione dell'informativa privacy corrente (privacy.html)
+
   function escapeHtml(value) {
     var div = document.createElement("div");
     div.textContent = value == null ? "" : String(value);
@@ -74,6 +76,10 @@
   var opzionePrezzoTotale = document.getElementById("opzione-prezzo-totale");
   var campoNomeSoloEvento = document.getElementById("campo-nome-solo-evento");
   var campoCognomeSoloEvento = document.getElementById("campo-cognome-solo-evento");
+  var campoNewsletterSoloEvento = document.getElementById("campo-newsletter-solo-evento");
+  var campoConsensoSoloEvento = document.getElementById("campo-consenso-solo-evento");
+  var inputSeConsenso = document.getElementById("se-consenso");
+  var inputSeNewsletter = document.getElementById("se-newsletter");
   var inputSoloEventoNome = document.getElementById("se-nome");
   var inputSoloEventoCognome = document.getElementById("se-cognome");
 
@@ -278,6 +284,8 @@
     btnConfermaSoloEvento.hidden = !visibile;
     campoNomeSoloEvento.hidden = !visibile;
     campoCognomeSoloEvento.hidden = !visibile;
+    campoNewsletterSoloEvento.hidden = !visibile;
+    campoConsensoSoloEvento.hidden = !visibile;
   }
 
   // Il testo del bottone cambia in "Invio in corso…" mentre la richiesta è
@@ -416,6 +424,9 @@
     if (!inputSoloEventoNome.reportValidity() || !inputSoloEventoCognome.reportValidity()) {
       return;
     }
+    if (!inputSeConsenso.reportValidity()) {
+      return;
+    }
     if (stato.opzioniPartecipazione.length && (!inputNumeroPersone.reportValidity() || !inputOpzione.reportValidity())) {
       return;
     }
@@ -504,7 +515,7 @@
         citta: document.getElementById("ia-citta").value.trim() || null,
         cap: document.getElementById("ia-cap").value.trim() || null,
         consensoAccettato: document.getElementById("ia-consenso").checked,
-        consensoVersione: "1.0",
+        consensoVersione: CONSENSO_VERSIONE,
         consensoNewsletter: document.getElementById("ia-newsletter").checked
       })
     })
@@ -556,6 +567,11 @@
     if (soloEvento) {
       payload.nome = inputSoloEventoNome.value.trim();
       payload.cognome = inputSoloEventoCognome.value.trim();
+      // Solo qui: un socio già noto ha accettato l'informativa quando si è
+      // iscritto, e i campi non sono nemmeno mostrati fuori da questo passo.
+      payload.consensoAccettato = inputSeConsenso.checked;
+      payload.consensoVersione = CONSENSO_VERSIONE;
+      payload.consensoNewsletter = inputSeNewsletter.checked;
     }
 
     if (!soloEvento && (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo))) {

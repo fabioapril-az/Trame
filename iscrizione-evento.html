@@ -91,6 +91,17 @@
               <label for="se-cognome">Cognome</label>
               <input type="text" id="se-cognome" maxlength="100" required>
             </div>
+            <!-- Un socio già noto ha già accettato l'informativa quando si è
+                 iscritto: qui serve solo a chi si iscrive al solo evento
+                 senza mai essere passato da un consenso. -->
+            <div class="form-row form-row--checkbox" id="campo-newsletter-solo-evento" hidden>
+              <label><input type="checkbox" id="se-newsletter"> Vuoi ricevere anche la nostra newsletter,
+                con gli altri eventi e novità di TraMe?</label>
+            </div>
+            <div class="form-row form-row--checkbox" id="campo-consenso-solo-evento" hidden>
+              <label><input type="checkbox" id="se-consenso" required> Ho letto e accetto
+                <a href="privacy.html" target="_blank" rel="noopener">l'informativa privacy</a>.</label>
+            </div>
 
             <div class="admin-form__actions">
               <button type="button" class="btn btn--primary" id="btn-conferma-solo-evento" hidden>Conferma</button>

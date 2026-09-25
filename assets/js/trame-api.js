@@ -13,6 +13,7 @@
     posti_esauriti: "I posti disponibili per questo evento sono esauriti.",
     richiede_nuovo_socio: "Email non trovata: completa anche i dati di iscrizione all'associazione.",
     richiede_rinnovo: "La tessera risulta scaduta: è necessario rinnovarla per procedere.",
+    richiede_consenso: "Devi accettare l'informativa sul trattamento dei dati personali per procedere.",
     gia_iscritto: "Risulti già iscritto/a a questo evento con questa email.",
     validation_error: "Controlla i dati inseriti.",
     internal_error: "Si è verificato un errore imprevisto. Riprova più tardi."
