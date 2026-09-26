@@ -126,6 +126,7 @@
             // socio che ha pagato fuori dal sito — il dato c'era, mancava qui.
             // L'unione è sicura perché nessun socio ha entrambi valorizzati.
             "<td>" + escapeHtml(metodoLeggibile(s.metodoPagamento || s.ultimoIncassoMetodo)) + "</td>" +
+            "<td>" + (s.eventiPartecipatiDaRinnovo != null ? s.eventiPartecipatiDaRinnovo : "—") + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
             // Registrare la quota è un'azione diversa dal rinnovo (vedi il

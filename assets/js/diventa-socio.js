@@ -80,6 +80,11 @@
       consensoCanale: "web",
       consensoNewsletter: document.getElementById("newsletter").checked
     };
+    // Solo la segreteria vede questo campo: sul modulo pubblico la checkbox
+    // resta nascosta e non spedita, il contratto API resta false di default.
+    if (modalitaAdmin) {
+      payload.contaComeEventoGiaFatto = document.getElementById("evento-gia-fatto").checked;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Invio in corso…";
@@ -171,6 +176,7 @@
     // mano chi ha già pagato offline), ma entrambe le tab restano scelte
     // valide — è lei a sapere quale usare caso per caso.
     mostraTab("singolo");
+    document.getElementById("campo-evento-gia-fatto").hidden = false;
   } else {
     // "Iscrizione socio" (pagamento online) è il percorso standard per i
     // maggiorenni, quindi la tab predefinita — "Iscrizione minorenne" resta
