@@ -130,6 +130,21 @@
             </label>
           </div>
 
+          <!-- Solo per la segreteria (?admin=1): chi registra un socio a
+               mano lo fa quasi sempre a evento già concluso (paga in
+               contanti/bonifico dopo), quindi di norma HA già fatto un
+               evento — per questo di default è spuntata, al contrario di
+               ogni altra checkbox in questa pagina. Se lasciata spuntata,
+               il contatore usato per lo sconto sugli eventi parte da 1
+               invece di 0. Nascosta sul modulo pubblico: chi si iscrive da
+               solo non ha ancora partecipato a nulla. -->
+          <div class="form-row form-row--checkbox" id="campo-evento-gia-fatto" hidden>
+            <label>
+              <input type="checkbox" id="evento-gia-fatto" checked>
+              <span>Ha già fatto 1 evento?</span>
+            </label>
+          </div>
+
           <div class="form-row form-row--checkbox">
             <label>
               <input type="checkbox" id="consenso" name="consenso" required>

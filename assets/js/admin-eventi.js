@@ -476,9 +476,43 @@
           tbody.appendChild(tr);
         });
         document.getElementById("iscritti-tabella").hidden = false;
+        document.getElementById("riquadro-adegua-contatore").hidden = false;
+        document.getElementById("adegua-contatore-status").hidden = true;
       })
       .catch(function (err) { window.alert(err.message); });
   }
+
+  // Caso non comune: una persona si era iscritta a questo evento da
+  // non-socia (o come socia, il backend lo capisce da sé) ed è socia oggi —
+  // il contatore che decide lo sconto sui prossimi eventi è fissato al
+  // momento dell'iscrizione e non si aggiorna da solo dopo. Alza il
+  // contatore a 1 per chi vi ha partecipato ed è socio ora, senza mai
+  // abbassarlo: non tocca importi già incassati.
+  document.getElementById("btn-adegua-contatore").addEventListener("click", function () {
+    var statusEl = document.getElementById("adegua-contatore-status");
+    if (!window.confirm(
+      "Contare questo evento come \"primo evento\" per lo sconto, per tutti i soci di oggi che vi hanno " +
+      "partecipato? Non tocca nessun pagamento già incassato: alza solo il contatore usato per lo sconto sui " +
+      "prossimi eventi, e solo per chi ce l'ha più basso."
+    )) {
+      return;
+    }
+    statusEl.hidden = true;
+    apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/adegua-contatore-partecipanti", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ valoreMinimo: 1 })
+    })
+      .then(function (risultato) {
+        var modificati = risultato.filter(function (r) { return r.modificato; });
+        var testo = modificati.length
+          ? "Contatore aggiornato per " + modificati.length + " soci: " +
+            modificati.map(function (r) { return r.email + " (" + r.valorePrima + " → " + r.valoreDopo + ")"; }).join(", ")
+          : "Nessuna modifica: tutti i soci che hanno partecipato a questo evento avevano già il contatore a 1 o più.";
+        mostraMessaggio(statusEl, testo, false);
+      })
+      .catch(function (err) { mostraMessaggio(statusEl, messaggioErrorePagamento(err), true); });
+  });
 
   // Il rimborso vero si fa dal Dashboard Stripe (payment_intent_id non
   // mostrato qui ma disponibile lato backend): questa azione registra solo

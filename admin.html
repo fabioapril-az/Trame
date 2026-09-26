@@ -303,6 +303,20 @@
               <p class="form-note" id="modifica-evento-status" role="alert" hidden></p>
             </div>
 
+            <!-- Correzione del contatore "eventi scontati": serve solo per un
+                 caso non comune — una persona era iscritta a questo evento
+                 da non-socia e lo è diventata prima o dopo, quindi il
+                 sistema non le conta quella partecipazione per lo sconto sui
+                 prossimi eventi (fissato al momento dell'iscrizione, non
+                 aggiornato dopo). Non tocca soldi già incassati: alza solo
+                 il contatore, e mai lo abbassa. -->
+            <div class="admin-toolbar" id="riquadro-adegua-contatore" hidden>
+              <button type="button" class="btn btn--outline btn--small" id="btn-adegua-contatore">
+                Conta questo evento per lo sconto dei soci che vi hanno partecipato
+              </button>
+              <p class="form-note" id="adegua-contatore-status" role="status" hidden></p>
+            </div>
+
             <div style="overflow-x:auto;">
               <table class="admin-table" id="iscritti-tabella" hidden>
                 <thead><tr><th>Evento</th><th>Email</th><th>Tipo</th><th>Persone</th><th>Modalità</th><th>Stato</th><th>Importo</th><th>Metodo</th><th>Allergie</th><th>Data</th><th>Azioni</th></tr></thead>
