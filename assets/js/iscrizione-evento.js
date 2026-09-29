@@ -725,12 +725,26 @@
         var nome = blocchi[i].querySelector(".pg-persona-nome");
         var cognome = blocchi[i].querySelector(".pg-persona-cognome");
         var email = blocchi[i].querySelector(".pg-persona-email");
+        var consenso = blocchi[i].querySelector(".pg-persona-consenso");
+        var newsletter = blocchi[i].querySelector(".pg-persona-newsletter");
         if (validare) {
-          if (!nome.reportValidity() || !cognome.reportValidity() || !email.reportValidity()) {
+          if (!nome.reportValidity() || !cognome.reportValidity() || !email.reportValidity() || !consenso.reportValidity()) {
             return null;
           }
         }
-        persone.push({ nome: nome.value.trim(), cognome: cognome.value.trim(), email: email.value.trim() });
+        // Mostrata a tutti indistintamente, socio o non-socio: per chi
+        // risulta già socio al momento del pagamento il backend non scrive
+        // né legge questi tre campi (verificato), quindi non serve
+        // determinarlo qui prima — una chiamata in più per persona (fino a
+        // 6) senza alcun beneficio di correttezza, solo estetico.
+        persone.push({
+          nome: nome.value.trim(),
+          cognome: cognome.value.trim(),
+          email: email.value.trim(),
+          consensoAccettato: consenso.checked,
+          consensoVersione: CONSENSO_VERSIONE,
+          consensoNewsletter: newsletter.checked
+        });
       }
       if (validare) {
         var viste = {};
@@ -760,11 +774,21 @@
           "color:var(--color-terracotta-dark); border-bottom:1px solid var(--color-line);\">Persona " + (i + 1) + "</h4>" +
           "<div class=\"form-row\"><label>Nome</label><input type=\"text\" class=\"pg-persona-nome\" maxlength=\"100\" required></div>" +
           "<div class=\"form-row\"><label>Cognome</label><input type=\"text\" class=\"pg-persona-cognome\" maxlength=\"100\" required></div>" +
-          "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"pg-persona-email\" maxlength=\"255\" required></div>";
+          "<div class=\"form-row\"><label>Email</label><input type=\"email\" class=\"pg-persona-email\" maxlength=\"255\" required></div>" +
+          // Mostrate a tutti: chi risulta già socio non le vede scritte da
+          // nessuna parte (il server le ignora per lui), quindi non c'è un
+          // caso in cui vadano nascoste. Facoltativa la newsletter, come
+          // ovunque; obbligatorio il consenso, come sull'altro wizard.
+          "<div class=\"form-row form-row--checkbox\"><label><input type=\"checkbox\" class=\"pg-persona-newsletter\"> " +
+          "Vuole ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</label></div>" +
+          "<div class=\"form-row form-row--checkbox\"><label><input type=\"checkbox\" class=\"pg-persona-consenso\" required> " +
+          "Ho letto e accetto <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">l'informativa privacy</a> per questa persona.</label></div>";
         if (precedenti[i]) {
           blocco.querySelector(".pg-persona-nome").value = precedenti[i].nome;
           blocco.querySelector(".pg-persona-cognome").value = precedenti[i].cognome;
           blocco.querySelector(".pg-persona-email").value = precedenti[i].email;
+          blocco.querySelector(".pg-persona-consenso").checked = Boolean(precedenti[i].consensoAccettato);
+          blocco.querySelector(".pg-persona-newsletter").checked = Boolean(precedenti[i].consensoNewsletter);
         }
         pgBlocchiPersone.appendChild(blocco);
       }
