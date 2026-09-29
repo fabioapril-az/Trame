@@ -31,6 +31,86 @@
 
   var STATO_LABELS = { bozza: "Bozza", pubblicato: "Pubblicato" };
 
+  // --- Editor rich text (Descrizione) — stesso schema di admin-eventi.js:
+  //     grassetto/corsivo/colore/elenchi sempre, il bottone immagine (per
+  //     loghi o foto inline nel testo, es. il logo dell'attività della
+  //     persona) solo nel pannello Modifica, dove esiste già un id. ---
+  var TOOLBAR_BASE = [["bold", "italic"], [{ color: [] }], [{ list: "ordered" }, { list: "bullet" }]];
+  var TOOLBAR_CON_IMMAGINE = TOOLBAR_BASE.concat([["image"]]);
+  var quillEditors = {};
+
+  function inizializzaEditor(id, conImmagine) {
+    var quill = new Quill("#" + id + "-editor", {
+      theme: "snow",
+      modules: { toolbar: conImmagine ? TOOLBAR_CON_IMMAGINE : TOOLBAR_BASE }
+    });
+    if (conImmagine) {
+      registraGestoreImmagineInline(quill);
+    }
+    quillEditors[id] = quill;
+  }
+
+  inizializzaEditor("tal-descrizione", false);
+  inizializzaEditor("mod-tal-descrizione", true);
+
+  function contenutoQuill(quill) {
+    return quill.getText().trim() === "" ? null : quill.root.innerHTML;
+  }
+
+  // Compatibilità con eventuali talenti creati prima dell'editor rich text
+  // (nessuno ancora in produzione, ma stesso criterio degli eventi: se il
+  // valore non contiene già tag HTML, è testo semplice con eventuali "\n" a
+  // separare i paragrafi).
+  function sembraHtml(testo) {
+    return /<[a-z][\s\S]*>/i.test(testo);
+  }
+
+  function testoSempliceInHtml(testo) {
+    return testo.split(/\n{2,}/).map(function (paragrafo) {
+      return "<p>" + escapeHtml(paragrafo).replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+
+  function impostaContenutoQuill(quill, valore) {
+    if (!valore) {
+      quill.setText("");
+      return;
+    }
+    var html = sembraHtml(valore) ? valore : testoSempliceInHtml(valore);
+    quill.root.innerHTML = DOMPurify.sanitize(html);
+  }
+
+  function registraGestoreImmagineInline(quill) {
+    quill.getModule("toolbar").addHandler("image", function () {
+      if (!stato.talentoCorrenteId) {
+        window.alert("Salva prima il talento per poter inserire immagini nel testo.");
+        return;
+      }
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = "image/jpeg,image/png,image/webp";
+      input.onchange = function () {
+        if (!input.files || !input.files[0]) return;
+        var range = quill.getSelection(true);
+        ridimensionaImmagine(input.files[0], 1600, 0.8)
+          .then(function (blob) {
+            var formData = new FormData();
+            formData.append("file", blob, "immagine.jpg");
+            return apiFetchAuth("/api/talenti/" + stato.talentoCorrenteId + "/immagini-contenuto", {
+              method: "POST",
+              body: formData
+            });
+          })
+          .then(function (result) {
+            quill.insertEmbed(range.index, "image", result.url, "user");
+            quill.setSelection(range.index + 1);
+          })
+          .catch(function (err) { window.alert(err.message); });
+      };
+      input.click();
+    });
+  }
+
   // --- Elenco ---
 
   function caricaTalenti() {
@@ -67,7 +147,7 @@
   document.getElementById("btn-mostra-nuovo-talento").addEventListener("click", function () {
     document.getElementById("tal-nome").value = "";
     document.getElementById("tal-ambito").value = "";
-    document.getElementById("tal-descrizione").value = "";
+    quillEditors["tal-descrizione"].setText("");
     document.getElementById("crea-talento-status").hidden = true;
     document.getElementById("pannello-nuovo-talento").hidden = false;
     document.getElementById("pannello-nuovo-talento").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -82,7 +162,7 @@
     var payload = {
       nome: document.getElementById("tal-nome").value.trim(),
       ambito: document.getElementById("tal-ambito").value.trim(),
-      descrizione: document.getElementById("tal-descrizione").value.trim()
+      descrizione: contenutoQuill(quillEditors["tal-descrizione"])
     };
     apiFetchAuth("/api/talenti", {
       method: "POST",
@@ -114,7 +194,7 @@
     stato.talentoCorrenteId = talento.id;
     document.getElementById("mod-tal-nome").value = talento.nome || "";
     document.getElementById("mod-tal-ambito").value = talento.ambito || "";
-    document.getElementById("mod-tal-descrizione").value = talento.descrizione || "";
+    impostaContenutoQuill(quillEditors["mod-tal-descrizione"], talento.descrizione);
     document.getElementById("mod-tal-stato").value = talento.stato;
     aggiornaAnteprimaImmagine(talento.immagineUrl);
     document.getElementById("mod-tal-immagine-file").value = "";
@@ -136,7 +216,7 @@
     var payload = {
       nome: document.getElementById("mod-tal-nome").value.trim(),
       ambito: document.getElementById("mod-tal-ambito").value.trim(),
-      descrizione: document.getElementById("mod-tal-descrizione").value.trim(),
+      descrizione: contenutoQuill(quillEditors["mod-tal-descrizione"]),
       stato: document.getElementById("mod-tal-stato").value
     };
     apiFetchAuth("/api/talenti/" + stato.talentoCorrenteId, {

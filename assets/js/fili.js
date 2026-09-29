@@ -20,9 +20,52 @@
     return div.innerHTML;
   }
 
-  // Testo libero (nessun editor Quill per questo campo, vedi backend):
-  // niente HTML da sanitizzare, solo paragrafi separati da eventuali "\n".
+  // Dall'editor Quill di admin.html "Descrizione" arriva come HTML
+  // (grassetto/corsivo/colore/liste/immagini inline, es. il logo
+  // dell'attività della persona) — stesso pattern/stessa ragione di
+  // events.js, duplicato qui per la stessa ragione (nessun modulo condiviso
+  // in questo sito). Un talento creato prima dell'editor (nessuno ancora in
+  // produzione, ma per coerenza) avrebbe testo semplice: si distingue
+  // cercando un tag HTML nel valore.
+  var TAG_HTML = /<[a-z][\s\S]*>/i;
+
+  function contieneHtml(testo) {
+    return TAG_HTML.test(testo);
+  }
+
+  function sanitizza(html) {
+    if (!window.DOMPurify) {
+      var div = document.createElement("div");
+      div.innerHTML = html;
+      return escapeHtml(div.textContent);
+    }
+    return window.DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ["p", "br", "strong", "b", "em", "i", "u", "s", "span", "ol", "ul", "li", "a", "img"],
+      ALLOWED_ATTR: ["href", "target", "rel", "src", "alt", "style", "class", "data-list"],
+    });
+  }
+
+  // Quill genera sempre <ol> per gli elenchi, puntati compresi (distinti da
+  // data-list="bullet"/"ordered" su ogni <li>): converte in un vero <ul>
+  // quando serve, così basta il CSS normale del sito — stesso helper di
+  // events.js.
+  function normalizzaListeQuill(container) {
+    container.querySelectorAll("ol").forEach(function (ol) {
+      var primoConTipo = ol.querySelector("li[data-list]");
+      var puntato = primoConTipo && primoConTipo.getAttribute("data-list") === "bullet";
+      ol.querySelectorAll("li[data-list]").forEach(function (li) { li.removeAttribute("data-list"); });
+      if (puntato) {
+        var ul = document.createElement("ul");
+        while (ol.firstChild) { ul.appendChild(ol.firstChild); }
+        ol.replaceWith(ul);
+      }
+    });
+  }
+
   function formattaDescrizione(testo) {
+    if (contieneHtml(testo)) {
+      return sanitizza(testo);
+    }
     return (testo || "")
       .split(/\n+/)
       .map(function (paragrafo) { return paragrafo.trim(); })
@@ -48,6 +91,11 @@
       '<h3 class="event-card__title">' + escapeHtml(talento.nome) + "</h3>" +
       (talento.descrizione ? '<div class="event-card__desc">' + formattaDescrizione(talento.descrizione) + "</div>" : "") +
       "</div>";
+
+    var descEl = article.querySelector(".event-card__desc");
+    if (descEl) {
+      normalizzaListeQuill(descEl);
+    }
 
     return article;
   }

@@ -400,7 +400,7 @@
             <h3>Nuovo talento</h3>
             <div class="form-row"><label for="tal-nome">Nome</label><input type="text" id="tal-nome" maxlength="200"></div>
             <div class="form-row"><label for="tal-ambito">Ambito</label><input type="text" id="tal-ambito" maxlength="100" placeholder="es. Fotografia"></div>
-            <div class="form-row"><label for="tal-descrizione">Descrizione</label><textarea id="tal-descrizione" rows="5" maxlength="5000"></textarea></div>
+            <div class="form-row"><label>Descrizione</label><div id="tal-descrizione-editor" class="quill-editor" style="min-height:120px;"></div></div>
             <div class="admin-form__actions">
               <button type="button" class="btn btn--primary" id="btn-crea-talento">Crea talento</button>
               <button type="button" class="btn btn--outline" id="btn-annulla-nuovo-talento">Annulla</button>
@@ -433,7 +433,11 @@
             <h3>Modifica talento</h3>
             <div class="form-row"><label for="mod-tal-nome">Nome</label><input type="text" id="mod-tal-nome" maxlength="200"></div>
             <div class="form-row"><label for="mod-tal-ambito">Ambito</label><input type="text" id="mod-tal-ambito" maxlength="100"></div>
-            <div class="form-row"><label for="mod-tal-descrizione">Descrizione</label><textarea id="mod-tal-descrizione" rows="6" maxlength="5000"></textarea></div>
+            <!-- Immagini inline (es. il logo dell'attività della persona)
+                 richiedono un talento già salvato: il bottone immagine della
+                 toolbar è attivo solo qui, non nel pannello "Nuovo talento"
+                 sopra — stesso vincolo già applicato agli eventi. -->
+            <div class="form-row"><label>Descrizione</label><div id="mod-tal-descrizione-editor" class="quill-editor" style="min-height:150px;"></div></div>
             <div class="form-row">
               <label for="mod-tal-stato">Stato</label>
               <select id="mod-tal-stato">
