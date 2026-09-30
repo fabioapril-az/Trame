@@ -48,6 +48,31 @@
   var TOOLBAR_CON_IMMAGINE = TOOLBAR_BASE.concat([["image"]]);
   var quillEditors = {};
 
+  // Il formato "image" di Quill è di base a blocco: va sempre a riga
+  // propria, indipendentemente da quanto è piccola — non basta
+  // ridimensionarla per poterci scrivere testo a fianco (stesso difetto
+  // segnalato su Talenti, corretto qui allo stesso modo). Variante inline
+  // (stesso tag <img> in salvataggio: sul sito pubblico events.js non
+  // cambia nulla, legge solo il tag), usata al posto di quella di base nel
+  // gestore sotto. Classe ES6 perché le classi Blot di Quill sono ES6 a
+  // loro volta: non si possono estendere con costruttori/prototype "a
+  // mano" di ES5 (chiamarle senza "new" lancia un errore).
+  var EmbedBlot = Quill.import("blots/embed");
+  class ImmagineInline extends EmbedBlot {
+    static create(url) {
+      var node = super.create(url);
+      node.setAttribute("src", url);
+      node.setAttribute("alt", "");
+      return node;
+    }
+    static value(node) {
+      return node.getAttribute("src");
+    }
+  }
+  ImmagineInline.blotName = "immagineInline";
+  ImmagineInline.tagName = "IMG";
+  Quill.register(ImmagineInline);
+
   function inizializzaEditor(id, conImmagine) {
     var quill = new Quill("#" + id + "-editor", {
       theme: "snow",
@@ -122,7 +147,7 @@
             });
           })
           .then(function (result) {
-            quill.insertEmbed(range.index, "image", result.url, "user");
+            quill.insertEmbed(range.index, "immagineInline", result.url, "user");
             quill.setSelection(range.index + 1);
             // Senza una larghezza propria, l'immagine occupa tutta la riga
             // (nessuno spazio per il testo a fianco) e non c'è modo di
