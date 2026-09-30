@@ -827,10 +827,49 @@ p {
 
 .event-card__desc img,
 .event-detail__desc img {
+  /* display: inline-block (non il "block" del reset globale più sopra, che
+     qui vincerebbe per specificità pari e ordine successivo nel file): con
+     "block" un'immagine va sempre a riga propria a prescindere da quanto è
+     piccola, e il testo non le sta mai a fianco — è la stessa causa del
+     problema corretto sotto per l'editor admin, qui sul lato pubblico. */
+  display: inline-block;
+  vertical-align: middle;
   max-width: 100%;
   height: auto;
   border-radius: var(--radius-m);
   margin: 0.4em 0;
+}
+
+/* Stesso problema, dentro l'editor di admin.html: quill.snow.css si carica
+   PRIMA di questo file, quindi il reset globale "img { display: block }" più
+   sopra vince anche lì, e un'immagine inserita nel testo va sempre a riga
+   propria — segnalato dall'utente, non risolto dal solo ridimensionamento
+   (assets/js/admin-eventi.js e admin-talenti.js impostano già una larghezza
+   sull'immagine, ma senza questa riga restava comunque bloccata sulla sua
+   riga). */
+.ql-editor img {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Classi generate da Quill per il comando "align" della toolbar (grassetto,
+   colore, elenchi si vedono già di default sul testo semplice — l'allineamento
+   invece è una classe sul paragrafo, quindi senza queste regole risulterebbe
+   sempre a sinistra sulle pagine pubbliche, anche se scelto diversamente in
+   admin: lì si vede giusto solo perché l'editor carica il proprio CSS). */
+.event-card__desc .ql-align-center,
+.event-detail__desc .ql-align-center {
+  text-align: center;
+}
+
+.event-card__desc .ql-align-right,
+.event-detail__desc .ql-align-right {
+  text-align: right;
+}
+
+.event-card__desc .ql-align-justify,
+.event-detail__desc .ql-align-justify {
+  text-align: justify;
 }
 
 .event-card__desc ul,

@@ -57,6 +57,7 @@
         <div class="container">
           <nav class="admin-tabs" style="display:flex; gap:10px; margin:0 0 10px;">
             <button type="button" class="btn btn--primary" id="tab-btn-eventi" data-tab-target="eventi">Eventi</button>
+            <button type="button" class="btn btn--outline" id="tab-btn-talenti" data-tab-target="talenti">Talenti</button>
             <button type="button" class="btn btn--outline" id="tab-btn-impostazioni" data-tab-target="impostazioni">Impostazioni</button>
           </nav>
         </div>
@@ -378,6 +379,98 @@
         </div>
       </div>
     </section>
+
+    <!-- TALENTI: le persone di TraMe presentate sulla pagina pubblica
+         "I Fili di TraMe" (fili.html) — foto, nome, ambito, descrizione.
+         Stesso accesso riservato di Eventi/Impostazioni (ruolo GestioneEventi:
+         Presidente/Admin), stesso schema bozza/pubblicato degli eventi: si
+         prepara la scheda con calma, si pubblica quando è pronta. -->
+    <section class="section section--alt" data-tab-panel="talenti" hidden>
+      <div class="container">
+        <div class="section__head" style="text-align:left; margin:0 0 30px;">
+          <span class="section__eyebrow">Talenti</span>
+          <h2 class="section__title">I Fili di TraMe</h2>
+          <p class="section__subtitle">Le persone dell'associazione, con foto, ambito e descrizione — pubblicati sul
+            sito quando lo stato è "Pubblicato".</p>
+        </div>
+
+        <div id="talenti-area-riservata">
+
+          <div class="admin-panel" id="pannello-nuovo-talento" hidden>
+            <h3>Nuovo talento</h3>
+            <div class="form-row"><label for="tal-nome">Nome</label><input type="text" id="tal-nome" maxlength="200"></div>
+            <div class="form-row"><label for="tal-ambito">Ambito</label><input type="text" id="tal-ambito" maxlength="100" placeholder="es. Fotografia"></div>
+            <div class="form-row"><label>Descrizione</label><div id="tal-descrizione-editor" class="quill-editor" style="min-height:120px;"></div></div>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-crea-talento">Crea talento</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-nuovo-talento">Annulla</button>
+            </div>
+            <p class="form-note">Si crea sempre in Bozza: l'immagine e la pubblicazione si fanno dopo, da "Modifica".</p>
+            <p class="form-note" id="crea-talento-status" role="alert" hidden></p>
+          </div>
+
+          <div class="admin-panel">
+            <h3>Tutti i talenti</h3>
+            <div class="admin-toolbar">
+              <button type="button" class="btn btn--primary btn--small" id="btn-mostra-nuovo-talento">+ Nuovo talento</button>
+              <select id="tal-filtro-stato">
+                <option value="">Tutti gli stati</option>
+                <option value="bozza">Bozza</option>
+                <option value="pubblicato">Pubblicato</option>
+              </select>
+              <button type="button" class="btn btn--outline btn--small" id="btn-carica-talenti">Aggiorna elenco</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="admin-table" id="talenti-tabella">
+                <thead><tr><th>Nome</th><th>Ambito</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="talenti-tabella-body"></tbody>
+              </table>
+            </div>
+            <p class="form-note" id="talenti-empty" hidden>Nessun talento trovato.</p>
+          </div>
+
+          <div class="admin-panel" id="pannello-modifica-talento" hidden>
+            <h3>Modifica talento</h3>
+            <div class="form-row"><label for="mod-tal-nome">Nome</label><input type="text" id="mod-tal-nome" maxlength="200"></div>
+            <div class="form-row"><label for="mod-tal-ambito">Ambito</label><input type="text" id="mod-tal-ambito" maxlength="100"></div>
+            <!-- Immagini inline (es. il logo dell'attività della persona)
+                 richiedono un talento già salvato: il bottone immagine della
+                 toolbar è attivo solo qui, non nel pannello "Nuovo talento"
+                 sopra — stesso vincolo già applicato agli eventi. -->
+            <div class="form-row"><label>Descrizione</label><div id="mod-tal-descrizione-editor" class="quill-editor" style="min-height:150px;"></div></div>
+            <div class="form-row">
+              <label for="mod-tal-stato">Stato</label>
+              <select id="mod-tal-stato">
+                <option value="bozza">Bozza</option>
+                <option value="pubblicato">Pubblicato</option>
+              </select>
+              <p class="form-note">Solo "Pubblicato" compare sulla pagina "I Fili di TraMe".</p>
+            </div>
+
+            <!-- Immagine: solo dopo la creazione, stesso pattern eventi
+                 (ridimensionata lato client a 1600px/JPEG 80% prima
+                 dell'upload). -->
+            <div class="form-row">
+              <label>Foto</label>
+              <img id="mod-tal-immagine-anteprima" alt="" hidden style="max-width:200px; display:block; margin-bottom:10px; border-radius:8px;">
+              <input type="file" id="mod-tal-immagine-file" accept="image/jpeg,image/png,image/webp">
+              <div class="admin-form__actions">
+                <button type="button" class="btn btn--outline btn--small" id="btn-carica-immagine-talento">Carica immagine</button>
+                <button type="button" class="btn btn--outline btn--small" id="btn-rimuovi-immagine-talento">Rimuovi immagine</button>
+              </div>
+              <p class="form-note" id="immagine-talento-status" role="alert" hidden></p>
+            </div>
+
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-salva-talento">Salva modifiche</button>
+              <button type="button" class="btn btn--outline" id="btn-chiudi-modifica-talento">Chiudi</button>
+            </div>
+            <p class="form-note" id="modifica-talento-status" role="alert" hidden></p>
+          </div>
+
+        </div>
+      </div>
+    </section>
     </div>
   </main>
 
@@ -390,6 +483,7 @@
   <script src="assets/js/admin-auth.js"></script>
   <script src="assets/js/admin.js"></script>
   <script src="assets/js/admin-eventi.js"></script>
+  <script src="assets/js/admin-talenti.js"></script>
   <script src="assets/js/admin-tabs.js"></script>
 </body>
 </html>

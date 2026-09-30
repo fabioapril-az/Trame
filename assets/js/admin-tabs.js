@@ -41,5 +41,5 @@
   } catch (e) {
     // Come sopra: si resta sul default.
   }
-  attiva(salvata === "impostazioni" ? "impostazioni" : "eventi");
+  attiva((salvata === "impostazioni" || salvata === "talenti") ? salvata : "eventi");
 })();
