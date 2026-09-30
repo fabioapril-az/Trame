@@ -833,6 +833,26 @@ p {
   margin: 0.4em 0;
 }
 
+/* Classi generate da Quill per il comando "align" della toolbar (grassetto,
+   colore, elenchi si vedono già di default sul testo semplice — l'allineamento
+   invece è una classe sul paragrafo, quindi senza queste regole risulterebbe
+   sempre a sinistra sulle pagine pubbliche, anche se scelto diversamente in
+   admin: lì si vede giusto solo perché l'editor carica il proprio CSS). */
+.event-card__desc .ql-align-center,
+.event-detail__desc .ql-align-center {
+  text-align: center;
+}
+
+.event-card__desc .ql-align-right,
+.event-detail__desc .ql-align-right {
+  text-align: right;
+}
+
+.event-card__desc .ql-align-justify,
+.event-detail__desc .ql-align-justify {
+  text-align: justify;
+}
+
 .event-card__desc ul,
 .event-detail__desc ul {
   list-style: disc; /* il reset globale "ul { list-style:none }" (per i menu) va annullato qui */

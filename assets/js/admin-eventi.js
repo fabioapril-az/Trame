@@ -44,7 +44,7 @@
   // quando si ricarica il contenuto per la modifica: un account
   // Presidente/Admin compromesso non deve poter eseguire script anche
   // nel browser di un altro operatore che apre "Modifica evento".
-  var TOOLBAR_BASE = [["bold", "italic"], [{ color: [] }], [{ list: "ordered" }, { list: "bullet" }]];
+  var TOOLBAR_BASE = [["bold", "italic"], [{ color: [] }], [{ align: [] }], [{ list: "ordered" }, { list: "bullet" }]];
   var TOOLBAR_CON_IMMAGINE = TOOLBAR_BASE.concat([["image"]]);
   var quillEditors = {};
 
@@ -55,6 +55,7 @@
     });
     if (conImmagine) {
       registraGestoreImmagineInline(quill);
+      registraRidimensionamentoImmagini(quill);
     }
     quillEditors[id] = quill;
   }
@@ -123,10 +124,49 @@
           .then(function (result) {
             quill.insertEmbed(range.index, "image", result.url, "user");
             quill.setSelection(range.index + 1);
+            // Senza una larghezza propria, l'immagine occupa tutta la riga
+            // (nessuno spazio per il testo a fianco) e non c'è modo di
+            // rimpicciolirla — stesso difetto segnalato su Talenti, corretto
+            // qui allo stesso modo. Dimensione di partenza contenuta, che si
+            // può cambiare subito cliccandoci sopra (vedi
+            // registraRidimensionamentoImmagini).
+            var img = quill.root.querySelector('img[src="' + result.url + '"]');
+            if (img) {
+              img.style.width = "120px";
+              img.style.height = "auto";
+            }
           })
           .catch(function (err) { window.alert(err.message); });
       };
       input.click();
+    });
+  }
+
+  // Clic su un'immagine già inserita nel testo → un piccolo popup per
+  // impostarne la dimensione esatta (mm, cm o px). Altezza sempre
+  // proporzionale alla larghezza, per non deformare un logo. Nessun modulo
+  // Quill in più: qui si legge/scrive quill.root.innerHTML direttamente (non
+  // il formato Delta di Quill), quindi uno style scritto a mano sull'<img>
+  // resta nel testo salvato esattamente come un grassetto o un colore scelti
+  // dalla toolbar.
+  function registraRidimensionamentoImmagini(quill) {
+    quill.root.addEventListener("click", function (e) {
+      if (e.target.tagName !== "IMG") return;
+      var img = e.target;
+      var attuale = img.style.width || Math.round(img.getBoundingClientRect().width) + "px";
+      var valore = window.prompt(
+        "Larghezza dell'immagine (es. 5mm, 1cm, 40px). L'altezza si adatta da sola, senza deformarla.",
+        attuale
+      );
+      if (valore === null) return; // Annullato: nessuna modifica.
+      valore = valore.trim();
+      if (!valore) {
+        img.style.width = "";
+        img.style.height = "";
+        return;
+      }
+      img.style.width = valore;
+      img.style.height = "auto";
     });
   }
 
