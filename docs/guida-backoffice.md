@@ -235,7 +235,7 @@ In fondo alla pagina si impostano:
 
 ## 6. Registrare un pagamento incassato a mano
 
-Vale per contanti, bonifico, Satispay e PayPal ricevuti fuori dal sito. I metodi disponibili sono esattamente questi quattro: la carta non c'è perché è ciò che usa il pagamento online del sito.
+Vale per contanti, bonifico, Satispay, PayPal, carta o altro ricevuti fuori dal sito. "Carta" qui significa un pagamento con carta raccolto fuori da Stripe, per esempio su un POS fisico: è un valore diverso da quello che il pagamento online del sito scrive da sé quando qualcuno paga con carta su Stripe.
 
 ### Quota di un socio
 

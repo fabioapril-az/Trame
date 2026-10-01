@@ -88,7 +88,11 @@
   var METODO_PAGAMENTO_LABELS = {
     card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
     amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay",
-    bonifico: "Bonifico", contante: "Contante"
+    bonifico: "Bonifico", contante: "Contante",
+    // "carta" (manuale, es. POS fisico) è un valore distinto da "card"
+    // (lo scrive Stripe sui pagamenti online): colonne diverse, nessun
+    // vincolo in comune, ma la stessa etichetta ha senso in entrambi i casi.
+    carta: "Carta", altro: "Altro"
   };
 
   function metodoLeggibile(metodo) {

@@ -458,7 +458,9 @@
   var METODO_PAGAMENTO_LABELS = {
     card: "Carta", paypal: "PayPal", klarna: "Klarna", satispay: "Satispay",
     amazon_pay: "Amazon Pay", link: "Link", apple_pay: "Apple Pay", google_pay: "Google Pay",
-    bonifico: "Bonifico", contante: "Contante"
+    bonifico: "Bonifico", contante: "Contante",
+    // "carta" (manuale, es. POS fisico) è distinto da "card" (Stripe).
+    carta: "Carta", altro: "Altro"
   };
   // Il valore a DB è "non_socio": senza etichetta la colonna Tipo mostrava
   // l'underscore così com'era (segnalato dall'utente su uno screenshot).
