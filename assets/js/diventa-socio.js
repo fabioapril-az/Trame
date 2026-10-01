@@ -132,19 +132,15 @@
   var btnTabMultiplo = document.getElementById("btn-tab-multiplo");
   var pannelloMultiplo = document.getElementById("pannello-multiplo");
 
-  // "Iscrizione minorenne" nascosta al pubblico per ora (richiesta
-  // dell'utente): resta raggiungibile solo dalla segreteria (?admin=1). Con
-  // una sola scelta visibile non ha senso mostrare il toggle delle tab, né
-  // la nota che parla di minorenni (nessuna alternativa da indicare).
-  var notaMinorenni = document.getElementById("mt-nota-minorenni");
-  if (!modalitaAdmin) {
-    document.querySelector(".admin-toolbar").hidden = true;
-    notaMinorenni.hidden = true;
-  } else {
-    // Solo per la segreteria la tab esiste ancora: la nota può rimandarci.
-    notaMinorenni.innerHTML =
-      "Non adatta a chi è minorenne: usa \"Iscrizione minorenne\" qui sopra per quella persona.";
-  }
+  // Il toggle delle due tab resta nascosto SEMPRE, non solo al pubblico: la
+  // tab "Iscrizione socio" (Stripe, pagamento online) non ha senso per la
+  // segreteria, che per definizione registra solo chi ha già pagato fuori
+  // dal sito (segnalato dall'utente: poteva finirci per errore). Il modulo
+  // diretto (senza Stripe) già gestisce sia adulti sia minorenni in
+  // modalità admin — vedi submitBtn.disabled più sotto — quindi non si
+  // perde nessuna possibilità nascondendo l'altra tab, solo la via che
+  // porterebbe a un pagamento online per chi ha già pagato.
+  document.querySelector(".admin-toolbar").hidden = true;
 
   function mostraTab(tab) {
     form.hidden = tab !== "singolo";
@@ -172,9 +168,9 @@
     document.querySelector(".admin-toolbar").hidden = true;
     mostraEsito("Pagamento confermato! Riceverai a breve via email le tessere socio per tutte le persone iscritte.", "successo");
   } else if (modalitaAdmin) {
-    // Segreteria da admin-soci.html: parte dal modulo classico (registra a
-    // mano chi ha già pagato offline), ma entrambe le tab restano scelte
-    // valide — è lei a sapere quale usare caso per caso.
+    // Segreteria da admin-soci.html: solo il modulo diretto (registra a
+    // mano chi ha già pagato offline, adulto o minorenne) — niente Stripe,
+    // vedi sopra.
     mostraTab("singolo");
     document.getElementById("campo-evento-gia-fatto").hidden = false;
     // Facoltativa solo qui: la segreteria spesso non la conosce al momento
