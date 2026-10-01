@@ -70,7 +70,7 @@
       cognome: document.getElementById("cognome").value.trim(),
       email: document.getElementById("email").value.trim(),
       telefono: document.getElementById("telefono").value.trim() || null,
-      dataNascita: document.getElementById("data-nascita").value,
+      dataNascita: document.getElementById("data-nascita").value || null,
       codiceFiscale: document.getElementById("codice-fiscale").value.trim().toUpperCase(),
       indirizzo: document.getElementById("indirizzo").value.trim() || null,
       citta: document.getElementById("citta").value.trim() || null,
@@ -177,6 +177,12 @@
     // valide — è lei a sapere quale usare caso per caso.
     mostraTab("singolo");
     document.getElementById("campo-evento-gia-fatto").hidden = false;
+    // Facoltativa solo qui: la segreteria spesso non la conosce al momento
+    // della registrazione (es. ha solo il contante e i dati essenziali) e
+    // può inserirla più tardi da "Modifica socio" — il modulo pubblico resta
+    // invariato, la richiede sempre.
+    dataNascitaInput.removeAttribute("required");
+    document.querySelector('label[for="data-nascita"]').textContent = "Data di nascita (facoltativa)";
   } else {
     // "Iscrizione socio" (pagamento online) è il percorso standard per i
     // maggiorenni, quindi la tab predefinita — "Iscrizione minorenne" resta

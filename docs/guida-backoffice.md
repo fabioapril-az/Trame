@@ -206,11 +206,15 @@ Il campo di ricerca funziona su nome, cognome ed email; il filtro accanto selezi
 
 **+ Registra nuovo socio** apre il modulo di iscrizione in una scheda nuova, nella versione riservata alla segreteria: qui puoi registrare anche un adulto che ha già pagato in contanti o con bonifico. Dal sito pubblico, invece, un adulto passa sempre dal pagamento online.
 
+In questa versione la **data di nascita è facoltativa**: se non la conosci al momento, lascia il campo vuoto e completalo più avanti da "Modifica" sulla riga del socio (vedi sotto). Finché resta vuota, il socio non viene mai considerato minorenne.
+
 Compilato il modulo, il socio compare in elenco con il suo numero di tessera. **Il pagamento è un passaggio a parte**: vedi il capitolo 6.
+
+> **L'email con la tessera parte sempre**, anche per un socio registrato a mano qui — non c'è un modo di evitarlo. Se la persona è già stata avvisata a voce, riceverà comunque il messaggio.
 
 ### Le azioni su ogni riga
 
-- **Modifica** — dati di contatto: nome, cognome, telefono, indirizzo, città, CAP.
+- **Modifica** — dati di contatto: nome, cognome, telefono, indirizzo, città, CAP. In fondo al pannello, separati, anche data di nascita e codice fiscale: compaiono sempre vuoti anche se il socio li ha già (non è un errore), e lasciarli vuoti **non li cancella** — servono solo per completarli in un momento successivo, per esempio quando un socio è stato registrato a mano senza la data di nascita (vedi capitolo 3).
 - **Rinnova** — rinnovo annuale della tessera. Registra l'incasso **e insieme** sposta la scadenza, riporta il socio ad attivo, azzera i promemoria e il contatore degli eventi scontati. Da usare **solo per un rinnovo vero**. Non è disponibile a chi ha solo il ruolo della cassa, proprio perché cambia l'anagrafica.
 - **Registra quota** — registra un incasso senza toccare nient'altro. È quello che serve per la prima quota. Vedi capitolo 6.
 - **Scarica tessera** — genera il PDF della tessera.
