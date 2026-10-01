@@ -206,7 +206,7 @@ Il campo di ricerca funziona su nome, cognome ed email; il filtro accanto selezi
 
 **+ Registra nuovo socio** apre il modulo di iscrizione in una scheda nuova, nella versione riservata alla segreteria: qui puoi registrare anche un adulto che ha già pagato in contanti o con bonifico. Dal sito pubblico, invece, un adulto passa sempre dal pagamento online.
 
-In questa versione la **data di nascita è facoltativa**: se non la conosci al momento, lascia il campo vuoto e completalo più avanti da "Modifica" sulla riga del socio (vedi sotto). Finché resta vuota, il socio non viene mai considerato minorenne.
+In questa versione la **data di nascita e il codice fiscale sono facoltativi**: se non li conosci al momento, lascia i campi vuoti e completali più avanti da "Modifica" sulla riga del socio (vedi sotto). Finché la data di nascita resta vuota, il socio non viene mai considerato minorenne.
 
 Compilato il modulo, il socio compare in elenco con il suo numero di tessera. **Il pagamento è un passaggio a parte**: vedi il capitolo 6.
 

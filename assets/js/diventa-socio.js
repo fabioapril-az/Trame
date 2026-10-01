@@ -71,7 +71,7 @@
       email: document.getElementById("email").value.trim(),
       telefono: document.getElementById("telefono").value.trim() || null,
       dataNascita: document.getElementById("data-nascita").value || null,
-      codiceFiscale: document.getElementById("codice-fiscale").value.trim().toUpperCase(),
+      codiceFiscale: document.getElementById("codice-fiscale").value.trim().toUpperCase() || null,
       indirizzo: document.getElementById("indirizzo").value.trim() || null,
       citta: document.getElementById("citta").value.trim() || null,
       cap: document.getElementById("cap").value.trim() || null,
@@ -173,12 +173,14 @@
     // vedi sopra.
     mostraTab("singolo");
     document.getElementById("campo-evento-gia-fatto").hidden = false;
-    // Facoltativa solo qui: la segreteria spesso non la conosce al momento
-    // della registrazione (es. ha solo il contante e i dati essenziali) e
-    // può inserirla più tardi da "Modifica socio" — il modulo pubblico resta
-    // invariato, la richiede sempre.
+    // Facoltative solo qui, entrambe: la segreteria spesso non le conosce al
+    // momento della registrazione (es. ha solo il contante e i dati
+    // essenziali) e può inserirle più tardi da "Modifica socio" — il modulo
+    // pubblico resta invariato, le richiede sempre entrambe.
     dataNascitaInput.removeAttribute("required");
     document.querySelector('label[for="data-nascita"]').textContent = "Data di nascita (facoltativa)";
+    document.getElementById("codice-fiscale").removeAttribute("required");
+    document.querySelector('label[for="codice-fiscale"]').textContent = "Codice fiscale (facoltativo)";
   } else {
     // "Iscrizione socio" (pagamento online) è il percorso standard per i
     // maggiorenni, quindi la tab predefinita — "Iscrizione minorenne" resta
