@@ -333,6 +333,18 @@
     bozza: "Bozza", annunciato: "Annunciato", aperto: "Aperto", chiuso: "Chiuso", annullato: "Annullato"
   };
 
+  // Stesse etichette delle option del select categoria (vedi admin.html) e
+  // di events.js sul sito pubblico — qui mancava del tutto: la tabella
+  // mostrava il valore grezzo salvato nel database (es. "trekking-urbano"),
+  // mai tradotto. Il pannello Modifica non ne risentiva perché un <select>
+  // mostra già il testo dell'opzione corrispondente al value, non il value
+  // stesso (segnalato dall'utente dopo la rinomina della categoria).
+  var CATEGORY_LABELS = {
+    yoga: "Yoga", fotografia: "Fotografia", pasticceria: "Pasticceria", canto: "Canto",
+    ballo: "Ballo", teatro: "Teatro", disegno: "Disegno",
+    "trekking-urbano": "Itinerari urbani", viaggi: "Viaggi"
+  };
+
   function caricaEventi() {
     var filtroStato = document.getElementById("ev-filtro-stato").value;
     var query = filtroStato ? "?stato=" + encodeURIComponent(filtroStato) : "";
@@ -346,7 +358,7 @@
           tr.innerHTML =
             "<td>" + escapeHtml(ev.titolo) + "</td>" +
             "<td>" + formattaData(ev.dataEvento) + (ev.ora ? " · " + escapeHtml(ev.ora) : "") + "</td>" +
-            "<td>" + escapeHtml(ev.categoria || "—") + "</td>" +
+            "<td>" + escapeHtml(ev.categoria ? (CATEGORY_LABELS[ev.categoria] || ev.categoria) : "—") + "</td>" +
             '<td><span class="status-badge status-badge--' + escapeHtml(ev.stato) + '">' +
             escapeHtml(STATO_EVENTO_LABELS[ev.stato] || ev.stato) + "</span></td>" +
             "<td>" + (ev.postiMax ? ev.postiDisponibili + " / " + ev.postiMax : "illimitati") + "</td>" +
