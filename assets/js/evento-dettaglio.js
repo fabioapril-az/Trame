@@ -19,7 +19,7 @@
     ballo: "Ballo",
     teatro: "Teatro",
     disegno: "Disegno",
-    "trekking-urbano": "Trekking urbano",
+    "trekking-urbano": "Itinerari urbani",
     viaggi: "Viaggi",
   };
 
