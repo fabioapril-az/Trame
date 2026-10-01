@@ -102,6 +102,23 @@
             <div class="form-row"><label for="mod-indirizzo">Indirizzo</label><input type="text" id="mod-indirizzo" maxlength="255"></div>
             <div class="form-row"><label for="mod-citta">Città</label><input type="text" id="mod-citta" maxlength="100"></div>
             <div class="form-row"><label for="mod-cap">CAP</label><input type="text" id="mod-cap" maxlength="10"></div>
+            <hr style="margin:24px 0; border:none; border-top:1px solid var(--color-line);">
+            <!-- Due campi a parte, deliberatamente sempre vuoti all'apertura
+                 (non mostrano il valore già presente: l'elenco soci non lo
+                 restituisce). Lasciarli vuoti NON cancella il dato esistente
+                 — a differenza dei campi sopra, qui "vuoto" significa "non
+                 toccare", non "svuota". Servono per completare in un
+                 secondo momento la data di nascita lasciata vuota in
+                 registrazione manuale (vedi diventa-socio.html?admin=1). -->
+            <div class="form-row">
+              <label for="mod-data-nascita">Data di nascita (facoltativa, lascia vuoto per non modificarla)</label>
+              <input type="date" id="mod-data-nascita">
+            </div>
+            <div class="form-row">
+              <label for="mod-codice-fiscale">Codice fiscale (facoltativo, lascia vuoto per non modificarlo)</label>
+              <input type="text" id="mod-codice-fiscale" maxlength="16"
+                pattern="^[A-Za-z]{6}\d{2}[A-EHLMPRSTabcdehlmprst]\d{2}([A-Za-z]\d{3}|\d{4})[A-Za-z]$">
+            </div>
             <div class="admin-form__actions">
               <button type="button" class="btn btn--primary" id="btn-salva-modifica">Salva modifiche</button>
               <button type="button" class="btn btn--outline" id="btn-annulla-modifica">Annulla</button>

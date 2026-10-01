@@ -70,8 +70,8 @@
       cognome: document.getElementById("cognome").value.trim(),
       email: document.getElementById("email").value.trim(),
       telefono: document.getElementById("telefono").value.trim() || null,
-      dataNascita: document.getElementById("data-nascita").value,
-      codiceFiscale: document.getElementById("codice-fiscale").value.trim().toUpperCase(),
+      dataNascita: document.getElementById("data-nascita").value || null,
+      codiceFiscale: document.getElementById("codice-fiscale").value.trim().toUpperCase() || null,
       indirizzo: document.getElementById("indirizzo").value.trim() || null,
       citta: document.getElementById("citta").value.trim() || null,
       cap: document.getElementById("cap").value.trim() || null,
@@ -132,19 +132,15 @@
   var btnTabMultiplo = document.getElementById("btn-tab-multiplo");
   var pannelloMultiplo = document.getElementById("pannello-multiplo");
 
-  // "Iscrizione minorenne" nascosta al pubblico per ora (richiesta
-  // dell'utente): resta raggiungibile solo dalla segreteria (?admin=1). Con
-  // una sola scelta visibile non ha senso mostrare il toggle delle tab, né
-  // la nota che parla di minorenni (nessuna alternativa da indicare).
-  var notaMinorenni = document.getElementById("mt-nota-minorenni");
-  if (!modalitaAdmin) {
-    document.querySelector(".admin-toolbar").hidden = true;
-    notaMinorenni.hidden = true;
-  } else {
-    // Solo per la segreteria la tab esiste ancora: la nota può rimandarci.
-    notaMinorenni.innerHTML =
-      "Non adatta a chi è minorenne: usa \"Iscrizione minorenne\" qui sopra per quella persona.";
-  }
+  // Il toggle delle due tab resta nascosto SEMPRE, non solo al pubblico: la
+  // tab "Iscrizione socio" (Stripe, pagamento online) non ha senso per la
+  // segreteria, che per definizione registra solo chi ha già pagato fuori
+  // dal sito (segnalato dall'utente: poteva finirci per errore). Il modulo
+  // diretto (senza Stripe) già gestisce sia adulti sia minorenni in
+  // modalità admin — vedi submitBtn.disabled più sotto — quindi non si
+  // perde nessuna possibilità nascondendo l'altra tab, solo la via che
+  // porterebbe a un pagamento online per chi ha già pagato.
+  document.querySelector(".admin-toolbar").hidden = true;
 
   function mostraTab(tab) {
     form.hidden = tab !== "singolo";
@@ -172,11 +168,19 @@
     document.querySelector(".admin-toolbar").hidden = true;
     mostraEsito("Pagamento confermato! Riceverai a breve via email le tessere socio per tutte le persone iscritte.", "successo");
   } else if (modalitaAdmin) {
-    // Segreteria da admin-soci.html: parte dal modulo classico (registra a
-    // mano chi ha già pagato offline), ma entrambe le tab restano scelte
-    // valide — è lei a sapere quale usare caso per caso.
+    // Segreteria da admin-soci.html: solo il modulo diretto (registra a
+    // mano chi ha già pagato offline, adulto o minorenne) — niente Stripe,
+    // vedi sopra.
     mostraTab("singolo");
     document.getElementById("campo-evento-gia-fatto").hidden = false;
+    // Facoltative solo qui, entrambe: la segreteria spesso non le conosce al
+    // momento della registrazione (es. ha solo il contante e i dati
+    // essenziali) e può inserirle più tardi da "Modifica socio" — il modulo
+    // pubblico resta invariato, le richiede sempre entrambe.
+    dataNascitaInput.removeAttribute("required");
+    document.querySelector('label[for="data-nascita"]').textContent = "Data di nascita (facoltativa)";
+    document.getElementById("codice-fiscale").removeAttribute("required");
+    document.querySelector('label[for="codice-fiscale"]').textContent = "Codice fiscale (facoltativo)";
   } else {
     // "Iscrizione socio" (pagamento online) è il percorso standard per i
     // maggiorenni, quindi la tab predefinita — "Iscrizione minorenne" resta

@@ -200,6 +200,11 @@
     document.getElementById("mod-indirizzo").value = "";
     document.getElementById("mod-citta").value = "";
     document.getElementById("mod-cap").value = "";
+    // Sempre vuoti all'apertura, come indirizzo/citta/cap sopra: l'elenco
+    // soci non restituisce questi due valori. Ma a differenza di quelli,
+    // lasciarli vuoti al salvataggio NON li cancella — vedi il payload.
+    document.getElementById("mod-data-nascita").value = "";
+    document.getElementById("mod-codice-fiscale").value = "";
     document.getElementById("modifica-status").hidden = true;
     document.getElementById("pannello-modifica").hidden = false;
     document.getElementById("pannello-modifica").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -309,6 +314,18 @@
       citta: document.getElementById("mod-citta").value.trim() || null,
       cap: document.getElementById("mod-cap").value.trim() || null
     };
+    // Solo se compilati: per questi due il server tratta "assente" come
+    // "non toccare", non come "svuota" (diverso dai campi sopra) — quindi
+    // qui NON si manda null quando sono vuoti, si omette la chiave del
+    // tutto, altrimenti si rischierebbe di confondersi su cosa succede.
+    var dataNascitaVal = document.getElementById("mod-data-nascita").value;
+    if (dataNascitaVal) {
+      payload.dataNascita = dataNascitaVal;
+    }
+    var codiceFiscaleVal = document.getElementById("mod-codice-fiscale").value.trim().toUpperCase();
+    if (codiceFiscaleVal) {
+      payload.codiceFiscale = codiceFiscaleVal;
+    }
     apiFetchAuth("/api/soci/" + stato.editingSocioId, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
