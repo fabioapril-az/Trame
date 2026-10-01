@@ -339,16 +339,20 @@
               <div class="form-row"><label for="pag-isc-data">Data dell'incasso</label><input type="date" id="pag-isc-data"></div>
               <div class="form-row">
                 <label for="pag-isc-metodo">Metodo di pagamento</label>
-                <!-- Gli stessi quattro valori del pannello quota in
+                <!-- Gli stessi sei valori del pannello quota in
                      admin-soci.html, ammessi dal vincolo sul database.
-                     "Carta" non c'è volutamente: la scrive Stripe sui
-                     pagamenti online e il server la rifiuterebbe qui. -->
+                     "Carta" qui significa un pagamento con carta raccolto
+                     fuori da Stripe (es. POS fisico): è un valore diverso
+                     da "card", che invece lo scrive Stripe sui pagamenti
+                     online e vive in una colonna separata, senza vincolo. -->
                 <select id="pag-isc-metodo">
                   <option value="">— scegli —</option>
                   <option value="contante">Contante</option>
                   <option value="bonifico">Bonifico</option>
                   <option value="satispay">Satispay</option>
                   <option value="paypal">PayPal</option>
+                  <option value="carta">Carta</option>
+                  <option value="altro">Altro</option>
                 </select>
               </div>
               <div class="form-row">
