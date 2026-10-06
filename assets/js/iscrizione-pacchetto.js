@@ -102,22 +102,23 @@
     }
     popolaSelectNumerico(pgNumeroPersone, 1, 6);
 
-    // Un'opzione per sotto-evento, più "tutte le date" solo se il pacchetto
-    // ha davvero uno sconto configurato — altrimenti il server la
-    // rifiuterebbe (409 sconto_non_configurato) e non avrebbe senso
-    // offrirla.
-    sottoEventi.forEach(function (ev) {
-      var opzione = document.createElement("option");
-      opzione.value = String(ev.id);
-      opzione.textContent = "Solo " + ev.titolo + " — " + formattaData(ev.dataEvento);
-      pgCombinazione.appendChild(opzione);
-    });
+    // "Tutte le date" in cima (richiesto dall'utente: è la scelta che
+    // l'associazione vuole in evidenza, con lo sconto incluso), poi le
+    // singole date. Solo se il pacchetto ha davvero uno sconto configurato
+    // — altrimenti il server la rifiuterebbe (409 sconto_non_configurato) e
+    // non avrebbe senso offrirla.
     if (pacchetto.scontoTutteLeDate != null) {
       var opzioneTutte = document.createElement("option");
       opzioneTutte.value = "tutte";
       opzioneTutte.textContent = "Tutte le date (sconto incluso)";
       pgCombinazione.appendChild(opzioneTutte);
     }
+    sottoEventi.forEach(function (ev) {
+      var opzione = document.createElement("option");
+      opzione.value = String(ev.id);
+      opzione.textContent = "Solo " + ev.titolo + " — " + formattaData(ev.dataEvento);
+      pgCombinazione.appendChild(opzione);
+    });
 
     function sottoEventiScelti() {
       if (pgCombinazione.value === "tutte") {
