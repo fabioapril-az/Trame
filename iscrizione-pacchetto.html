@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iscrizione evento — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">tra me, insieme <span class="heart">♥</span></span>
+        </span>
+      </a>
+      <nav class="nav">
+        <ul class="nav__list">
+          <li><a href="index.html" class="nav__link">Home</a></li>
+          <li><a href="eventi.html" class="nav__link">Eventi</a></li>
+          <li><a href="diventa-socio.html" class="nav__link">Diventa socio</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Iscrizione evento</span>
+        <h1 id="pacchetto-titolo">Caricamento evento…</h1>
+        <p class="page-hero__subtitle" id="pacchetto-sottotitolo"></p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container" style="max-width:640px;">
+
+        <div id="pacchetto-loading">Caricamento evento in corso…</div>
+        <div id="pacchetto-chiuso" class="form-note" hidden></div>
+
+        <!-- Nessun percorso "socio già riconosciuto senza pagamento", a
+             differenza di iscrizione-evento.html: qui si paga sempre via
+             Stripe, chiunque sia (lo sconto socio lo calcola il server). -->
+        <div id="wizard-pagamento" hidden>
+          <p class="form-note" id="pagamento-annullato-nota" role="alert" hidden>Pagamento annullato: puoi riprovare qui sotto.</p>
+          <div class="admin-panel">
+            <h3>Iscrizione con pagamento online</h3>
+            <p class="form-note" id="pg-date-info"></p>
+
+            <div class="form-row">
+              <label for="pg-combinazione">A quali date partecipi?</label>
+              <select id="pg-combinazione"></select>
+            </div>
+            <div class="form-row">
+              <label for="pg-numero-persone">Per quante persone ti iscrivi?</label>
+              <select id="pg-numero-persone"></select>
+            </div>
+
+            <div id="pg-blocchi-persone"></div>
+
+            <!-- Aperitivo per data, popolato via JS solo per le date incluse
+                 nella combinazione scelta (vedi aggiornaCampi() nel JS):
+                 indipendente da chi partecipa all'evento vero e proprio. -->
+            <div id="pg-blocchi-aperitivo"></div>
+
+            <p class="form-note" id="pg-totale" style="font-weight:600;"></p>
+            <p class="form-note">Lo sconto socio (dal 2° evento, se spetta) e l'eventuale sconto per chi prende tutte le date vengono applicati automaticamente al pagamento.</p>
+
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="pg-btn-paga">Vai al pagamento</button>
+            </div>
+            <p class="form-note" id="pg-status" role="alert" hidden></p>
+          </div>
+        </div>
+
+        <div id="esito-finale" class="admin-panel" hidden></div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.4/dist/purify.min.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/iscrizione-pacchetto.js"></script>
+</body>
+</html>

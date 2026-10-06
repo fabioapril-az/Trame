@@ -15,6 +15,9 @@
     richiede_rinnovo: "La tessera risulta scaduta: è necessario rinnovarla per procedere.",
     richiede_consenso: "Devi accettare l'informativa sul trattamento dei dati personali per procedere.",
     gia_iscritto: "Risulti già iscritto/a a questo evento con questa email.",
+    combinazione_non_valida: "Scegli una sola data o tutte le date collegate: una via di mezzo non è ammessa.",
+    sconto_non_configurato: "\"Tutte le date\" non è ancora disponibile per questo evento: riprova più tardi o scegli una sola data.",
+    pacchetto_non_aperto: "Le iscrizioni a questo evento non sono attualmente aperte.",
     validation_error: "Controlla i dati inseriti.",
     internal_error: "Si è verificato un errore imprevisto. Riprova più tardi."
   };

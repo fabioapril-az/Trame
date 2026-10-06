@@ -57,6 +57,7 @@
         <div class="container">
           <nav class="admin-tabs" style="display:flex; gap:10px; margin:0 0 10px;">
             <button type="button" class="btn btn--primary" id="tab-btn-eventi" data-tab-target="eventi">Eventi</button>
+            <button type="button" class="btn btn--outline" id="tab-btn-pacchetti" data-tab-target="pacchetti">Pacchetti</button>
             <button type="button" class="btn btn--outline" id="tab-btn-talenti" data-tab-target="talenti">Talenti</button>
             <button type="button" class="btn btn--outline" id="tab-btn-impostazioni" data-tab-target="impostazioni">Impostazioni</button>
           </nav>
@@ -384,6 +385,122 @@
       </div>
     </section>
 
+    <!-- PACCHETTI: eventi a più date collegate (es. un corso su due giornate),
+         dove si può partecipare a una sola data o a tutte, con uno sconto sul
+         totale se si scelgono tutte. Pubblicamente è l'unico evento visibile
+         (una card, una pagina, una pagina di iscrizione): le date collegate
+         restano eventi normali gestibili separatamente nel tab Eventi (posti,
+         iscritti, pagamenti), ma non compaiono mai come card pubbliche proprie
+         — vedi l'etichetta "fa parte di" aggiunta lì. Stesso ruolo
+         GestioneEventi, stesso ciclo di stati degli eventi (il pacchetto È
+         l'evento visto dal pubblico). -->
+    <section class="section section--alt" data-tab-panel="pacchetti" hidden>
+      <div class="container">
+        <div class="section__head" style="text-align:left; margin:0 0 30px;">
+          <span class="section__eyebrow">Pacchetti</span>
+          <h2 class="section__title">Eventi a più date collegate</h2>
+          <p class="section__subtitle">Collega due o più eventi già creati (es. le due giornate di un corso):
+            chi si iscrive scegli una sola data o tutte, con uno sconto sul totale se le prende tutte.</p>
+        </div>
+
+        <div id="pacchetti-area-riservata">
+
+          <div class="admin-panel" id="pannello-nuovo-pacchetto" hidden>
+            <h3>Nuovo pacchetto</h3>
+            <div class="form-row"><label for="pac-nome">Nome (quello che vede il pubblico)</label><input type="text" id="pac-nome" maxlength="200"></div>
+            <div class="form-row"><label>Descrizione</label><div id="pac-descrizione-editor" class="quill-editor" style="min-height:120px;"></div></div>
+            <div class="form-row">
+              <label>Date collegate</label>
+              <p class="form-note">Scegli le date già create (nel tab Eventi) che fanno parte di questo pacchetto, nell'ordine in cui devono comparire. Servono almeno due.</p>
+              <div id="pac-sottoeventi-lista"></div>
+              <select id="pac-sottoeventi-select"></select>
+              <button type="button" class="btn btn--outline btn--small" id="pac-sottoeventi-aggiungi">+ Aggiungi data</button>
+            </div>
+            <div class="form-row">
+              <label for="pac-sconto">Sconto per chi prende tutte le date (€, sul totale)</label>
+              <input type="number" id="pac-sconto" min="0" step="0.01">
+              <p class="form-note">Obbligatorio prima che qualcuno possa comprare "tutte le date": senza, chi lo prova riceve un errore.</p>
+            </div>
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-crea-pacchetto">Crea pacchetto</button>
+              <button type="button" class="btn btn--outline" id="btn-annulla-nuovo-pacchetto">Annulla</button>
+            </div>
+            <p class="form-note">Si crea sempre in Bozza: l'immagine e la pubblicazione si fanno dopo, da "Modifica".</p>
+            <p class="form-note" id="crea-pacchetto-status" role="alert" hidden></p>
+          </div>
+
+          <div class="admin-panel">
+            <h3>Tutti i pacchetti</h3>
+            <div class="admin-toolbar">
+              <button type="button" class="btn btn--primary btn--small" id="btn-mostra-nuovo-pacchetto">+ Nuovo pacchetto</button>
+              <select id="pac-filtro-stato">
+                <option value="">Tutti gli stati</option>
+                <option value="bozza">Bozza</option>
+                <option value="annunciato">Annunciato</option>
+                <option value="aperto">Aperto</option>
+                <option value="chiuso">Chiuso</option>
+                <option value="annullato">Annullato</option>
+              </select>
+              <button type="button" class="btn btn--outline btn--small" id="btn-carica-pacchetti">Aggiorna elenco</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="admin-table" id="pacchetti-tabella">
+                <thead><tr><th>Nome</th><th>Date</th><th>Stato</th><th>Azioni</th></tr></thead>
+                <tbody id="pacchetti-tabella-body"></tbody>
+              </table>
+            </div>
+            <p class="form-note" id="pacchetti-empty" hidden>Nessun pacchetto trovato.</p>
+          </div>
+
+          <div class="admin-panel" id="pannello-modifica-pacchetto" hidden>
+            <h3>Modifica pacchetto</h3>
+            <div class="form-row"><label for="mod-pac-nome">Nome (quello che vede il pubblico)</label><input type="text" id="mod-pac-nome" maxlength="200"></div>
+            <div class="form-row"><label>Descrizione</label><div id="mod-pac-descrizione-editor" class="quill-editor" style="min-height:150px;"></div></div>
+            <div class="form-row">
+              <label>Date collegate</label>
+              <p class="form-note">Attenzione: salvando, l'elenco qui sotto SOSTITUISCE interamente quello attuale — non si fonde con quello esistente.</p>
+              <div id="mod-pac-sottoeventi-lista"></div>
+              <select id="mod-pac-sottoeventi-select"></select>
+              <button type="button" class="btn btn--outline btn--small" id="mod-pac-sottoeventi-aggiungi">+ Aggiungi data</button>
+            </div>
+            <div class="form-row">
+              <label for="mod-pac-sconto">Sconto per chi prende tutte le date (€, sul totale)</label>
+              <input type="number" id="mod-pac-sconto" min="0" step="0.01">
+            </div>
+            <div class="form-row">
+              <label for="mod-pac-stato">Stato</label>
+              <select id="mod-pac-stato">
+                <option value="bozza">Bozza</option>
+                <option value="annunciato">Annunciato (visibile, senza iscrizioni)</option>
+                <option value="aperto">Aperto</option>
+                <option value="chiuso">Chiuso</option>
+                <option value="annullato">Annullato</option>
+              </select>
+            </div>
+
+            <!-- Immagine: solo dopo la creazione, stesso pattern eventi/talenti. -->
+            <div class="form-row">
+              <label>Immagine di copertina</label>
+              <img id="mod-pac-immagine-anteprima" alt="" hidden style="max-width:200px; display:block; margin-bottom:10px; border-radius:8px;">
+              <input type="file" id="mod-pac-immagine-file" accept="image/jpeg,image/png,image/webp">
+              <div class="admin-form__actions">
+                <button type="button" class="btn btn--outline btn--small" id="btn-carica-immagine-pacchetto">Carica immagine</button>
+                <button type="button" class="btn btn--outline btn--small" id="btn-rimuovi-immagine-pacchetto">Rimuovi immagine</button>
+              </div>
+              <p class="form-note" id="immagine-pacchetto-status" role="alert" hidden></p>
+            </div>
+
+            <div class="admin-form__actions">
+              <button type="button" class="btn btn--primary" id="btn-salva-pacchetto">Salva modifiche</button>
+              <button type="button" class="btn btn--outline" id="btn-chiudi-modifica-pacchetto">Chiudi</button>
+            </div>
+            <p class="form-note" id="modifica-pacchetto-status" role="alert" hidden></p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- TALENTI: le persone di TraMe presentate sulla pagina pubblica
          "I Fili di TraMe" (fili.html) — foto, nome, ambito, descrizione.
          Stesso accesso riservato di Eventi/Impostazioni (ruolo GestioneEventi:
@@ -487,6 +604,7 @@
   <script src="assets/js/admin-auth.js"></script>
   <script src="assets/js/admin.js"></script>
   <script src="assets/js/admin-eventi.js"></script>
+  <script src="assets/js/admin-pacchetti.js"></script>
   <script src="assets/js/admin-talenti.js"></script>
   <script src="assets/js/admin-tabs.js"></script>
 </body>

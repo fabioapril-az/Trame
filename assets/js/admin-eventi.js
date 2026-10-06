@@ -356,7 +356,13 @@
         eventi.forEach(function (ev) {
           var tr = document.createElement("tr");
           tr.innerHTML =
-            "<td>" + escapeHtml(ev.titolo) + "</td>" +
+            // Un sotto-evento di un pacchetto resta un evento gestibile come
+            // sempre (posti, iscritti, pagamenti), ma non deve sembrare una
+            // riga scollegata — da qui non si capirebbe altrimenti che fa
+            // parte di "Itinerario in due tappe" insieme a un'altra riga.
+            "<td>" + escapeHtml(ev.titolo) +
+            (ev.pacchettoNome ? '<br><small class="form-note" style="margin:0;">fa parte di: ' + escapeHtml(ev.pacchettoNome) + "</small>" : "") +
+            "</td>" +
             "<td>" + formattaData(ev.dataEvento) + (ev.ora ? " · " + escapeHtml(ev.ora) : "") + "</td>" +
             "<td>" + escapeHtml(ev.categoria ? (CATEGORY_LABELS[ev.categoria] || ev.categoria) : "—") + "</td>" +
             '<td><span class="status-badge status-badge--' + escapeHtml(ev.stato) + '">' +
