@@ -279,7 +279,40 @@ Sotto il pulsante compare l'esito. Se dice che l'export è **incompleto**, non u
 
 ---
 
-## 8. Se qualcosa non funziona
+## 8. Eventi a più date (Pacchetti)
+
+Serve quando un evento si svolge su due o più giornate e chi partecipa può scegliere di venire a una sola data o a tutte, con uno sconto sul totale se le prende tutte (es. un corso in due incontri). Pubblicamente deve sembrare **un evento solo**, non due eventi scollegati: una card, una pagina, una pagina di iscrizione — questo è il motivo per cui funziona in due passaggi.
+
+### Come si crea
+
+1. **Crea le singole date come eventi normali**, una per ciascuna giornata, esattamente come al capitolo 3 (titolo, prezzi, posti, tutto come sempre). Per adesso resteranno visibili come eventi separati.
+2. Vai sul tab **Pacchetti** → **+ Nuovo pacchetto**. Scrivi il nome che vedrà il pubblico (non deve coincidere con il titolo delle singole date — è il nome dell'evento nel suo insieme), la **descrizione breve** (quella della card) e, se serve, il **testo esteso** per la pagina di dettaglio — stessa coppia di campi di un evento normale (capitolo 3). Finché il testo esteso resta vuoto, la pagina di dettaglio mostra la descrizione breve. La casella **"Pagina dettaglio attiva"** funziona come per gli eventi: se la togli, "Dettagli" non è raggiungibile nemmeno con link diretto.
+3. In "Date collegate", scegli dal menu le date create al punto 1 e premi **+ Aggiungi data**, una per una, nell'ordine in cui devono comparire. Servono almeno due.
+4. Imposta lo **sconto per chi prende tutte le date**: è l'importo (in euro) che si sottrae dal totale di chi si iscrive a tutte le date insieme. Senza questo importo, chi tenta di iscriversi a "tutte le date" riceve un errore — se non sei ancora pronto a deciderlo, lascialo vuoto e completalo più avanti, prima di pubblicare.
+5. Crea il pacchetto (parte sempre in Bozza), poi da **Modifica** carica l'immagine di copertina e porta lo stato ad **Aperto** quando è pronto — stessi stati di un evento normale (Bozza/Annunciato/Aperto/Chiuso/Annullato).
+
+Da quel momento, le singole date **non compaiono più come card separate** sul sito pubblico (nella tabella Eventi restano visibili, ma etichettate "fa parte di: [nome pacchetto]"): l'unica cosa che il pubblico vede è il pacchetto.
+
+### Attenzione quando modifichi le date collegate
+
+Nel pannello Modifica, l'elenco delle date collegate **sostituisce sempre quello esistente** quando salvi — non si aggiunge a quello che c'è già. Se vuoi solo cambiare il nome o la descrizione senza toccare le date, salva comunque con l'elenco delle date intatto (così com'è quando apri il pannello): non rimuoverlo per errore.
+
+### Come funziona il prezzo
+
+Il pagamento è **sempre online** (Stripe), per chiunque — non esiste un percorso di pagamento manuale per i pacchetti. Chi si iscrive scegli: quante persone (1 = singolo, 2-6 = gruppo — nessun prezzo ridotto per essere un gruppo, ognuno paga come se fosse solo) e quale combinazione di date (una sola, o tutte). Il sistema poi calcola, per ciascuna persona:
+
+- il prezzo di ciascuna data scelta, **meno lo sconto socio se le spetta** (stessa regola di sempre: dal secondo evento in poi, valutata data per data se sceglie tutte le date)
+- **meno lo sconto pacchetto**, in più, se ha scelto tutte le date — diviso proporzionalmente fra le date, non tutto su una sola
+
+Vedendo gli iscritti di una singola data (dal tab Eventi, come sempre), troverai quindi importi diversi fra la prima e la seconda data dello stesso acquisto: è corretto, il totale pagato complessivamente è sempre quello giusto.
+
+### Eliminare un pacchetto
+
+**Non elimina le date collegate.** Tornano eventi normali, di nuovo visibili singolarmente sul sito, con tutti i loro iscritti e pagamenti intatti — solo lo "scollegamento", niente di irreversibile sui dati.
+
+---
+
+## 9. Se qualcosa non funziona
 
 | Cosa vedi | Cosa significa |
 |---|---|

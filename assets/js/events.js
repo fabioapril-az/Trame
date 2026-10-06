@@ -141,7 +141,164 @@
       .join("");
   }
 
+  // "11 e 18 ottobre 2026": stesso mese/anno scritti una sola volta se
+  // coincidono (il caso comune), altrimenti ogni data per intero. Duplicato
+  // da pacchetto-dettaglio.js, stesso motivo degli altri helper di questo
+  // file (nessun build step / bundler).
+  function formattaDateMultiple(dates) {
+    var MESI = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+      "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
+    var parsed = dates.map(function (iso) {
+      if (!iso) return null;
+      var p = iso.split("-");
+      return { giorno: parseInt(p[2], 10), mese: parseInt(p[1], 10) - 1, anno: p[0] };
+    });
+    if (parsed.some(function (d) { return !d; })) {
+      return "Date da definire";
+    }
+    var stessoMeseAnno = parsed.every(function (d) { return d.mese === parsed[0].mese && d.anno === parsed[0].anno; });
+    if (stessoMeseAnno) {
+      return parsed.map(function (d) { return d.giorno; }).join(" e ") + " " + MESI[parsed[0].mese] + " " + parsed[0].anno;
+    }
+    return parsed.map(function (d) { return d.giorno + " " + MESI[d.mese] + " " + d.anno; }).join(" e ");
+  }
+
+  // Un pacchetto ha una forma diversa da un evento (più date, niente
+  // categoria, prezzo da calcolare per combinazione) — invece di adattare
+  // renderEventCard con rami ovunque, si normalizza qui in un oggetto con
+  // solo i campi che la griglia (fillMount/ordinaPerData) già sa leggere, più
+  // un marcatore (__pacchetto) che dice a renderEventCard di delegare alla
+  // sua card dedicata. dataEvento = la prima data, per l'ordinamento
+  // cronologico insieme agli eventi normali — "categoria" resta assente
+  // apposta: un pacchetto non appartiene a nessuna categoria, quindi un
+  // filtro per categoria lo esclude sempre, correttamente.
+  // Un valore mostrato solo se tutte le date del pacchetto lo condividono
+  // (il caso comune: stesso luogo/stessa ora per ogni data) — con valori
+  // diversi non ha senso una riga sola di meta, si lascia alla pagina di
+  // iscrizione il dettaglio data per data. Stesso criterio di
+  // pacchetto-dettaglio.js, duplicato qui per lo stesso motivo degli altri
+  // helper di questo file.
+  function valoreComune(sottoEventi, campo) {
+    var valori = sottoEventi.map(function (ev) { return ev[campo]; }).filter(Boolean);
+    var comune = valori.length === sottoEventi.length && valori.every(function (v) { return v === valori[0]; });
+    return comune ? valori[0] : null;
+  }
+
+  function normalizzaPacchetto(pacchetto) {
+    var sottoEventi = (pacchetto.sottoEventi || []).slice();
+    var dateOrdinate = sottoEventi.map(function (ev) { return ev.dataEvento; }).filter(Boolean).sort();
+    var postiNoti = sottoEventi.map(function (ev) { return ev.postiDisponibili; }).filter(function (p) { return p != null; });
+    return {
+      __pacchetto: true,
+      id: pacchetto.id,
+      titolo: pacchetto.nome,
+      descrizione: pacchetto.descrizione,
+      immagineUrl: pacchetto.immagineUrl,
+      stato: pacchetto.stato,
+      dettagliAttivi: pacchetto.dettagliAttivi,
+      dataEvento: dateOrdinate[0] || null,
+      numeroDate: sottoEventi.length,
+      dateTesto: formattaDateMultiple(dateOrdinate),
+      ora: valoreComune(sottoEventi, "ora"),
+      luogo: valoreComune(sottoEventi, "luogo"),
+      // Qui, a differenza di ora/luogo, il valore condiviso diventa anche
+      // "categoria" vera e propria: un pacchetto con tutte le date nella
+      // stessa categoria deve comparire nel filtro di quella categoria come
+      // un evento normale (richiesto dall'utente). Se le date hanno
+      // categorie diverse resta assente, e il filtro lo esclude sempre —
+      // comportamento di prima, non un regresso.
+      categoria: valoreComune(sottoEventi, "categoria"),
+      prezzoMinimo: sottoEventi.map(function (ev) { return ev.prezzoSingolo; }).filter(function (p) { return p != null; }),
+      // Esaurito solo se OGNI data lo è davvero (postiDisponibili<=0): se
+      // anche una sola data ha ancora posti, si può comunque prenotare
+      // quella — la pagina di iscrizione fa i conti veri per combinazione.
+      postiDisponibili: postiNoti.length === sottoEventi.length && postiNoti.every(function (p) { return p <= 0; }) ? 0 : null,
+    };
+  }
+
+  function renderPackageCard(pacchetto) {
+    var article = document.createElement("article");
+    article.className = "event-card";
+    if (pacchetto.categoria) {
+      article.setAttribute("data-category", pacchetto.categoria);
+    }
+
+    var mediaHtml = pacchetto.immagineUrl
+      ? '<img src="' + escapeHtml(pacchetto.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
+      : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(pacchetto.categoria) + "</span>";
+
+    var annunciato = pacchetto.stato === "annunciato";
+    var postiEsauriti = pacchetto.postiDisponibili === 0;
+    var nonPrenotabile = pacchetto.stato !== "aperto" || postiEsauriti;
+    var etichettaNonPrenotabile = pacchetto.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
+
+    // "Informami quando parte" non esiste per un pacchetto: quella pagina
+    // chiama POST /api/eventi/{id}/interesse-notifica, che si aspetta un id
+    // di evento — un pacchetto vive in una tabella e in uno spazio di id
+    // completamente separato, usarlo lì sarebbe un id sbagliato silenzioso,
+    // non un errore visibile. Finché non esiste l'endpoint equivalente per
+    // i pacchetti, un pacchetto "Annunciato" resta solo "in arrivo".
+    var azionePrenota = annunciato
+      ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">In arrivo</span>'
+      : (nonPrenotabile
+        ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
+        : '<a href="iscrizione-pacchetto.html?id=' + pacchetto.id + '" class="btn btn--primary btn--small">Prenota →</a>');
+
+    var prezzoHtml = pacchetto.prezzoMinimo.length
+      ? '<span class="event-card__price">da ' + formattaPrezzo(Math.min.apply(null, pacchetto.prezzoMinimo)) + "</span>"
+      : "<span></span>";
+
+    // dettagliAttivi: interruttore manuale, default true se omesso — stesso
+    // principio della card evento.
+    var dettagliAttivi = pacchetto.dettagliAttivi !== false;
+    var azioneDettagli = dettagliAttivi
+      ? '<a href="pacchetto.html?id=' + pacchetto.id + '" class="btn btn--outline btn--small">Dettagli →</a>'
+      : "";
+
+    // Ora/luogo: mostrati solo se condivisi da tutte le date (vedi
+    // valoreComune) — stessa riga meta di un evento normale, qui con il
+    // testo di più date al posto di una sola.
+    var metaParts = [
+      "<span>🗓️ " + escapeHtml(pacchetto.dateTesto) + (pacchetto.ora ? " · " + escapeHtml(pacchetto.ora) : "") + "</span>"
+    ];
+    if (pacchetto.luogo) {
+      metaParts.push("<span>📍 " + escapeHtml(pacchetto.luogo) + "</span>");
+    }
+
+    article.innerHTML =
+      '<div class="event-card__media">' +
+      mediaHtml +
+      '<div class="event-card__badges">' +
+      (pacchetto.categoria ? '<span class="event-card__badge">' + escapeHtml(categoryLabel(pacchetto.categoria)) + "</span>" : "") +
+      '<span class="event-card__badge event-card__badge--date">' + pacchetto.numeroDate + " date</span>" +
+      "</div>" +
+      (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
+      "</div>" +
+      '<div class="event-card__body">' +
+      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
+      '<h3 class="event-card__title">' + escapeHtml(pacchetto.titolo) + "</h3>" +
+      (pacchetto.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(pacchetto.descrizione) + "</div>" : "") +
+      '<div class="event-card__footer">' +
+      prezzoHtml +
+      '<div class="event-card__actions">' +
+      azioneDettagli +
+      azionePrenota +
+      "</div>" +
+      "</div>" +
+      "</div>";
+
+    var descEl = article.querySelector(".event-card__desc");
+    if (descEl) {
+      normalizzaListeQuill(descEl);
+    }
+
+    return article;
+  }
+
   function renderEventCard(event) {
+    if (event.__pacchetto) {
+      return renderPackageCard(event);
+    }
     var article = document.createElement("article");
     article.className = "event-card";
     if (event.categoria) {
@@ -416,12 +573,24 @@
       comingSoonEls[0].parentNode.insertBefore(loadingEl, comingSoonEls[0]);
     }
 
-    window.trameFetch("/api/eventi")
-      .then(function (events) {
+    // I pacchetti (eventi a più date collegate — vedi pacchetto.html) si
+    // mostrano nella stessa griglia degli eventi normali, non in una
+    // sezione separata: pubblicamente devono sembrare eventi come gli
+    // altri, solo con più date. L'endpoint pacchetti è nuovo e potrebbe
+    // non esistere ancora durante un rilascio in due tempi col backend:
+    // .catch(=>[]) fa degradare a "nessun pacchetto" invece di rompere
+    // anche gli eventi normali, che non hanno nessuna colpa.
+    Promise.all([
+      window.trameFetch("/api/eventi"),
+      window.trameFetch("/api/pacchetti-eventi").catch(function () { return []; })
+    ])
+      .then(function (risultati) {
         if (loadingEl) {
           loadingEl.remove();
         }
-        events = events || [];
+        var events = risultati[0] || [];
+        var pacchetti = (risultati[1] || []).map(normalizzaPacchetto);
+        events = events.concat(pacchetti);
 
         function renderizza(categoria) {
           categoriaFiltro = categoria;

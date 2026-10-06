@@ -763,7 +763,12 @@ p {
 .event-card__image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* contain, non cover: la foto si vede sempre per intero (richiesto
+     dall'utente, scoperto confrontando una card evento con una pacchetto —
+     il taglio era lo stesso ovunque, non una differenza fra i due). Lo
+     spazio vuoto sopra/sotto o ai lati, se la foto non è 4:3, mostra lo
+     sfondo sfumato di .event-card__media invece di un bordo bianco. */
+  object-fit: contain;
 }
 
 .event-card__media-icon {
@@ -788,6 +793,34 @@ p {
 .event-card__badge--stato {
   left: auto;
   right: 14px;
+  background: var(--color-terracotta-dark);
+}
+
+/* Solo sui pacchetti: quando c'è anche un badge categoria, i due vanno
+   affiancati sulla stessa riga in alto a sinistra (preferito dall'utente a
+   uno impilato sotto l'altro) — ".event-card__badge" da solo è sempre
+   "in alto a sinistra" in assoluto, quindi due badge con quella sola classe
+   finiscono esattamente nello stesso punto, sovrapposti. Questo contenitore
+   prende lui la posizione assoluta; i badge dentro tornano al flusso
+   normale, affiancati da flexbox. */
+.event-card__badges {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.event-card__badges .event-card__badge {
+  position: static;
+}
+
+/* Colore diverso dal badge categoria accanto, per distinguerli a colpo
+   d'occhio (richiesto dall'utente) — stesso colore già usato per
+   "Prossimamente" (.event-card__badge--stato), qui solo per il colore: la
+   posizione la decide già il contenitore sopra. */
+.event-card__badge--date {
   background: var(--color-terracotta-dark);
 }
 
@@ -1028,7 +1061,8 @@ p {
 .event-detail__image {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* contain, non cover: stessa ragione di .event-card__image sopra. */
+  object-fit: contain;
 }
 
 .event-detail__media-icon {
