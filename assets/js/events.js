@@ -183,6 +183,7 @@
       descrizione: pacchetto.descrizione,
       immagineUrl: pacchetto.immagineUrl,
       stato: pacchetto.stato,
+      dettagliAttivi: pacchetto.dettagliAttivi,
       dataEvento: dateOrdinate[0] || null,
       numeroDate: sottoEventi.length,
       dateTesto: formattaDateMultiple(dateOrdinate),
@@ -223,6 +224,13 @@
       ? '<span class="event-card__price">da ' + formattaPrezzo(Math.min.apply(null, pacchetto.prezzoMinimo)) + "</span>"
       : "<span></span>";
 
+    // dettagliAttivi: interruttore manuale, default true se omesso — stesso
+    // principio della card evento.
+    var dettagliAttivi = pacchetto.dettagliAttivi !== false;
+    var azioneDettagli = dettagliAttivi
+      ? '<a href="pacchetto.html?id=' + pacchetto.id + '" class="btn btn--outline btn--small">Dettagli →</a>'
+      : "";
+
     article.innerHTML =
       '<div class="event-card__media">' +
       mediaHtml +
@@ -236,7 +244,7 @@
       '<div class="event-card__footer">' +
       prezzoHtml +
       '<div class="event-card__actions">' +
-      '<a href="pacchetto.html?id=' + pacchetto.id + '" class="btn btn--outline btn--small">Dettagli →</a>' +
+      azioneDettagli +
       azionePrenota +
       "</div>" +
       "</div>" +

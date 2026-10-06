@@ -97,13 +97,20 @@
     var id = new URLSearchParams(window.location.search).get("id");
     var loadingEl = document.getElementById("pacchetto-loading");
     var erroreEl = document.getElementById("pacchetto-errore");
+    var erroreIconaEl = document.getElementById("pacchetto-errore-icona");
+    var erroreTitoloEl = document.getElementById("pacchetto-errore-titolo");
     var erroreMsgEl = document.getElementById("pacchetto-errore-msg");
     var contentEl = document.getElementById("pacchetto-content");
 
-    function mostraErrore(messaggio) {
+    // titolo/icona facoltativi: di default lo stesso messaggio "evento non
+    // trovato" di sempre, riusato anche per "dettagli non ancora attivi"
+    // passando un titolo/icona diversi — stesso schema di evento.html.
+    function mostraErrore(messaggio, titolo, icona) {
       loadingEl.hidden = true;
       contentEl.hidden = true;
       erroreEl.hidden = false;
+      erroreIconaEl.textContent = icona || "🔍";
+      erroreTitoloEl.textContent = titolo || "Evento non trovato";
       if (messaggio) {
         erroreMsgEl.textContent = messaggio;
       }
@@ -116,6 +123,14 @@
 
     window.trameFetch("/api/pacchetti-eventi/" + encodeURIComponent(id))
       .then(function (pacchetto) {
+        // Interruttore manuale, stesso principio di evento.html: il
+        // pacchetto esiste (l'API l'ha trovato) ma i dettagli non sono
+        // ancora pronti — niente contenuto reale nemmeno con il link diretto.
+        if (pacchetto.dettagliAttivi === false) {
+          mostraErrore("Prova a tornare più avanti, oppure scrivici per saperne di più.", "Dettagli in arrivo", "🕒");
+          return;
+        }
+
         loadingEl.hidden = true;
         contentEl.hidden = false;
         document.title = pacchetto.nome + " — Progetto TraMe";
@@ -146,8 +161,11 @@
         }
         document.getElementById("pacchetto-meta").textContent = metaParts.join("    ");
 
+        // testoDettaglio: testo esteso pensato apposta per questa pagina,
+        // facoltativo — finché non è compilato si mostra la descrizione
+        // breve (quella della card), stesso principio di evento.html.
         var descEl = document.getElementById("pacchetto-descrizione");
-        descEl.innerHTML = formattaTestoRicco(pacchetto.descrizione || "");
+        descEl.innerHTML = formattaTestoRicco(pacchetto.testoDettaglio || pacchetto.descrizione || "");
         normalizzaListeQuill(descEl);
 
         // Teaser di prezzo: il minimo tra le singole date, per dare un'idea

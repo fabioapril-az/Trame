@@ -86,7 +86,9 @@
   }
 
   inizializzaEditor("pac-descrizione", false);
+  inizializzaEditor("pac-testo-dettaglio", false);
   inizializzaEditor("mod-pac-descrizione", true);
+  inizializzaEditor("mod-pac-testo-dettaglio", true);
 
   function contenutoQuill(quill) {
     return quill.getText().trim() === "" ? null : quill.root.innerHTML;
@@ -285,6 +287,8 @@
   document.getElementById("btn-mostra-nuovo-pacchetto").addEventListener("click", function () {
     document.getElementById("pac-nome").value = "";
     quillEditors["pac-descrizione"].setText("");
+    quillEditors["pac-testo-dettaglio"].setText("");
+    document.getElementById("pac-dettagli-attivi").checked = true;
     document.getElementById("pac-sconto").value = "";
     document.getElementById("pac-sottoeventi-lista").innerHTML = "";
     document.getElementById("crea-pacchetto-status").hidden = true;
@@ -310,6 +314,8 @@
     var payload = {
       nome: document.getElementById("pac-nome").value.trim(),
       descrizione: contenutoQuill(quillEditors["pac-descrizione"]),
+      testoDettaglio: contenutoQuill(quillEditors["pac-testo-dettaglio"]),
+      dettagliAttivi: document.getElementById("pac-dettagli-attivi").checked,
       sottoEventoIds: sottoEventoIds,
       scontoTutteLeDate: scontoVal === "" ? null : parseFloat(scontoVal)
     };
@@ -343,6 +349,8 @@
     stato.pacchettoCorrenteId = pacchetto.id;
     document.getElementById("mod-pac-nome").value = pacchetto.nome || "";
     impostaContenutoQuill(quillEditors["mod-pac-descrizione"], pacchetto.descrizione);
+    impostaContenutoQuill(quillEditors["mod-pac-testo-dettaglio"], pacchetto.testoDettaglio);
+    document.getElementById("mod-pac-dettagli-attivi").checked = pacchetto.dettagliAttivi !== false;
     document.getElementById("mod-pac-sconto").value = pacchetto.scontoTutteLeDate != null ? pacchetto.scontoTutteLeDate : "";
     document.getElementById("mod-pac-stato").value = pacchetto.stato;
     aggiornaAnteprimaImmagine(pacchetto.immagineUrl);
@@ -383,6 +391,8 @@
     var payload = {
       nome: document.getElementById("mod-pac-nome").value.trim(),
       descrizione: contenutoQuill(quillEditors["mod-pac-descrizione"]),
+      testoDettaglio: contenutoQuill(quillEditors["mod-pac-testo-dettaglio"]),
+      dettagliAttivi: document.getElementById("mod-pac-dettagli-attivi").checked,
       sottoEventoIds: sottoEventoIds,
       scontoTutteLeDate: scontoVal === "" ? null : parseFloat(scontoVal),
       stato: document.getElementById("mod-pac-stato").value
