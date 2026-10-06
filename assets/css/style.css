@@ -796,6 +796,15 @@ p {
   background: var(--color-terracotta-dark);
 }
 
+/* Solo sui pacchetti: la categoria resta nell'angolo di sempre, il numero
+   di date va impilato sotto — senza questa, i due badge finiscono esattamente
+   nello stesso punto (entrambi "in alto a sinistra" di default) e quello
+   scritto per secondo nasconde l'altro. Scoperto dall'utente: la categoria
+   "Canto" era già nei dati, ma invisibile sotto il badge "2 date". */
+.event-card__badge--date {
+  top: 44px;
+}
+
 .event-card__title {
   font-size: 1.25rem;
   margin-bottom: 0.3em;
