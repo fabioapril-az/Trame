@@ -172,6 +172,18 @@
   // cronologico insieme agli eventi normali — "categoria" resta assente
   // apposta: un pacchetto non appartiene a nessuna categoria, quindi un
   // filtro per categoria lo esclude sempre, correttamente.
+  // Un valore mostrato solo se tutte le date del pacchetto lo condividono
+  // (il caso comune: stesso luogo/stessa ora per ogni data) — con valori
+  // diversi non ha senso una riga sola di meta, si lascia alla pagina di
+  // iscrizione il dettaglio data per data. Stesso criterio di
+  // pacchetto-dettaglio.js, duplicato qui per lo stesso motivo degli altri
+  // helper di questo file.
+  function valoreComune(sottoEventi, campo) {
+    var valori = sottoEventi.map(function (ev) { return ev[campo]; }).filter(Boolean);
+    var comune = valori.length === sottoEventi.length && valori.every(function (v) { return v === valori[0]; });
+    return comune ? valori[0] : null;
+  }
+
   function normalizzaPacchetto(pacchetto) {
     var sottoEventi = (pacchetto.sottoEventi || []).slice();
     var dateOrdinate = sottoEventi.map(function (ev) { return ev.dataEvento; }).filter(Boolean).sort();
@@ -187,6 +199,15 @@
       dataEvento: dateOrdinate[0] || null,
       numeroDate: sottoEventi.length,
       dateTesto: formattaDateMultiple(dateOrdinate),
+      ora: valoreComune(sottoEventi, "ora"),
+      luogo: valoreComune(sottoEventi, "luogo"),
+      // Qui, a differenza di ora/luogo, il valore condiviso diventa anche
+      // "categoria" vera e propria: un pacchetto con tutte le date nella
+      // stessa categoria deve comparire nel filtro di quella categoria come
+      // un evento normale (richiesto dall'utente). Se le date hanno
+      // categorie diverse resta assente, e il filtro lo esclude sempre —
+      // comportamento di prima, non un regresso.
+      categoria: valoreComune(sottoEventi, "categoria"),
       prezzoMinimo: sottoEventi.map(function (ev) { return ev.prezzoSingolo; }).filter(function (p) { return p != null; }),
       // Esaurito solo se OGNI data lo è davvero (postiDisponibili<=0): se
       // anche una sola data ha ancora posti, si può comunque prenotare
@@ -198,10 +219,13 @@
   function renderPackageCard(pacchetto) {
     var article = document.createElement("article");
     article.className = "event-card";
+    if (pacchetto.categoria) {
+      article.setAttribute("data-category", pacchetto.categoria);
+    }
 
     var mediaHtml = pacchetto.immagineUrl
       ? '<img src="' + escapeHtml(pacchetto.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
-      : '<span class="event-card__media-icon" aria-hidden="true">🗓️</span>';
+      : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(pacchetto.categoria) + "</span>";
 
     var annunciato = pacchetto.stato === "annunciato";
     var postiEsauriti = pacchetto.postiDisponibili === 0;
@@ -231,14 +255,25 @@
       ? '<a href="pacchetto.html?id=' + pacchetto.id + '" class="btn btn--outline btn--small">Dettagli →</a>'
       : "";
 
+    // Ora/luogo: mostrati solo se condivisi da tutte le date (vedi
+    // valoreComune) — stessa riga meta di un evento normale, qui con il
+    // testo di più date al posto di una sola.
+    var metaParts = [
+      "<span>🗓️ " + escapeHtml(pacchetto.dateTesto) + (pacchetto.ora ? " · " + escapeHtml(pacchetto.ora) : "") + "</span>"
+    ];
+    if (pacchetto.luogo) {
+      metaParts.push("<span>📍 " + escapeHtml(pacchetto.luogo) + "</span>");
+    }
+
     article.innerHTML =
       '<div class="event-card__media">' +
       mediaHtml +
+      (pacchetto.categoria ? '<span class="event-card__badge">' + escapeHtml(categoryLabel(pacchetto.categoria)) + "</span>" : "") +
       '<span class="event-card__badge">' + pacchetto.numeroDate + " date</span>" +
       (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
       "</div>" +
       '<div class="event-card__body">' +
-      '<p class="event-card__meta"><span>🗓️ ' + escapeHtml(pacchetto.dateTesto) + "</span></p>" +
+      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<h3 class="event-card__title">' + escapeHtml(pacchetto.titolo) + "</h3>" +
       (pacchetto.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(pacchetto.descrizione) + "</div>" : "") +
       '<div class="event-card__footer">' +

@@ -150,14 +150,19 @@
         document.getElementById("pacchetto-titolo").textContent = pacchetto.nome;
 
         var dateTesto = formattaDateMultiple(sottoEventi.map(function (ev) { return ev.dataEvento; }));
-        var luoghi = sottoEventi.map(function (ev) { return ev.luogo; }).filter(Boolean);
-        // Luogo mostrato solo se uguale per tutte le date (il caso comune):
-        // con luoghi diversi non ha senso un'unica riga di meta, si lascia
-        // solo alla pagina di iscrizione il dettaglio data per data.
-        var stessoLuogo = luoghi.length === sottoEventi.length && luoghi.every(function (l) { return l === luoghi[0]; });
-        var metaParts = ["🗓️ " + dateTesto];
-        if (stessoLuogo && luoghi[0]) {
-          metaParts.push("📍 " + luoghi[0]);
+        // Ora/luogo mostrati solo se uguali per tutte le date (il caso
+        // comune): con valori diversi non ha senso un'unica riga di meta, si
+        // lascia solo alla pagina di iscrizione il dettaglio data per data.
+        function valoreComune(campo) {
+          var valori = sottoEventi.map(function (ev) { return ev[campo]; }).filter(Boolean);
+          var comune = valori.length === sottoEventi.length && valori.every(function (v) { return v === valori[0]; });
+          return comune ? valori[0] : null;
+        }
+        var ora = valoreComune("ora");
+        var luogo = valoreComune("luogo");
+        var metaParts = ["🗓️ " + dateTesto + (ora ? " · " + ora : "")];
+        if (luogo) {
+          metaParts.push("📍 " + luogo);
         }
         document.getElementById("pacchetto-meta").textContent = metaParts.join("    ");
 
