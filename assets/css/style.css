@@ -816,6 +816,14 @@ p {
   position: static;
 }
 
+/* Colore diverso dal badge categoria accanto, per distinguerli a colpo
+   d'occhio (richiesto dall'utente) — stesso colore già usato per
+   "Prossimamente" (.event-card__badge--stato), qui solo per il colore: la
+   posizione la decide già il contenitore sopra. */
+.event-card__badge--date {
+  background: var(--color-terracotta-dark);
+}
+
 .event-card__title {
   font-size: 1.25rem;
   margin-bottom: 0.3em;
