@@ -796,13 +796,24 @@ p {
   background: var(--color-terracotta-dark);
 }
 
-/* Solo sui pacchetti: la categoria resta nell'angolo di sempre, il numero
-   di date va impilato sotto — senza questa, i due badge finiscono esattamente
-   nello stesso punto (entrambi "in alto a sinistra" di default) e quello
-   scritto per secondo nasconde l'altro. Scoperto dall'utente: la categoria
-   "Canto" era già nei dati, ma invisibile sotto il badge "2 date". */
-.event-card__badge--date {
-  top: 44px;
+/* Solo sui pacchetti: quando c'è anche un badge categoria, i due vanno
+   affiancati sulla stessa riga in alto a sinistra (preferito dall'utente a
+   uno impilato sotto l'altro) — ".event-card__badge" da solo è sempre
+   "in alto a sinistra" in assoluto, quindi due badge con quella sola classe
+   finiscono esattamente nello stesso punto, sovrapposti. Questo contenitore
+   prende lui la posizione assoluta; i badge dentro tornano al flusso
+   normale, affiancati da flexbox. */
+.event-card__badges {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.event-card__badges .event-card__badge {
+  position: static;
 }
 
 .event-card__title {

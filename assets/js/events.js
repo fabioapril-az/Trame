@@ -268,8 +268,10 @@
     article.innerHTML =
       '<div class="event-card__media">' +
       mediaHtml +
+      '<div class="event-card__badges">' +
       (pacchetto.categoria ? '<span class="event-card__badge">' + escapeHtml(categoryLabel(pacchetto.categoria)) + "</span>" : "") +
-      '<span class="event-card__badge event-card__badge--date">' + pacchetto.numeroDate + " date</span>" +
+      '<span class="event-card__badge">' + pacchetto.numeroDate + " date</span>" +
+      "</div>" +
       (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
       "</div>" +
       '<div class="event-card__body">' +
