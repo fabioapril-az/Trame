@@ -8,7 +8,7 @@
 // chiamata.
 
 (function () {
-  var stato = { eventoCorrenteId: null };
+  var stato = { eventoCorrenteId: null, eventoCorrentePacchettoId: null };
 
   function apiFetchAuth(path, options) {
     options = options || {};
@@ -389,6 +389,10 @@
   function apriModificaEvento(evento) {
     stato.eventoCorrenteId = evento.id;
     stato.eventoCorrenteTitolo = evento.titolo;
+    // Serve per il bottone "Rimborsa pacchetto" sulle righe iscritti
+    // generate da un acquisto pacchetto: l'URL di rimborso usa l'id del
+    // pacchetto (il genitore), non quello di questo sotto-evento.
+    stato.eventoCorrentePacchettoId = evento.pacchettoEventoId || null;
     document.getElementById("mod-ev-titolo").value = evento.titolo;
     impostaContenutoQuill(quillEditors["mod-ev-descrizione"], evento.descrizione);
     impostaContenutoQuill(quillEditors["mod-ev-testo-dettaglio"], evento.testoDettaglio);
@@ -520,22 +524,29 @@
             '<td><button type="button" class="btn btn--outline btn--small" data-action="annulla">Annulla</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="elimina">Elimina</button>' +
             (i.stato === "confermata"
-              ? (i.checkoutEventoId
-                // Un solo pagamento Stripe può generare più righe (gruppo,
-                // o singolo+aperitivo): il rimborso è unico sul pagamento,
-                // quindi va applicato a tutte insieme in un click, non riga
-                // per riga (rischio di lasciarne indietro qualcuna).
-                ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa-gruppo">Rimborsa gruppo</button>'
-                : ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>')
+              ? (i.checkoutPacchettoId
+                // Un acquisto pacchetto può coprire più date e più persone
+                // in un solo pagamento: il rimborso è unico sull'intero
+                // acquisto (tutte le righe collegate, anche sulle altre
+                // date), non riga per riga — stesso principio del gruppo.
+                ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa-pacchetto">Rimborsa pacchetto</button>'
+                : (i.checkoutEventoId
+                  // Un solo pagamento Stripe può generare più righe (gruppo,
+                  // o singolo+aperitivo): il rimborso è unico sul pagamento,
+                  // quindi va applicato a tutte insieme in un click, non riga
+                  // per riga (rischio di lasciarne indietro qualcuna).
+                  ? ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa-gruppo">Rimborsa gruppo</button>'
+                  : ' <button type="button" class="btn btn--outline btn--small" data-action="rimborsa">Segna come rimborsato</button>'))
               : "") +
             (i.stato === "in_attesa_pagamento_manuale" ? ' <button type="button" class="btn btn--primary btn--small" data-action="conferma-manuale">Conferma pagamento ricevuto</button>' : "") +
-            // Solo sulle righe senza checkout Stripe. Su una riga pagata
-            // online l'importo e il metodo veri sono quelli del checkout, che
-            // hanno la precedenza in lettura: scrivere qui un valore a mano
-            // non cambierebbe nulla di visibile, cioè sarebbe un bottone che
-            // finge di funzionare. Un errore su un pagamento Stripe si
-            // rimedia col rimborso, non riscrivendo l'importo.
-            (!i.checkoutEventoId
+            // Solo sulle righe senza checkout (Stripe evento o Stripe
+            // pacchetto). Su una riga pagata online l'importo e il metodo
+            // veri sono quelli del checkout, che hanno la precedenza in
+            // lettura: scrivere qui un valore a mano non cambierebbe nulla
+            // di visibile, cioè sarebbe un bottone che finge di funzionare.
+            // Un errore su un pagamento online si rimedia col rimborso, non
+            // riscrivendo l'importo.
+            (!i.checkoutEventoId && !i.checkoutPacchettoId
               ? ' <button type="button" class="btn btn--outline btn--small" data-action="pagamento">' +
                 (i.metodoPagamento ? "Correggi pagamento" : "Registra pagamento") + "</button>"
               : "") +
@@ -549,6 +560,10 @@
           var btnRimborsaGruppo = tr.querySelector('[data-action="rimborsa-gruppo"]');
           if (btnRimborsaGruppo) {
             btnRimborsaGruppo.addEventListener("click", function () { segnaGruppoRimborsato(i.checkoutEventoId); });
+          }
+          var btnRimborsaPacchetto = tr.querySelector('[data-action="rimborsa-pacchetto"]');
+          if (btnRimborsaPacchetto) {
+            btnRimborsaPacchetto.addEventListener("click", function () { segnaPacchettoRimborsato(i.checkoutPacchettoId); });
           }
           var btnConfermaManuale = tr.querySelector('[data-action="conferma-manuale"]');
           if (btnConfermaManuale) {
@@ -622,6 +637,20 @@
       return;
     }
     apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId + "/checkout/" + checkoutEventoId + "/rimborsato", { method: "POST" })
+      .then(function () { caricaIscritti(stato.eventoCorrenteId); })
+      .catch(function (err) { window.alert(err.message); });
+  }
+
+  // Un acquisto pacchetto può coprire più date e più persone in un solo
+  // pagamento: il rimborso è unico sull'intero acquisto, quindi segna anche
+  // le righe sulle ALTRE date collegate, non solo quella che si sta
+  // guardando qui — il backend scala il contatore sconto una volta per ogni
+  // data pagata da ciascun socio coinvolto.
+  function segnaPacchettoRimborsato(checkoutPacchettoId) {
+    if (!window.confirm("Segnare come rimborsato l'intero acquisto pacchetto? Riguarda anche le altre date collegate, non solo questa. Il rimborso vero va fatto prima dal Dashboard Stripe.")) {
+      return;
+    }
+    apiFetchAuth("/api/pacchetti-eventi/" + stato.eventoCorrentePacchettoId + "/checkout/" + checkoutPacchettoId + "/rimborsato", { method: "POST" })
       .then(function () { caricaIscritti(stato.eventoCorrenteId); })
       .catch(function (err) { window.alert(err.message); });
   }
@@ -720,6 +749,7 @@
   function mostraIscrittiDiretti(evento) {
     stato.eventoCorrenteId = evento.id;
     stato.eventoCorrenteTitolo = evento.titolo;
+    stato.eventoCorrentePacchettoId = evento.pacchettoEventoId || null;
     document.getElementById("evento-dettaglio").hidden = true;
     caricaIscritti(evento.id).then(function () {
       document.getElementById("iscritti-tabella").scrollIntoView({ behavior: "smooth", block: "start" });
