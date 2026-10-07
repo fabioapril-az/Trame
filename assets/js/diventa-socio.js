@@ -84,6 +84,11 @@
     // resta nascosta e non spedita, il contratto API resta false di default.
     if (modalitaAdmin) {
       payload.contaComeEventoGiaFatto = document.getElementById("evento-gia-fatto").checked;
+      // Indipendente dal campo sopra (quello serve solo al contatore sconto
+      // socio): questo decide se la notifica di nuovo socio parte o non
+      // parte — una registrazione fatta dalla segreteria non deve avvisare
+      // la segreteria stessa di sé stessa.
+      payload.registratoDallaSegreteria = true;
     }
 
     submitBtn.disabled = true;

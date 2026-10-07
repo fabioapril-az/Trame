@@ -212,6 +212,8 @@ Compilato il modulo, il socio compare in elenco con il suo numero di tessera. **
 
 > **L'email con la tessera parte sempre**, anche per un socio registrato a mano qui — non c'è un modo di evitarlo. Se la persona è già stata avvisata a voce, riceverà comunque il messaggio.
 
+Quando invece è una **persona nuova a registrarsi da sola** dal sito pubblico (modulo diretto o pagamento con più tessere), arriva anche un'email di avviso a `info@progettotrame.org`, con nome, numero tessera, email e canale usato — così non scopri un nuovo socio solo guardando l'elenco. Questo avviso **non** parte quando sei tu (la segreteria) a registrare qualcuno da qui: non ha senso avvisarti di un'azione che hai appena fatto tu stesso.
+
 ### Le azioni su ogni riga
 
 - **Modifica** — dati di contatto: nome, cognome, telefono, indirizzo, città, CAP. In fondo al pannello, separati, anche data di nascita e codice fiscale: compaiono sempre vuoti anche se il socio li ha già (non è un errore), e lasciarli vuoti **non li cancella** — servono solo per completarli in un momento successivo, per esempio quando un socio è stato registrato a mano senza la data di nascita (vedi capitolo 3).
