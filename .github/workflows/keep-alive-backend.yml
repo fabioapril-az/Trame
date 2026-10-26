@@ -1,0 +1,58 @@
+# Tiene sveglio il backend .NET (app-trame-prod) sul piano gratuito F1 di
+# Azure App Service, che non ha "Always On": dopo circa 20 minuti senza
+# richieste Azure mette l'app a riposo, e il primo visitatore successivo
+# aspetta ~7 secondi che si riavvii (misurato: /api/eventi 6,9s a freddo,
+# 0,15s a caldo). Un ping ogni 10 minuti la tiene sempre sotto quella soglia.
+#
+# Costo zero: il repository è pubblico, e per i repository pubblici GitHub
+# non conteggia i minuti di Actions. Il piano F1 ha un tetto di 60 minuti di
+# CPU al giorno: una GET leggera ne usa una frazione di secondo, ~144 al
+# giorno restano ben lontani dal limite.
+#
+# Limiti noti, accettati consapevolmente al posto del piano a pagamento:
+# - GitHub non garantisce la puntualità dei job "schedule": nelle ore di
+#   carico un ping può slittare o saltare, e qualche visitatore troverà
+#   ancora la prima chiamata lenta.
+# - GitHub disattiva i workflow schedulati dopo 60 giorni senza attività sul
+#   repository (avvisa via email): basta un commit qualsiasi, o riattivarlo
+#   dalla scheda Actions.
+# - I job schedulati girano solo dal ramo principale (master).
+#
+# Un ping fallito (backend non raggiungibile dopo i tentativi) fa fallire il
+# job, e GitHub manda un'email a chi ha modificato per ultimo questo file:
+# un avviso gratuito, seppur grezzo, se il backend va giù.
+
+name: Keep-alive backend
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  # Per provarlo a mano dalla scheda Actions, senza aspettare l'orario.
+  workflow_dispatch:
+
+# Nessun permesso sul repository: il job fa solo una richiesta HTTP verso
+# l'esterno, non legge né scrive niente qui.
+permissions: {}
+
+# Se un ping è ancora in corso (backend lento a svegliarsi) quando parte il
+# successivo, non ne serve un secondo in parallelo.
+concurrency:
+  group: keep-alive-backend
+  cancel-in-progress: false
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Ping /api/impostazioni
+        # /api/impostazioni: pubblico (nessun login), leggero, e tocca il
+        # database — così si riscalda anche la connessione, non solo il
+        # processo. Retry per assorbire il risveglio a freddo, che può
+        # richiedere diversi secondi.
+        run: |
+          curl --fail --silent --show-error \
+            --max-time 60 --retry 3 --retry-delay 10 --retry-all-errors \
+            --output /dev/null \
+            --write-out "HTTP %{http_code} in %{time_total}s\n" \
+            https://app-trame-prod.azurewebsites.net/api/impostazioni
