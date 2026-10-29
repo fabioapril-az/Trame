@@ -131,6 +131,7 @@
             // L'unione è sicura perché nessun socio ha entrambi valorizzati.
             "<td>" + escapeHtml(metodoLeggibile(s.metodoPagamento || s.ultimoIncassoMetodo)) + "</td>" +
             "<td>" + (s.eventiPartecipatiDaRinnovo != null ? s.eventiPartecipatiDaRinnovo : "—") + "</td>" +
+            "<td>" + (s.consensoFoto === true ? "Sì" : s.consensoFoto === false ? "No" : "—") + "</td>" +
             '<td><button type="button" class="btn btn--outline btn--small" data-action="modifica">Modifica</button> ' +
             '<button type="button" class="btn btn--outline btn--small" data-action="rinnova">Rinnova</button> ' +
             // Registrare la quota è un'azione diversa dal rinnovo (vedi il
@@ -205,6 +206,10 @@
     // lasciarli vuoti al salvataggio NON li cancella — vedi il payload.
     document.getElementById("mod-data-nascita").value = "";
     document.getElementById("mod-codice-fiscale").value = "";
+    // A differenza dei due campi sopra, questo lo sa gia' l'elenco: si apre
+    // mostrando lo stato vero (compreso "mai chiesto"), non vuoto.
+    document.getElementById("mod-consenso-foto").value =
+      socio.consensoFoto === true ? "si" : socio.consensoFoto === false ? "no" : "";
     document.getElementById("modifica-status").hidden = true;
     document.getElementById("pannello-modifica").hidden = false;
     document.getElementById("pannello-modifica").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -325,6 +330,14 @@
     var codiceFiscaleVal = document.getElementById("mod-codice-fiscale").value.trim().toUpperCase();
     if (codiceFiscaleVal) {
       payload.codiceFiscale = codiceFiscaleVal;
+    }
+    // Stessa logica "assente = non toccare": qui il select mostra sempre lo
+    // stato vero, ma "— non ha ancora risposto —" resta la scelta che non
+    // invia nulla, non un modo di tornare a null — "assente" e "null
+    // esplicito" probabilmente collassano nello stesso ramo lato server.
+    var consensoFotoVal = document.getElementById("mod-consenso-foto").value;
+    if (consensoFotoVal) {
+      payload.consensoFoto = consensoFotoVal === "si";
     }
     apiFetchAuth("/api/soci/" + stato.editingSocioId, {
       method: "PUT",

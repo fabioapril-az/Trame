@@ -146,6 +146,20 @@
             </label>
           </div>
 
+          <!-- Scelta forzata, non una checkbox facoltativa come quella
+               sopra: due radio sullo stesso name, entrambi required, quindi
+               il submit non parte finché non si sceglie Sì o No — niente
+               terza opzione "non ho risposto" (a differenza della
+               newsletter, qui l'assenza di risposta non è ammessa). -->
+          <div class="form-row">
+            <label>Autorizzi la pubblicazione di foto e video dell'associazione in cui compari?
+              <a href="consenso-foto.html" target="_blank" rel="noopener">(dettagli)</a></label>
+            <div class="form-row--radio-pair">
+              <label><input type="radio" id="foto-si" name="foto-consenso" value="si" required> Sì</label>
+              <label><input type="radio" id="foto-no" name="foto-consenso" value="no" required> No</label>
+            </div>
+          </div>
+
           <div class="form-row form-row--checkbox">
             <label>
               <input type="checkbox" id="consenso" name="consenso" required>
@@ -180,6 +194,19 @@
               <input type="checkbox" id="mt-newsletter">
               <span>Volete ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</span>
             </label>
+          </div>
+
+          <!-- Come mt-consenso/mt-newsletter: una sola scelta per tutte le
+               persone di questa iscrizione, non una per persona — ma qui
+               (come il consenso sotto) è una scelta forzata, non facoltativa:
+               il submit non parte senza Sì o No. -->
+          <div class="form-row">
+            <label>Autorizzate la pubblicazione di foto e video dell'associazione in cui comparite?
+              <a href="consenso-foto.html" target="_blank" rel="noopener">(dettagli)</a></label>
+            <div class="form-row--radio-pair">
+              <label><input type="radio" id="mt-foto-si" name="mt-foto-consenso" value="si" required> Sì</label>
+              <label><input type="radio" id="mt-foto-no" name="mt-foto-consenso" value="no" required> No</label>
+            </div>
           </div>
 
           <div class="form-row form-row--checkbox">
@@ -236,6 +263,7 @@
       <div class="footer__bottom">
         <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
         <span><a href="privacy.html">Privacy</a></span>
+        <span><a href="consenso-foto.html">Consenso foto</a></span>
         <span>TraMe, insieme ♥</span>
       </div>
     </div>

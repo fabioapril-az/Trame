@@ -78,7 +78,11 @@
       consensoAccettato: document.getElementById("consenso").checked,
       consensoVersione: CONSENSO_VERSIONE,
       consensoCanale: "web",
-      consensoNewsletter: document.getElementById("newsletter").checked
+      consensoNewsletter: document.getElementById("newsletter").checked,
+      // required su entrambi i radio garantisce che uno dei due sia
+      // sempre spuntato quando si arriva fin qui (altrimenti il submit
+      // nativo del browser non parte): niente terzo caso da gestire.
+      consensoFoto: document.getElementById("foto-si").checked
     };
     // Solo la segreteria vede questo campo: sul modulo pubblico la checkbox
     // resta nascosta e non spedita, il contratto API resta false di default.
@@ -357,15 +361,26 @@
       mtStatus.hidden = false;
       return;
     }
+    // Il "required" sui radio non basta qui: questo è un bottone semplice,
+    // non il submit di un <form>, quindi la validazione nativa del browser
+    // non si attiva da sola — va controllata a mano, come per mtConsenso.
+    var mtFotoSelezionato = document.querySelector('input[name="mt-foto-consenso"]:checked');
+    if (!mtFotoSelezionato) {
+      mtStatus.textContent = "Devi scegliere Sì o No alla domanda sulla pubblicazione di foto e video per procedere.";
+      mtStatus.hidden = false;
+      return;
+    }
     var persone = leggiPersoneMultiplo(true);
     if (!persone) {
       return;
     }
     var newsletter = mtNewsletter.checked;
+    var foto = mtFotoSelezionato.value === "si";
     persone.forEach(function (p) {
       p.consensoAccettato = true;
       p.consensoVersione = CONSENSO_VERSIONE;
       p.consensoNewsletter = newsletter;
+      p.consensoFoto = foto;
     });
 
     var testoOriginale = mtBtnPaga.textContent;

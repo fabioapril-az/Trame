@@ -148,6 +148,20 @@
               <label><input type="checkbox" id="sc-newsletter"> Vuoi ricevere anche la nostra newsletter,
                 con gli altri eventi e novità di TraMe?</label>
             </div>
+            <!-- Stesso meccanismo del campo sopra (solo se consensoFoto:
+                 null, mai chiesto prima), ma qui è una scelta forzata, non
+                 facoltativa: Conferma iscrizione resta bloccato se compare
+                 e nessuna delle due opzioni è scelta — validato a mano nel
+                 click handler, non con "required" nativo (il bottone non è
+                 il submit di un form). -->
+            <div class="form-row" id="campo-foto-socio" hidden>
+              <label>Autorizzi la pubblicazione di foto e video dell'associazione in cui compari?
+                <a href="consenso-foto.html" target="_blank" rel="noopener">(dettagli)</a></label>
+              <div class="form-row--radio-pair">
+                <label><input type="radio" id="sc-foto-si" name="sc-foto-consenso" value="si"> Sì</label>
+                <label><input type="radio" id="sc-foto-no" name="sc-foto-consenso" value="no"> No</label>
+              </div>
+            </div>
             <button type="button" class="btn btn--primary" id="btn-conferma">Conferma iscrizione</button>
             <p class="form-note" id="conferma-status" role="alert" hidden></p>
           </div>
@@ -174,6 +188,19 @@
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="ia-newsletter"> Vuoi ricevere anche la nostra newsletter,
                 con gli altri eventi e novità di TraMe?</label>
+            </div>
+            <!-- required sui radio: validata da validaSezione(stepInteresse),
+                 che controlla già ogni campo del passo — nessun codice in
+                 più necessario qui, a differenza degli altri due punti di
+                 questa pagina (bottoni senza <form> dietro, ma validati con
+                 lo stesso checkValidity() su tutti i campi del contenitore). -->
+            <div class="form-row">
+              <label>Autorizzi la pubblicazione di foto e video dell'associazione in cui compari?
+                <a href="consenso-foto.html" target="_blank" rel="noopener">(dettagli)</a></label>
+              <div class="form-row--radio-pair">
+                <label><input type="radio" id="ia-foto-si" name="ia-foto-consenso" value="si" required> Sì</label>
+                <label><input type="radio" id="ia-foto-no" name="ia-foto-consenso" value="no" required> No</label>
+              </div>
             </div>
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="ia-consenso" required> Ho letto e accetto
