@@ -120,10 +120,24 @@
             <input type="text" id="cap" name="cap" maxlength="10">
           </div>
 
-          <!-- Facoltativa, a differenza del consenso sotto: oggi alimenta solo
-               una lista consultata a mano dalla segreteria, non un invio
-               automatico (stesso campo consensoNewsletter già usato da
-               interesse-evento.html). -->
+          <!-- Scelta forzata, non una checkbox facoltativa come quella
+               sotto: due radio sullo stesso name, entrambi required, quindi
+               il submit non parte finché non si sceglie Sì o No — niente
+               terza opzione "non ho risposto" (a differenza della
+               newsletter, qui l'assenza di risposta non è ammessa). -->
+          <div class="form-row">
+            <label>Autorizzi la pubblicazione di foto e video dell'associazione in cui compari?
+              <a href="consenso-foto.html" target="_blank" rel="noopener" class="link-documentazione">(documentazione)</a></label>
+            <div class="form-row--radio-pair">
+              <label><input type="radio" id="foto-si" name="foto-consenso" value="si" required> Sì</label>
+              <label><input type="radio" id="foto-no" name="foto-consenso" value="no" required> No</label>
+            </div>
+          </div>
+
+          <!-- Facoltativa, a differenza delle due scelte sopra/sotto: oggi
+               alimenta solo una lista consultata a mano dalla segreteria,
+               non un invio automatico (stesso campo consensoNewsletter già
+               usato da interesse-evento.html). -->
           <div class="form-row form-row--checkbox">
             <label>
               <input type="checkbox" id="newsletter">
@@ -144,20 +158,6 @@
               <input type="checkbox" id="evento-gia-fatto" checked>
               <span>Ha già fatto 1 evento?</span>
             </label>
-          </div>
-
-          <!-- Scelta forzata, non una checkbox facoltativa come quella
-               sopra: due radio sullo stesso name, entrambi required, quindi
-               il submit non parte finché non si sceglie Sì o No — niente
-               terza opzione "non ho risposto" (a differenza della
-               newsletter, qui l'assenza di risposta non è ammessa). -->
-          <div class="form-row">
-            <label>Autorizzi la pubblicazione di foto e video dell'associazione in cui compari?
-              <a href="consenso-foto.html" target="_blank" rel="noopener" class="link-documentazione">(documentazione)</a></label>
-            <div class="form-row--radio-pair">
-              <label><input type="radio" id="foto-si" name="foto-consenso" value="si" required> Sì</label>
-              <label><input type="radio" id="foto-no" name="foto-consenso" value="no" required> No</label>
-            </div>
           </div>
 
           <div class="form-row form-row--checkbox">
@@ -187,19 +187,10 @@
 
           <div id="mt-blocchi-persone"></div>
 
-          <!-- Come mt-consenso: una sola scelta vale per tutte le persone di
-               questa iscrizione, non una per persona. Facoltativa. -->
-          <div class="form-row form-row--checkbox">
-            <label>
-              <input type="checkbox" id="mt-newsletter">
-              <span>Volete ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</span>
-            </label>
-          </div>
-
-          <!-- Come mt-consenso/mt-newsletter: una sola scelta per tutte le
-               persone di questa iscrizione, non una per persona — ma qui
-               (come il consenso sotto) è una scelta forzata, non facoltativa:
-               il submit non parte senza Sì o No. -->
+          <!-- Come mt-consenso: una sola scelta per tutte le persone di
+               questa iscrizione, non una per persona — ma qui (come il
+               consenso sotto) è una scelta forzata, non facoltativa: il
+               submit non parte senza Sì o No. -->
           <div class="form-row">
             <label>Autorizzate la pubblicazione di foto e video dell'associazione in cui comparite?
               <a href="consenso-foto.html" target="_blank" rel="noopener" class="link-documentazione">(documentazione)</a></label>
@@ -207,6 +198,16 @@
               <label><input type="radio" id="mt-foto-si" name="mt-foto-consenso" value="si" required> Sì</label>
               <label><input type="radio" id="mt-foto-no" name="mt-foto-consenso" value="no" required> No</label>
             </div>
+          </div>
+
+          <!-- Come mt-consenso/mt-foto-consenso: una sola scelta vale per
+               tutte le persone di questa iscrizione, non una per persona.
+               Facoltativa, a differenza delle altre due. -->
+          <div class="form-row form-row--checkbox">
+            <label>
+              <input type="checkbox" id="mt-newsletter">
+              <span>Volete ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</span>
+            </label>
           </div>
 
           <div class="form-row form-row--checkbox">
