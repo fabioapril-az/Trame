@@ -2,10 +2,24 @@
   BOZZA: testo scritto a partire dal modulo di carta usato finora
   ("Consenso fotografico"), NON un parere legale. Da far rivedere a un
   legale/consulente privacy prima di considerarlo definitivo — in
-  particolare se davvero si vuole un consenso unico (pubblicazione) invece
-  dei due distinti del modulo di carta (realizzazione delle foto +
-  pubblicazione), e la lista di brand/canali citati.
+  particolare:
+  - se davvero si vuole un consenso unico (pubblicazione) invece dei due
+    distinti del modulo di carta (realizzazione delle foto + pubblicazione);
+  - l'autorizzazione copre ora ANCHE i talenti/professionisti terzi che
+    conducono un evento, non solo TraMe: condividere dati/immagini con terzi
+    (anche descritti genericamente, non per nome) è un punto su cui un
+    legale dovrebbe pronunciarsi esplicitamente, più delicato del solo uso
+    interno all'associazione;
+  - il sito NON collega oggi un evento al talento che lo conduce: la frase
+    sui talenti resta volutamente generica (rimanda solo alla pagina "I
+    Fili di TraMe"), per non promettere un'informazione che il sito non da'.
 -->
+<!-- VERIFICATO (nessuna azione in sospeso): il sito non ha un legame
+     tecnico tra "evento" e "talento che lo conduce" (ultimo controllo sul
+     codice: 2026-10-29, nessun campo del genere su CreaEventoRequest/
+     EventoDto né altrove). Se un domani questo legame venisse costruito,
+     la frase sopra può diventare più specifica. -->
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -53,13 +67,22 @@
 
         <h3>Cosa autorizzi scegliendo "Sì"</h3>
         <p>La pubblicazione delle immagini in cui sei riconoscibile, a titolo gratuito, per finalità promozionali,
-          comunicative, artistiche ed editoriali dell'associazione, incluso a titolo esemplificativo:</p>
+          comunicative, artistiche ed editoriali, da parte di:</p>
         <ul>
-          <li>il sito web di Progetto TraMe</li>
-          <li>i canali social dell'associazione</li>
+          <li><strong>Progetto TraMe</strong> e i suoi amministratori</li>
+          <li><strong>il talento o il professionista che conduce l'evento</strong> a cui hai partecipato (es.
+            l'istruttore, la guida, l'associazione o attività con cui Progetto TraMe collabora per quello
+            specifico evento), anche sui propri canali distinti da quelli di TraMe</li>
+        </ul>
+        <p>I canali su cui le immagini possono essere pubblicate includono, a titolo esemplificativo:</p>
+        <ul>
+          <li>il sito web e i canali social di Progetto TraMe</li>
+          <li>il sito web e i canali social del talento/professionista che ha condotto l'evento</li>
           <li>materiale promozionale (locandine, brochure, newsletter)</li>
           <li>gallerie fotografiche online degli eventi</li>
         </ul>
+        <p class="form-note">I talenti con cui Progetto TraMe collabora sono presentati nella pagina
+          <a href="fili.html">I Fili di TraMe</a>.</p>
         <p>Le immagini non verranno utilizzate in contesti lesivi della tua dignità personale.</p>
 
         <h3>Cosa succede scegliendo "No"</h3>

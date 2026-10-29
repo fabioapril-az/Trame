@@ -208,7 +208,7 @@ Il campo di ricerca funziona su nome, cognome ed email; il filtro accanto selezi
 
 In questa versione la **data di nascita e il codice fiscale sono facoltativi**: se non li conosci al momento, lascia i campi vuoti e completali più avanti da "Modifica" sulla riga del socio (vedi sotto). Finché la data di nascita resta vuota, il socio non viene mai considerato minorenne.
 
-Il modulo chiede anche, **in modo obbligatorio**, se la persona autorizza la pubblicazione di foto e video dell'associazione in cui compare (link "(dettagli)" accanto alla domanda, testo completo in [consenso-foto.html](../consenso-foto.html)): non si può salvare senza scegliere Sì o No, al posto del modulo di carta usato finora. Se hai già una firma su carta per questa persona, registra comunque la scelta qui — è l'unico posto in cui resta salvata.
+Il modulo chiede anche, **in modo obbligatorio**, se la persona autorizza Progetto TraMe, i suoi amministratori e i talenti che conducono gli eventi a pubblicare foto e video in cui compare (link "(documentazione)" accanto alla domanda, testo completo in [consenso-foto.html](../consenso-foto.html)): non si può salvare senza scegliere Sì o No, al posto del modulo di carta usato finora. Se hai già una firma su carta per questa persona, registra comunque la scelta qui — è l'unico posto in cui resta salvata.
 
 Compilato il modulo, il socio compare in elenco con il suo numero di tessera. **Il pagamento è un passaggio a parte**: vedi il capitolo 6.
 
