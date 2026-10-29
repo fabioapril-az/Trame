@@ -1473,6 +1473,16 @@ p {
   flex-shrink: 0;
 }
 
+/* Il resto del sito usa link senza sottolineatura e dello stesso colore del
+   testo (regola globale "a { color: inherit }"): dentro una domanda come il
+   consenso foto non si leggeva come link cliccabile. Qui si rompe apposta
+   quella coerenza, con il classico blu sottolineato, per farlo riconoscere
+   subito come un rimando a un documento — richiesto dall'utente. */
+.link-documentazione {
+  color: #1a56db;
+  text-decoration: underline;
+}
+
 .status-badge--attivo {
   background: var(--color-sage-light);
   color: var(--color-sage-dark);
