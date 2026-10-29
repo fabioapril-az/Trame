@@ -139,11 +139,27 @@
                esplicito, mai in automatico). -->
           <div id="step-conferma" class="admin-panel" hidden>
             <h3>Conferma iscrizione</h3>
-            <!-- Solo se GET /api/soci/verifica dice consensoNewsletter: null,
+            <!-- Solo se GET /api/soci/verifica dice consensoFoto: null,
                  cioè non gli è mai stato chiesto: chi ha già risposto (sì o
-                 no) non lo rivede. Il consenso al trattamento dati non si
-                 richiede qui: un socio esiste solo perché l'ha già dato al
-                 momento dell'iscrizione all'associazione. -->
+                 no) non la rivede. Scelta forzata, non facoltativa:
+                 Conferma iscrizione resta bloccato se compare e nessuna
+                 delle due opzioni è scelta — validato a mano nel click
+                 handler, non con "required" nativo (il bottone non è il
+                 submit di un form). -->
+            <div class="form-row" id="campo-foto-socio" hidden>
+              <label>Autorizzi Progetto TraMe, i suoi amministratori e i talenti che conducono gli eventi a pubblicare, sui propri canali social e nel materiale promozionale, foto e video in cui compari?
+                <a href="consenso-foto.html" target="_blank" rel="noopener" class="link-documentazione">(documentazione)</a></label>
+              <div class="form-row--radio-pair">
+                <label><input type="radio" id="sc-foto-si" name="sc-foto-consenso" value="si"> Sì</label>
+                <label><input type="radio" id="sc-foto-no" name="sc-foto-consenso" value="no"> No</label>
+              </div>
+            </div>
+            <!-- Stesso meccanismo del campo sopra, ma per consensoNewsletter
+                 (null = mai chiesto) — facoltativo, a differenza di quello:
+                 chi ha già risposto (sì o no) non lo rivede. Il consenso al
+                 trattamento dati non si richiede qui: un socio esiste solo
+                 perché l'ha già dato al momento dell'iscrizione
+                 all'associazione. -->
             <div class="form-row form-row--checkbox" id="campo-newsletter-socio" hidden>
               <label><input type="checkbox" id="sc-newsletter"> Vuoi ricevere anche la nostra newsletter,
                 con gli altri eventi e novità di TraMe?</label>
@@ -171,6 +187,19 @@
             <div class="form-row"><label for="ia-indirizzo">Indirizzo (facoltativo)</label><input type="text" id="ia-indirizzo" maxlength="255"></div>
             <div class="form-row"><label for="ia-citta">Città (facoltativo)</label><input type="text" id="ia-citta" maxlength="100"></div>
             <div class="form-row"><label for="ia-cap">CAP (facoltativo)</label><input type="text" id="ia-cap" maxlength="10"></div>
+            <!-- required sui radio: validata da validaSezione(stepInteresse),
+                 che controlla già ogni campo del passo — nessun codice in
+                 più necessario qui, a differenza degli altri due punti di
+                 questa pagina (bottoni senza <form> dietro, ma validati con
+                 lo stesso checkValidity() su tutti i campi del contenitore). -->
+            <div class="form-row">
+              <label>Autorizzi Progetto TraMe, i suoi amministratori e i talenti che conducono gli eventi a pubblicare, sui propri canali social e nel materiale promozionale, foto e video in cui compari?
+                <a href="consenso-foto.html" target="_blank" rel="noopener" class="link-documentazione">(documentazione)</a></label>
+              <div class="form-row--radio-pair">
+                <label><input type="radio" id="ia-foto-si" name="ia-foto-consenso" value="si" required> Sì</label>
+                <label><input type="radio" id="ia-foto-no" name="ia-foto-consenso" value="no" required> No</label>
+              </div>
+            </div>
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="ia-newsletter"> Vuoi ricevere anche la nostra newsletter,
                 con gli altri eventi e novità di TraMe?</label>

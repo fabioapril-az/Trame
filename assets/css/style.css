@@ -1451,6 +1451,38 @@ p {
   flex-shrink: 0;
 }
 
+/* Scelta forzata Sì/No (es. consenso foto): a differenza di una checkbox,
+   qui "non selezionato" non è un'opzione valida — required su entrambi i
+   radio dello stesso name blocca il submit finché non se ne scegli uno. */
+.form-row--radio-pair {
+  display: flex;
+  gap: 28px;
+  margin-top: 6px;
+}
+
+.form-row--radio-pair label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 400;
+}
+
+.form-row--radio-pair input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Il resto del sito usa link senza sottolineatura e dello stesso colore del
+   testo (regola globale "a { color: inherit }"): dentro una domanda come il
+   consenso foto non si leggeva come link cliccabile. Qui si rompe apposta
+   quella coerenza, con il classico blu sottolineato, per farlo riconoscere
+   subito come un rimando a un documento — richiesto dall'utente. */
+.link-documentazione {
+  color: #1a56db;
+  text-decoration: underline;
+}
+
 .status-badge--attivo {
   background: var(--color-sage-light);
   color: var(--color-sage-dark);
