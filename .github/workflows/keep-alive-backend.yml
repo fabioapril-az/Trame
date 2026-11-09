@@ -9,14 +9,14 @@
 # CPU al giorno: una GET leggera ne usa una frazione di secondo, ~144 al
 # giorno restano ben lontani dal limite.
 #
-# Limiti noti, accettati consapevolmente al posto del piano a pagamento:
-# - GitHub non garantisce la puntualità dei job "schedule": nelle ore di
-#   carico un ping può slittare o saltare, e qualche visitatore troverà
-#   ancora la prima chiamata lenta.
-# - GitHub disattiva i workflow schedulati dopo 60 giorni senza attività sul
-#   repository (avvisa via email): basta un commit qualsiasi, o riattivarlo
-#   dalla scheda Actions.
-# - I job schedulati girano solo dal ramo principale (master).
+# DISATTIVATO (2026-11-09): il trigger "schedule" di GitHub si è rivelato
+# molto meno puntuale del previsto (misurato: 64 esecuzioni in ~335 ore,
+# una ogni ~5h invece che ogni 10 minuti), quindi il backend restava
+# comunque addormentato per lunghi periodi. Sostituito da un Availability
+# Test di Azure Application Insights, gestito dal backend: ping ogni 5
+# minuti da 5 sedi, sull'infrastruttura di test di Azure invece che su
+# GitHub Actions. Il trigger "schedule" è commentato, non cancellato, nel
+# caso serva ripristinarlo. workflow_dispatch resta per lanciarlo a mano.
 #
 # Un ping fallito (backend non raggiungibile dopo i tentativi) fa fallire il
 # job, e GitHub manda un'email a chi ha modificato per ultimo questo file:
@@ -25,8 +25,8 @@
 name: Keep-alive backend
 
 on:
-  schedule:
-    - cron: "*/10 * * * *"
+  # schedule:
+  #   - cron: "*/10 * * * *"
   # Per provarlo a mano dalla scheda Actions, senza aspettare l'orario.
   workflow_dispatch:
 
