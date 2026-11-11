@@ -312,6 +312,12 @@
     if (event.luogo) {
       metaParts.push("<span>📍 " + escapeHtml(event.luogo) + "</span>");
     }
+    // Nota libera (es. "Percorso a piedi di circa 4 km", "Evento online"):
+    // icona generica, stesso campo per qualsiasi tipo di informazione
+    // aggiuntiva — scelta dell'utente invece di un'icona specifica per caso.
+    if (event.notaEvento) {
+      metaParts.push("<span>📝 " + escapeHtml(event.notaEvento) + "</span>");
+    }
 
     // Se manca immagineUrl, un riquadro con l'icona della categoria al
     // posto della foto, così la card resta ben composta comunque.
@@ -338,7 +344,7 @@
     // non è pronta, indipendentemente dallo stato dell'evento.
     var dettagliAttivi = event.dettagliAttivi !== false;
     var azioneDettagli = dettagliAttivi
-      ? '<a href="evento.html?id=' + event.id + '" class="btn btn--outline btn--small">Dettagli →</a>'
+      ? '<a href="evento.html?id=' + event.id + '" class="event-card__details-link">Dettagli →</a>'
       : "";
 
     article.innerHTML =
@@ -348,13 +354,15 @@
       (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
       "</div>" +
       '<div class="event-card__body">' +
+      '<div class="event-card__scroll">' +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
       (event.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(event.descrizione) + "</div>" : "") +
+      azioneDettagli +
+      "</div>" +
       '<div class="event-card__footer">' +
       (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
       '<div class="event-card__actions">' +
-      azioneDettagli +
       azionePrenota +
       "</div>" +
       "</div>" +

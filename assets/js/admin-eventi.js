@@ -253,6 +253,7 @@
       dataEvento: document.getElementById(prefix + "data").value || null,
       ora: document.getElementById(prefix + "ora").value || null,
       luogo: document.getElementById(prefix + "luogo").value.trim() || null,
+      notaEvento: document.getElementById(prefix + "nota").value.trim() || null,
       categoria: document.getElementById(prefix + "categoria").value || null,
       quotaEvento: quota ? parseFloat(quota) : null,
       quotaIscrizioneInclusa: quotaIscrizione ? parseFloat(quotaIscrizione) : null,
@@ -399,6 +400,7 @@
     document.getElementById("mod-ev-data").value = evento.dataEvento;
     document.getElementById("mod-ev-ora").value = evento.ora || "";
     document.getElementById("mod-ev-luogo").value = evento.luogo || "";
+    document.getElementById("mod-ev-nota").value = evento.notaEvento || "";
     document.getElementById("mod-ev-categoria").value = evento.categoria || "";
     document.getElementById("mod-ev-quota").value = evento.quotaEvento || "";
     document.getElementById("mod-ev-quota-iscrizione").value = evento.quotaIscrizioneInclusa || "";

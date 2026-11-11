@@ -834,8 +834,8 @@ p {
   font-size: 0.85rem;
   margin-bottom: 10px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px 14px;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .event-card__body {
@@ -845,9 +845,30 @@ p {
   flex-direction: column;
 }
 
+/* Area scrollabile della card (meta, titolo, descrizione, link Dettagli):
+   un'altezza massima fissa, indipendente da quella (variabile) della foto
+   sopra, così il prezzo e il bottone Prenota sotto restano sempre visibili
+   — "fisso in basso durante lo scorrimento", richiesto dall'utente — senza
+   dover calcolare l'altezza totale della card. */
+.event-card__scroll {
+  max-height: 230px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
 .event-card__desc {
   color: var(--color-ink-soft);
-  flex-grow: 1;
+}
+
+/* Link "Dettagli" alla fine della descrizione breve, al posto del bottone
+   che prima stava in fondo alla card insieme a Prenota (richiesto
+   dall'utente): resta dentro l'area scrollabile, raggiungibile scorrendo il
+   testo, mentre Prenota (nel footer, fuori da qui) resta sempre visibile. */
+.event-card__details-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--color-terracotta-dark);
 }
 
 .event-card__desc p {
@@ -934,7 +955,11 @@ p {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 8px;
+  /* auto, non un valore fisso: nella stessa riga della griglia le card si
+     allungano tutte all'altezza della più alta (comportamento di default di
+     CSS grid) — questo spinge il footer in fondo alla card anche quando
+     l'area sopra (.event-card__scroll) non la riempie per intero. */
+  margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid var(--color-line);
 }
@@ -1412,29 +1437,6 @@ p {
 
   .nav__toggle {
     display: block;
-  }
-
-  /* Da cellulare la card evento/pacchetto è stretta, quindi la descrizione
-     (spesso lunga) finisce fra il titolo e il prezzo/i bottoni: per vederli
-     bisognava scorrere tutto il testo (segnalato dall'utente). .event-card__
-     body è già un flex column: con "order" sposto prezzo e bottoni subito
-     sotto il titolo, senza toccare l'ordine nel markup (che resta corretto
-     per lettori di schermo e per il desktop, dove questa regola non si
-     applica). */
-  .event-card__meta {
-    order: 1;
-  }
-
-  .event-card__title {
-    order: 2;
-  }
-
-  .event-card__footer {
-    order: 3;
-  }
-
-  .event-card__desc {
-    order: 4;
   }
 
   .cards-grid,
