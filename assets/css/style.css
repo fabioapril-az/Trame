@@ -1414,6 +1414,29 @@ p {
     display: block;
   }
 
+  /* Da cellulare la card evento/pacchetto è stretta, quindi la descrizione
+     (spesso lunga) finisce fra il titolo e il prezzo/i bottoni: per vederli
+     bisognava scorrere tutto il testo (segnalato dall'utente). .event-card__
+     body è già un flex column: con "order" sposto prezzo e bottoni subito
+     sotto il titolo, senza toccare l'ordine nel markup (che resta corretto
+     per lettori di schermo e per il desktop, dove questa regola non si
+     applica). */
+  .event-card__meta {
+    order: 1;
+  }
+
+  .event-card__title {
+    order: 2;
+  }
+
+  .event-card__footer {
+    order: 3;
+  }
+
+  .event-card__desc {
+    order: 4;
+  }
+
   .cards-grid,
   .events-grid,
   .values-grid,
