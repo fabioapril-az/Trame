@@ -861,23 +861,29 @@ p {
   margin: 14px 0 16px;
 }
 
+/* Altezza fissa, uguale su ogni card indipendentemente da quanti campi
+   facoltativi (sottotitolo, nota, righe meta) un evento ha compilato —
+   richiesto dall'utente anche a costo di non vedere la descrizione breve
+   per intero. Tutto qui dentro tranne .event-card__desc ha flex-shrink:0
+   (sotto): solo la descrizione si restringe o si taglia per riempire
+   esattamente lo spazio che resta, il resto (meta, prezzo/Prenota, nota
+   fissa, Dettagli) è sempre visibile per intero. */
 .event-card__body {
   padding: 22px 26px 26px;
-  flex-grow: 1;
+  height: 430px;
   display: flex;
   flex-direction: column;
 }
 
-/* Troncata a 3 righe: alcuni eventi hanno una descrizione di una riga,
-   altri di più paragrafi, e senza un limite le card finivano ad altezze
-   molto diverse (segnalato dall'utente) — il testo completo resta
-   comunque raggiungibile dal link Dettagli. */
+.event-card__body > * {
+  flex-shrink: 0;
+}
+
 .event-card__desc {
   color: var(--color-ink-soft);
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-height: 0;
   overflow: hidden;
 }
 
