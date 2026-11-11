@@ -846,12 +846,18 @@ p {
 }
 
 /* Area scrollabile della card (meta, titolo, descrizione, link Dettagli):
-   un'altezza massima fissa, indipendente da quella (variabile) della foto
-   sopra, così il prezzo e il bottone Prenota sotto restano sempre visibili
-   — "fisso in basso durante lo scorrimento", richiesto dall'utente — senza
-   dover calcolare l'altezza totale della card. */
+   flex-grow (+ min-height:0, altrimenti il contenuto impedisce lo scroll)
+   fa sì che riempia lo spazio che CSS grid aggiunge nelle card più corte
+   di una riga, invece di lasciarlo vuoto sotto il testo (segnalato
+   dall'utente, confrontando una card con poco testo e una con tanto).
+   max-height resta come limite massimo, non come altezza fissa: una card
+   con testo davvero lungo (anche da sola, non solo per via della riga)
+   scrolla comunque internamente invece di spingere il prezzo/Prenota fuori
+   dalla vista — lo scopo originale di questa area. */
 .event-card__scroll {
-  max-height: 230px;
+  flex-grow: 1;
+  min-height: 0;
+  max-height: 260px;
   overflow-y: auto;
   padding-right: 4px;
   /* Sottile e nei colori del sito, non la barra di scorrimento grigia di
