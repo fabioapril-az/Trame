@@ -63,9 +63,20 @@
 
           <span class="section__eyebrow" id="evento-categoria-label"></span>
           <h1 id="evento-titolo"></h1>
-          <p class="event-detail__meta" id="evento-meta"></p>
+          <p class="event-card__subtitle event-detail__subtitle" id="evento-sottotitolo" hidden></p>
+          <div class="event-card__meta event-detail__meta" id="evento-meta"></div>
           <p class="form-note" id="evento-scadenza" hidden></p>
           <p class="form-note" id="evento-riservato" hidden>Questo evento è riservato ai soci: la segreteria ti contatterà per completare l'associazione, se necessario.</p>
+
+          <div class="event-detail__footer">
+            <span class="event-card__price-block">
+              <span class="event-card__price" id="evento-prezzo"></span>
+              <span class="event-card__price-socio" id="evento-prezzo-socio" hidden>Prezzo socio</span>
+            </span>
+            <a id="evento-prenota" href="#" class="btn btn--primary">Prenota →</a>
+          </div>
+
+          <div id="evento-nota-iscrizione"></div>
 
           <div class="event-detail__desc" id="evento-descrizione"></div>
 
@@ -81,11 +92,6 @@
             <p class="contact-block__gallery">
               <a href="#" id="evento-galleria" target="_blank" rel="noopener" hidden>Galleria fotografica di questo evento →</a>
             </p>
-          </div>
-
-          <div class="event-detail__footer">
-            <span class="event-card__price" id="evento-prezzo"></span>
-            <a id="evento-prenota" href="#" class="btn btn--primary">Prenota →</a>
           </div>
         </article>
 

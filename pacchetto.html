@@ -64,17 +64,23 @@
             <span class="event-card__badge" id="pacchetto-badge-date"></span>
           </div>
 
-          <span class="section__eyebrow">Più date</span>
+          <span class="section__eyebrow" id="pacchetto-categoria-label">Più date</span>
           <h1 id="pacchetto-titolo"></h1>
-          <p class="event-detail__meta" id="pacchetto-meta"></p>
+          <p class="event-card__subtitle event-detail__subtitle" id="pacchetto-sottotitolo" hidden></p>
+          <div class="event-card__meta event-detail__meta" id="pacchetto-meta"></div>
           <p class="form-note">Puoi partecipare a una sola data o a tutte: la scelta è nella pagina di iscrizione.</p>
 
-          <div class="event-detail__desc" id="pacchetto-descrizione"></div>
-
           <div class="event-detail__footer">
-            <span class="event-card__price" id="pacchetto-prezzo"></span>
+            <span class="event-card__price-block">
+              <span class="event-card__price" id="pacchetto-prezzo"></span>
+              <span class="event-card__price-socio" id="pacchetto-prezzo-socio" hidden>Prezzo socio</span>
+            </span>
             <a id="pacchetto-prenota" href="#" class="btn btn--primary">Prenota →</a>
           </div>
+
+          <div id="pacchetto-nota-iscrizione"></div>
+
+          <div class="event-detail__desc" id="pacchetto-descrizione"></div>
         </article>
 
       </div>

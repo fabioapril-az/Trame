@@ -53,6 +53,22 @@
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
+  // Stessa frase/conteggio della card in eventi.html (vedi events.js,
+  // notaIscrizioneEvento) — duplicata qui per lo stesso motivo degli altri
+  // helper di questo file (nessun build step/bundler).
+  function notaIscrizioneHtml(quotaEvento, quotaIscrizioneSoci) {
+    var domanda = "<p class=\"event-card__nota-iscrizione\">Non sei ancora socio TraMe? Puoi richiedere l'iscrizione durante la prenotazione.</p>";
+    if (quotaEvento == null || quotaIscrizioneSoci == null) {
+      return domanda;
+    }
+    var totale = formattaPrezzo(Number(quotaEvento) + Number(quotaIscrizioneSoci));
+    return domanda +
+      '<p class="event-card__nota-iscrizione event-card__nota-iscrizione--prezzo">' +
+      "<span>Prima partecipazione, inclusa tessera da " + formattaPrezzo(quotaIscrizioneSoci) + "</span>" +
+      "<strong>" + totale + "</strong>" +
+      "</p>";
+  }
+
   function escapeHtml(value) {
     var div = document.createElement("div");
     div.textContent = value == null ? "" : String(value);
@@ -152,8 +168,16 @@
       return;
     }
 
-    window.trameFetch("/api/eventi/" + encodeURIComponent(id))
-      .then(function (event) {
+    Promise.all([
+      window.trameFetch("/api/eventi/" + encodeURIComponent(id)),
+      // Quota tessera per il conteggio "prima partecipazione" sotto il
+      // prezzo — pubblica, niente di grave se manca: niente conteggio,
+      // resta solo la frase (vedi notaIscrizioneHtml).
+      window.trameFetch("/api/impostazioni").catch(function () { return null; })
+    ])
+      .then(function (risultati) {
+        var event = risultati[0];
+        var impostazioni = risultati[1];
         // Interruttore manuale per-evento: se spento, niente accesso al
         // contenuto reale nemmeno con il link diretto — l'evento esiste
         // (l'API l'ha trovato) ma i dettagli non sono ancora pronti.
@@ -184,11 +208,25 @@
         document.getElementById("evento-categoria-label").textContent = categoryLabel(event.categoria);
         document.getElementById("evento-titolo").textContent = event.titolo;
 
-        var metaParts = ["🗓️ " + formattaData(event.dataEvento) + (event.ora ? " · " + event.ora : "")];
-        if (event.luogo) {
-          metaParts.push("📍 " + event.luogo);
+        if (event.sottotitolo) {
+          var sottotitoloEl = document.getElementById("evento-sottotitolo");
+          sottotitoloEl.textContent = event.sottotitolo;
+          sottotitoloEl.hidden = false;
         }
-        document.getElementById("evento-meta").textContent = metaParts.join("    ");
+
+        // Righe separate (data, ora, luogo, nota), stesso ordine e stesse
+        // icone della card in eventi.html — non più una riga unica di testo.
+        var metaParts = ["<span>🗓️ " + escapeHtml(formattaData(event.dataEvento)) + "</span>"];
+        if (event.ora) {
+          metaParts.push("<span>🕐 " + escapeHtml(event.ora) + "</span>");
+        }
+        if (event.luogo) {
+          metaParts.push("<span>📍 " + escapeHtml(event.luogo) + "</span>");
+        }
+        if (event.notaEvento) {
+          metaParts.push("<span>📝 " + escapeHtml(event.notaEvento) + "</span>");
+        }
+        document.getElementById("evento-meta").innerHTML = metaParts.join("");
 
         if (event.scadenzaIscrizione) {
           var scadenzaEl = document.getElementById("evento-scadenza");
@@ -199,6 +237,14 @@
         if (!event.apertoNonSoci) {
           document.getElementById("evento-riservato").hidden = false;
         }
+
+        if (event.quotaEvento) {
+          document.getElementById("evento-prezzo-socio").hidden = false;
+        }
+
+        var quotaIscrizioneSoci = (impostazioni && impostazioni.quotaIscrizioneSoci) || null;
+        document.getElementById("evento-nota-iscrizione").innerHTML =
+          notaIscrizioneHtml(event.quotaEvento, quotaIscrizioneSoci);
 
         // testoDettaglio: testo esteso pensato apposta per questa pagina,
         // facoltativo — finché non è compilato si mostra la descrizione

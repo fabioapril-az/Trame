@@ -1209,6 +1209,22 @@ p {
   margin-bottom: 6px;
 }
 
+/* Sulla pagina di dettaglio c'è spazio: a differenza della card piccola,
+   niente taglio/ellissi su sottotitolo e luogo, il testo si vede per
+   intero anche su più righe. */
+.event-detail__subtitle {
+  height: auto;
+  overflow: visible;
+  white-space: normal;
+}
+
+.event-detail__meta .event-card__meta-luogo {
+  height: auto;
+  overflow: visible;
+  white-space: normal;
+  text-overflow: unset;
+}
+
 .event-detail__desc {
   color: var(--color-ink-soft);
   font-size: 1.05rem;

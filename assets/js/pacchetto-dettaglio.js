@@ -3,6 +3,24 @@
 // duplicati qui per lo stesso motivo (nessun build step / bundler).
 
 (function () {
+  // Stessa etichetta categoria della card in eventi.html (vedi events.js),
+  // duplicata qui per lo stesso motivo degli altri helper di questo file.
+  var CATEGORY_LABELS = {
+    yoga: "Yoga",
+    fotografia: "Fotografia",
+    pasticceria: "Pasticceria",
+    canto: "Canto",
+    ballo: "Ballo",
+    teatro: "Teatro",
+    disegno: "Disegno",
+    "trekking-urbano": "Itinerari urbani",
+    viaggi: "Viaggi",
+  };
+
+  function categoryLabel(category) {
+    return CATEGORY_LABELS[category] || category || "Altro";
+  }
+
   function formattaData(isoDate) {
     if (!isoDate) return "Data da definire";
     var parti = isoDate.split("-");
@@ -11,6 +29,22 @@
 
   function formattaPrezzo(valore) {
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  }
+
+  // Stessa frase/conteggio della card in eventi.html (vedi events.js,
+  // notaIscrizioneEvento), qui con "da" davanti al totale: il prezzo di un
+  // pacchetto è il minimo tra le date, non un valore singolo.
+  function notaIscrizioneHtml(prezzoBase, quotaIscrizioneSoci) {
+    var domanda = "<p class=\"event-card__nota-iscrizione\">Non sei ancora socio TraMe? Puoi richiedere l'iscrizione durante la prenotazione.</p>";
+    if (prezzoBase == null || quotaIscrizioneSoci == null) {
+      return domanda;
+    }
+    var totale = formattaPrezzo(Number(prezzoBase) + Number(quotaIscrizioneSoci));
+    return domanda +
+      '<p class="event-card__nota-iscrizione event-card__nota-iscrizione--prezzo">' +
+      "<span>Prima partecipazione, inclusa tessera da " + formattaPrezzo(quotaIscrizioneSoci) + "</span>" +
+      "<strong>da " + totale + "</strong>" +
+      "</p>";
   }
 
   function escapeHtml(value) {
@@ -121,8 +155,16 @@
       return;
     }
 
-    window.trameFetch("/api/pacchetti-eventi/" + encodeURIComponent(id))
-      .then(function (pacchetto) {
+    Promise.all([
+      window.trameFetch("/api/pacchetti-eventi/" + encodeURIComponent(id)),
+      // Quota tessera per il conteggio "prima partecipazione" sotto il
+      // prezzo — pubblica, niente di grave se manca: niente conteggio,
+      // resta solo la frase (vedi notaIscrizioneHtml).
+      window.trameFetch("/api/impostazioni").catch(function () { return null; })
+    ])
+      .then(function (risultati) {
+        var pacchetto = risultati[0];
+        var impostazioni = risultati[1];
         // Interruttore manuale, stesso principio di evento.html: il
         // pacchetto esiste (l'API l'ha trovato) ma i dettagli non sono
         // ancora pronti — niente contenuto reale nemmeno con il link diretto.
@@ -149,6 +191,12 @@
         document.getElementById("pacchetto-badge-date").textContent = sottoEventi.length + " date";
         document.getElementById("pacchetto-titolo").textContent = pacchetto.nome;
 
+        if (pacchetto.sottotitolo) {
+          var sottotitoloEl = document.getElementById("pacchetto-sottotitolo");
+          sottotitoloEl.textContent = pacchetto.sottotitolo;
+          sottotitoloEl.hidden = false;
+        }
+
         var dateTesto = formattaDateMultiple(sottoEventi.map(function (ev) { return ev.dataEvento; }));
         // Ora/luogo mostrati solo se uguali per tutte le date (il caso
         // comune): con valori diversi non ha senso un'unica riga di meta, si
@@ -160,11 +208,28 @@
         }
         var ora = valoreComune("ora");
         var luogo = valoreComune("luogo");
-        var metaParts = ["🗓️ " + dateTesto + (ora ? " · " + ora : "")];
-        if (luogo) {
-          metaParts.push("📍 " + luogo);
+        var categoria = valoreComune("categoria");
+
+        // Eyebrow: categoria (se condivisa da tutte le date) e numero di
+        // date insieme, come l'eyebrow della card in eventi.html.
+        var eyebrowParts = [];
+        if (categoria) { eyebrowParts.push(categoryLabel(categoria)); }
+        eyebrowParts.push(sottoEventi.length + " date");
+        document.getElementById("pacchetto-categoria-label").textContent = eyebrowParts.join(" · ");
+
+        // Righe separate (data/più date, ora, luogo, nota), stesso ordine e
+        // stesse icone della card — non più una riga unica di testo.
+        var metaParts = ["<span>🗓️ " + escapeHtml(dateTesto) + "</span>"];
+        if (ora) {
+          metaParts.push("<span>🕐 " + escapeHtml(ora) + "</span>");
         }
-        document.getElementById("pacchetto-meta").textContent = metaParts.join("    ");
+        if (luogo) {
+          metaParts.push("<span>📍 " + escapeHtml(luogo) + "</span>");
+        }
+        if (pacchetto.nota) {
+          metaParts.push("<span>📝 " + escapeHtml(pacchetto.nota) + "</span>");
+        }
+        document.getElementById("pacchetto-meta").innerHTML = metaParts.join("");
 
         // testoDettaglio: testo esteso pensato apposta per questa pagina,
         // facoltativo — finché non è compilato si mostra la descrizione
@@ -177,10 +242,15 @@
         // senza anticipare il calcolo esatto (sconto socio + sconto
         // pacchetto), che si vede solo nella pagina di iscrizione.
         var prezziSingoli = sottoEventi.map(function (ev) { return ev.prezzoSingolo; }).filter(function (p) { return p != null; });
-        if (prezziSingoli.length) {
-          var minimo = Math.min.apply(null, prezziSingoli);
+        var minimo = prezziSingoli.length ? Math.min.apply(null, prezziSingoli) : null;
+        if (minimo != null) {
           document.getElementById("pacchetto-prezzo").textContent = "da " + formattaPrezzo(minimo);
+          document.getElementById("pacchetto-prezzo-socio").hidden = false;
         }
+
+        var quotaIscrizioneSoci = (impostazioni && impostazioni.quotaIscrizioneSoci) || null;
+        document.getElementById("pacchetto-nota-iscrizione").innerHTML =
+          notaIscrizioneHtml(minimo, quotaIscrizioneSoci);
 
         var prenotaEl = document.getElementById("pacchetto-prenota");
         var tutteEsaurite = sottoEventi.length > 0 && sottoEventi.every(function (ev) {
