@@ -884,7 +884,26 @@ p {
 .event-card__nota-iscrizione {
   color: var(--color-ink-soft);
   font-size: 0.8rem;
-  margin: 14px 0 16px;
+  margin: 14px 0 0;
+}
+
+.event-card__nota-iscrizione:last-of-type {
+  margin-bottom: 16px;
+}
+
+/* Riga "Prima partecipazione...": etichetta a sinistra, importo in
+   grassetto a destra, come prezzo/Prenota nel footer sopra. */
+.event-card__nota-iscrizione--prezzo {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.event-card__nota-iscrizione--prezzo strong {
+  color: var(--color-ink);
+  white-space: nowrap;
 }
 
 /* Altezza fissa, uguale su ogni card indipendentemente da quanti campi
@@ -1036,6 +1055,20 @@ p {
   font-weight: 700;
   color: var(--color-ink);
   font-size: 1.05rem;
+}
+
+/* Contenitore di prezzo + etichetta "Prezzo socio" sotto, stesso stile
+   (colore/dimensione) della frase "Non sei ancora socio..." più sotto. */
+.event-card__price-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-card__price-socio {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: var(--color-ink-soft);
 }
 
 .event-card__actions {

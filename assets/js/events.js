@@ -51,9 +51,32 @@
     viaggi: "🧳",
   };
 
-  // Frase fissa, uguale su ogni card (non un campo in admin): richiesta
-  // dall'utente subito dopo prezzo/Prenota, sia per eventi che pacchetti.
+  // Frase fissa, uguale su ogni card pacchetto (non un campo in admin):
+  // per i pacchetti il prezzo è un intervallo su più date ("da X€"), non
+  // un singolo valore come per un evento — niente conteggio prima
+  // partecipazione/tessera qui, solo la frase generica.
   var NOTA_ISCRIZIONE_HTML = '<p class="event-card__nota-iscrizione">Puoi richiedere l\'associazione a TraMe durante la prenotazione. Eventuali quote associative aggiuntive vanno indicate chiaramente.</p>';
+
+  // Quota tessera socio (GET /api/impostazioni, pubblico): usata nel
+  // conteggio "prima partecipazione" sotto il prezzo di un evento — vedi
+  // notaIscrizioneEvento(). null finché non è ancora arrivata o se manca.
+  var quotaIscrizioneSoci = null;
+
+  // "Non sei ancora socio...": sempre mostrato. Il conteggio con il totale
+  // (quota evento + tessera) solo se entrambi i valori sono disponibili —
+  // altrimenti la frase resta da sola, senza importi inventati.
+  function notaIscrizioneEvento(quotaEvento) {
+    var domanda = "<p class=\"event-card__nota-iscrizione\">Non sei ancora socio TraMe? Puoi richiedere l'iscrizione durante la prenotazione.</p>";
+    if (quotaEvento == null || quotaIscrizioneSoci == null) {
+      return domanda;
+    }
+    var totale = formattaPrezzo(Number(quotaEvento) + Number(quotaIscrizioneSoci));
+    return domanda +
+      '<p class="event-card__nota-iscrizione event-card__nota-iscrizione--prezzo">' +
+      "<span>Prima partecipazione, inclusa tessera da " + formattaPrezzo(quotaIscrizioneSoci) + "</span>" +
+      "<strong>" + totale + "</strong>" +
+      "</p>";
+  }
 
   function categoryLabel(category) {
     return CATEGORY_LABELS[category] || category || "Altro";
@@ -405,12 +428,15 @@
       sottotitoloHtml +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<div class="event-card__footer">' +
-      (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
+      (event.quotaEvento
+        ? '<span class="event-card__price-block"><span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" +
+          '<span class="event-card__price-socio">Prezzo socio</span></span>'
+        : "<span></span>") +
       '<div class="event-card__actions">' +
       azionePrenota +
       "</div>" +
       "</div>" +
-      NOTA_ISCRIZIONE_HTML +
+      notaIscrizioneEvento(event.quotaEvento) +
       (event.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(event.descrizione) + "</div>" : "") +
       azioneDettagli +
       "</div>";
@@ -637,7 +663,10 @@
     // anche gli eventi normali, che non hanno nessuna colpa.
     Promise.all([
       window.trameFetch("/api/eventi"),
-      window.trameFetch("/api/pacchetti-eventi").catch(function () { return []; })
+      window.trameFetch("/api/pacchetti-eventi").catch(function () { return []; }),
+      // Quota tessera per il conteggio "prima partecipazione" — pubblica,
+      // niente di grave se manca: niente conteggio, resta solo la frase.
+      window.trameFetch("/api/impostazioni").catch(function () { return null; })
     ])
       .then(function (risultati) {
         if (loadingEl) {
@@ -646,6 +675,7 @@
         var events = risultati[0] || [];
         var pacchetti = (risultati[1] || []).map(normalizzaPacchetto);
         events = events.concat(pacchetti);
+        quotaIscrizioneSoci = (risultati[2] && risultati[2].quotaIscrizioneSoci) || null;
 
         function renderizza(categoria) {
           categoriaFiltro = categoria;
