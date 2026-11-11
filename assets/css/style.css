@@ -856,8 +856,17 @@ p {
   flex-direction: column;
 }
 
+/* Troncata a 3 righe: alcuni eventi hanno una descrizione di una riga,
+   altri di più paragrafi, e senza un limite le card finivano ad altezze
+   molto diverse (segnalato dall'utente) — il testo completo resta
+   comunque raggiungibile dal link Dettagli. */
 .event-card__desc {
   color: var(--color-ink-soft);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 /* Link "Dettagli" alla fine della descrizione breve, al posto del bottone
