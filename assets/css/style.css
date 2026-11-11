@@ -829,9 +829,20 @@ p {
   margin-bottom: 0.3em;
 }
 
+.event-card__eyebrow {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+  margin-bottom: 6px;
+}
+
 .event-card__meta {
   color: var(--color-ink-soft);
   font-size: 0.85rem;
+  margin-top: 14px;
   margin-bottom: 10px;
   display: flex;
   flex-direction: column;
@@ -845,50 +856,13 @@ p {
   flex-direction: column;
 }
 
-/* Area scrollabile della card (meta, titolo, descrizione, link Dettagli):
-   flex-grow (+ min-height:0, altrimenti il contenuto impedisce lo scroll)
-   fa sì che riempia lo spazio che CSS grid aggiunge nelle card più corte
-   di una riga, invece di lasciarlo vuoto sotto il testo (segnalato
-   dall'utente, confrontando una card con poco testo e una con tanto).
-   max-height resta come limite massimo, non come altezza fissa: una card
-   con testo davvero lungo (anche da sola, non solo per via della riga)
-   scrolla comunque internamente invece di spingere il prezzo/Prenota fuori
-   dalla vista — lo scopo originale di questa area. */
-.event-card__scroll {
-  flex-grow: 1;
-  min-height: 0;
-  max-height: 260px;
-  overflow-y: auto;
-  padding-right: 4px;
-  /* Sottile e nei colori del sito, non la barra di scorrimento grigia di
-     default del browser (segnalata dall'utente, troppo invasiva su una
-     card piccola). scrollbar-width/-color per Firefox, ::-webkit-scrollbar
-     per Chrome/Edge/Safari — serve entrambe le sintassi. */
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-terracotta-light) transparent;
-}
-
-.event-card__scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.event-card__scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.event-card__scroll::-webkit-scrollbar-thumb {
-  background: var(--color-terracotta-light);
-  border-radius: 999px;
-}
-
 .event-card__desc {
   color: var(--color-ink-soft);
 }
 
 /* Link "Dettagli" alla fine della descrizione breve, al posto del bottone
    che prima stava in fondo alla card insieme a Prenota (richiesto
-   dall'utente): resta dentro l'area scrollabile, raggiungibile scorrendo il
-   testo, mentre Prenota (nel footer, fuori da qui) resta sempre visibile. */
+   dall'utente). */
 .event-card__details-link {
   display: inline-block;
   margin-top: 8px;

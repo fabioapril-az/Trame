@@ -305,6 +305,16 @@
       article.setAttribute("data-category", event.categoria);
     }
 
+    // Eyebrow sopra il titolo: categoria e luogo in breve, come nel mockup
+    // dell'utente — le righe con l'icona sotto la descrizione restano il
+    // posto con i dettagli completi (data, ora, luogo per intero, nota).
+    var eyebrowParts = [];
+    if (event.categoria) { eyebrowParts.push(escapeHtml(categoryLabel(event.categoria))); }
+    if (event.luogo) { eyebrowParts.push(escapeHtml(event.luogo)); }
+    var eyebrowHtml = eyebrowParts.length
+      ? '<span class="event-card__eyebrow">' + eyebrowParts.join(" · ") + "</span>"
+      : "";
+
     var metaParts = [];
     metaParts.push(
       "<span>🗓️ " + formattaData(event.dataEvento) + (event.ora ? " · " + escapeHtml(event.ora) : "") + "</span>"
@@ -354,12 +364,11 @@
       (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
       "</div>" +
       '<div class="event-card__body">' +
-      '<div class="event-card__scroll">' +
-      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
+      eyebrowHtml +
       '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
       (event.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(event.descrizione) + "</div>" : "") +
       azioneDettagli +
-      "</div>" +
+      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<div class="event-card__footer">' +
       (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
       '<div class="event-card__actions">' +
