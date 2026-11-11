@@ -51,6 +51,10 @@
     viaggi: "🧳",
   };
 
+  // Frase fissa, uguale su ogni card (non un campo in admin): richiesta
+  // dall'utente subito dopo prezzo/Prenota, sia per eventi che pacchetti.
+  var NOTA_ISCRIZIONE_HTML = '<p class="event-card__nota-iscrizione">Puoi richiedere l\'associazione a TraMe durante la prenotazione. Eventuali quote associative aggiuntive vanno indicate chiaramente.</p>';
+
   function categoryLabel(category) {
     return CATEGORY_LABELS[category] || category || "Altro";
   }
@@ -258,21 +262,21 @@
       ? '<a href="pacchetto.html?id=' + pacchetto.id + '" class="event-card__details-link">Dettagli →</a>'
       : "";
 
-    // Eyebrow sopra il titolo, come la card evento — qui "2 date" al posto
-    // della categoria quando non c'è una categoria comune a tutte le date
-    // (vedi normalizzaPacchetto).
+    // Eyebrow sopra il titolo, come la card evento — qui categoria e "2
+    // date" insieme (un pacchetto non ha un sottotitolo separato).
     var eyebrowParts = [];
     if (pacchetto.categoria) { eyebrowParts.push(escapeHtml(categoryLabel(pacchetto.categoria))); }
     eyebrowParts.push(pacchetto.numeroDate + " date");
-    if (pacchetto.luogo) { eyebrowParts.push(escapeHtml(pacchetto.luogo)); }
     var eyebrowHtml = '<span class="event-card__eyebrow">' + eyebrowParts.join(" · ") + "</span>";
 
-    // Ora/luogo: mostrati solo se condivisi da tutte le date (vedi
-    // valoreComune) — stessa riga meta di un evento normale, qui con il
-    // testo di più date al posto di una sola.
+    // Righe separate (data/più date, luogo) — stesso principio della card
+    // evento, qui con il testo di più date al posto di una sola.
     var metaParts = [
-      "<span>🗓️ " + escapeHtml(pacchetto.dateTesto) + (pacchetto.ora ? " · " + escapeHtml(pacchetto.ora) : "") + "</span>"
+      "<span>🗓️ " + escapeHtml(pacchetto.dateTesto) + "</span>"
     ];
+    if (pacchetto.ora) {
+      metaParts.push("<span>🕐 " + escapeHtml(pacchetto.ora) + "</span>");
+    }
     if (pacchetto.luogo) {
       metaParts.push("<span>📍 " + escapeHtml(pacchetto.luogo) + "</span>");
     }
@@ -289,8 +293,6 @@
       '<div class="event-card__body">' +
       eyebrowHtml +
       '<h3 class="event-card__title">' + escapeHtml(pacchetto.titolo) + "</h3>" +
-      (pacchetto.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(pacchetto.descrizione) + "</div>" : "") +
-      azioneDettagli +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<div class="event-card__footer">' +
       prezzoHtml +
@@ -298,6 +300,9 @@
       azionePrenota +
       "</div>" +
       "</div>" +
+      NOTA_ISCRIZIONE_HTML +
+      (pacchetto.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(pacchetto.descrizione) + "</div>" : "") +
+      azioneDettagli +
       "</div>";
 
     var descEl = article.querySelector(".event-card__desc");
@@ -318,20 +323,24 @@
       article.setAttribute("data-category", event.categoria);
     }
 
-    // Eyebrow sopra il titolo: categoria e luogo in breve, come nel mockup
-    // dell'utente — le righe con l'icona sotto la descrizione restano il
-    // posto con i dettagli completi (data, ora, luogo per intero, nota).
-    var eyebrowParts = [];
-    if (event.categoria) { eyebrowParts.push(escapeHtml(categoryLabel(event.categoria))); }
-    if (event.luogo) { eyebrowParts.push(escapeHtml(event.luogo)); }
-    var eyebrowHtml = eyebrowParts.length
-      ? '<span class="event-card__eyebrow">' + eyebrowParts.join(" · ") + "</span>"
+    // Eyebrow sopra il titolo: solo il tipo di evento (categoria) — luogo e
+    // data vanno nelle righe dedicate sotto il sottotitolo, ciascuno sulla
+    // propria riga (ordine deciso dall'utente).
+    var eyebrowHtml = event.categoria
+      ? '<span class="event-card__eyebrow">' + escapeHtml(categoryLabel(event.categoria)) + "</span>"
       : "";
 
+    var sottotitoloHtml = event.sottotitolo
+      ? '<p class="event-card__subtitle">' + escapeHtml(event.sottotitolo) + "</p>"
+      : "";
+
+    // Righe separate, non raggruppate: data, ora, luogo, nota — ciascuna
+    // sulla propria riga, ordine deciso dall'utente.
     var metaParts = [];
-    metaParts.push(
-      "<span>🗓️ " + formattaData(event.dataEvento) + (event.ora ? " · " + escapeHtml(event.ora) : "") + "</span>"
-    );
+    metaParts.push("<span>🗓️ " + formattaData(event.dataEvento) + "</span>");
+    if (event.ora) {
+      metaParts.push("<span>🕐 " + escapeHtml(event.ora) + "</span>");
+    }
     if (event.luogo) {
       metaParts.push("<span>📍 " + escapeHtml(event.luogo) + "</span>");
     }
@@ -379,8 +388,7 @@
       '<div class="event-card__body">' +
       eyebrowHtml +
       '<h3 class="event-card__title">' + escapeHtml(event.titolo) + "</h3>" +
-      (event.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(event.descrizione) + "</div>" : "") +
-      azioneDettagli +
+      sottotitoloHtml +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<div class="event-card__footer">' +
       (event.quotaEvento ? '<span class="event-card__price">' + formattaPrezzo(event.quotaEvento) + "</span>" : "<span></span>") +
@@ -388,6 +396,9 @@
       azionePrenota +
       "</div>" +
       "</div>" +
+      NOTA_ISCRIZIONE_HTML +
+      (event.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(event.descrizione) + "</div>" : "") +
+      azioneDettagli +
       "</div>";
 
     var descEl = article.querySelector(".event-card__desc");

@@ -839,14 +839,26 @@ p {
   margin-bottom: 6px;
 }
 
+.event-card__subtitle {
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+  margin-bottom: 10px;
+}
+
 .event-card__meta {
   color: var(--color-ink-soft);
   font-size: 0.85rem;
-  margin-top: 14px;
-  margin-bottom: 10px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* Frase fissa sotto prezzo/Prenota, uguale su ogni card. */
+.event-card__nota-iscrizione {
+  color: var(--color-ink-soft);
+  font-size: 0.8rem;
+  margin: 14px 0 16px;
 }
 
 .event-card__body {
@@ -963,11 +975,6 @@ p {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  /* auto, non un valore fisso: nella stessa riga della griglia le card si
-     allungano tutte all'altezza della più alta (comportamento di default di
-     CSS grid) — questo spinge il footer in fondo alla card anche quando
-     l'area sopra (.event-card__scroll) non la riempie per intero. */
-  margin-top: auto;
   padding-top: 16px;
   border-top: 1px solid var(--color-line);
 }

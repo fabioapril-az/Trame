@@ -108,6 +108,10 @@
           <div class="admin-panel" id="pannello-nuovo-evento" hidden>
             <h3>Nuovo evento</h3>
             <div class="form-row"><label for="ev-titolo">Titolo</label><input type="text" id="ev-titolo" maxlength="200"></div>
+            <div class="form-row">
+              <label for="ev-sottotitolo">Sottotitolo (facoltativo, una riga breve sotto il titolo nella card)</label>
+              <input type="text" id="ev-sottotitolo" maxlength="200">
+            </div>
             <div class="form-row"><label>Descrizione breve (per la card)</label><div id="ev-descrizione-editor" class="quill-editor" style="min-height:90px;"></div></div>
             <div class="form-row"><label>Testo esteso (per la pagina dettaglio, facoltativo)</label><div id="ev-testo-dettaglio-editor" class="quill-editor" style="min-height:150px;"></div></div>
             <div class="form-row"><label for="ev-data">Data evento</label><input type="date" id="ev-data"></div>
@@ -215,6 +219,10 @@
             <div id="evento-dettaglio" hidden>
               <h3>Modifica evento</h3>
               <div class="form-row"><label for="mod-ev-titolo">Titolo</label><input type="text" id="mod-ev-titolo" maxlength="200"></div>
+              <div class="form-row">
+                <label for="mod-ev-sottotitolo">Sottotitolo (facoltativo, una riga breve sotto il titolo nella card)</label>
+                <input type="text" id="mod-ev-sottotitolo" maxlength="200">
+              </div>
               <div class="form-row"><label>Descrizione breve (per la card)</label><div id="mod-ev-descrizione-editor" class="quill-editor" style="min-height:90px;"></div></div>
               <div class="form-row"><label>Testo esteso (per la pagina dettaglio, facoltativo)</label><div id="mod-ev-testo-dettaglio-editor" class="quill-editor" style="min-height:150px;"></div></div>
               <div class="form-row"><label for="mod-ev-data">Data evento</label><input type="date" id="mod-ev-data"></div>

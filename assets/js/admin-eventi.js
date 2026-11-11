@@ -248,6 +248,7 @@
     var prezzoAperitivo = document.getElementById(prefix + "prezzo-aperitivo").value;
     return {
       titolo: document.getElementById(prefix + "titolo").value.trim(),
+      sottotitolo: document.getElementById(prefix + "sottotitolo").value.trim() || null,
       descrizione: contenutoQuill(quillEditors[prefix + "descrizione"]),
       testoDettaglio: contenutoQuill(quillEditors[prefix + "testo-dettaglio"]),
       dataEvento: document.getElementById(prefix + "data").value || null,
@@ -395,6 +396,7 @@
     // pacchetto (il genitore), non quello di questo sotto-evento.
     stato.eventoCorrentePacchettoId = evento.pacchettoEventoId || null;
     document.getElementById("mod-ev-titolo").value = evento.titolo;
+    document.getElementById("mod-ev-sottotitolo").value = evento.sottotitolo || "";
     impostaContenutoQuill(quillEditors["mod-ev-descrizione"], evento.descrizione);
     impostaContenutoQuill(quillEditors["mod-ev-testo-dettaglio"], evento.testoDettaglio);
     document.getElementById("mod-ev-data").value = evento.dataEvento;
