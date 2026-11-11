@@ -196,7 +196,9 @@
       __pacchetto: true,
       id: pacchetto.id,
       titolo: pacchetto.nome,
+      sottotitolo: pacchetto.sottotitolo,
       descrizione: pacchetto.descrizione,
+      notaEvento: pacchetto.nota,
       immagineUrl: pacchetto.immagineUrl,
       stato: pacchetto.stato,
       dettagliAttivi: pacchetto.dettagliAttivi,
@@ -263,14 +265,18 @@
       : "";
 
     // Eyebrow sopra il titolo, come la card evento — qui categoria e "2
-    // date" insieme (un pacchetto non ha un sottotitolo separato).
+    // date" insieme.
     var eyebrowParts = [];
     if (pacchetto.categoria) { eyebrowParts.push(escapeHtml(categoryLabel(pacchetto.categoria))); }
     eyebrowParts.push(pacchetto.numeroDate + " date");
     var eyebrowHtml = '<span class="event-card__eyebrow">' + eyebrowParts.join(" · ") + "</span>";
 
-    // Righe separate (data/più date, luogo) — stesso principio della card
-    // evento, qui con il testo di più date al posto di una sola.
+    var sottotitoloHtml = pacchetto.sottotitolo
+      ? '<p class="event-card__subtitle">' + escapeHtml(pacchetto.sottotitolo) + "</p>"
+      : "";
+
+    // Righe separate (data/più date, luogo, nota) — stesso principio della
+    // card evento, qui con il testo di più date al posto di una sola.
     var metaParts = [
       "<span>🗓️ " + escapeHtml(pacchetto.dateTesto) + "</span>"
     ];
@@ -279,6 +285,9 @@
     }
     if (pacchetto.luogo) {
       metaParts.push("<span>📍 " + escapeHtml(pacchetto.luogo) + "</span>");
+    }
+    if (pacchetto.notaEvento) {
+      metaParts.push("<span>📝 " + escapeHtml(pacchetto.notaEvento) + "</span>");
     }
 
     article.innerHTML =
@@ -293,6 +302,7 @@
       '<div class="event-card__body">' +
       eyebrowHtml +
       '<h3 class="event-card__title">' + escapeHtml(pacchetto.titolo) + "</h3>" +
+      sottotitoloHtml +
       '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<div class="event-card__footer">' +
       prezzoHtml +

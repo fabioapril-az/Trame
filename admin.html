@@ -424,7 +424,15 @@
           <div class="admin-panel" id="pannello-nuovo-pacchetto" hidden>
             <h3>Nuovo pacchetto</h3>
             <div class="form-row"><label for="pac-nome">Nome (quello che vede il pubblico)</label><input type="text" id="pac-nome" maxlength="200"></div>
+            <div class="form-row">
+              <label for="pac-sottotitolo">Sottotitolo (facoltativo, massimo 81 caratteri, una riga breve sotto il titolo nella card)</label>
+              <input type="text" id="pac-sottotitolo" maxlength="81">
+            </div>
             <div class="form-row"><label>Descrizione breve (per la card)</label><div id="pac-descrizione-editor" class="quill-editor" style="min-height:90px;"></div></div>
+            <div class="form-row">
+              <label for="pac-nota">Nota aggiuntiva (facoltativa, mostrata con un'icona nella card)</label>
+              <input type="text" id="pac-nota" maxlength="200" placeholder="es. Percorso a piedi di circa 4 km, Evento online, Porta scarpe comode...">
+            </div>
             <div class="form-row"><label>Testo esteso (per la pagina dettaglio, facoltativo)</label><div id="pac-testo-dettaglio-editor" class="quill-editor" style="min-height:150px;"></div></div>
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="pac-dettagli-attivi" checked> Pagina dettaglio attiva sul sito (se disattivata, "Dettagli" non è raggiungibile nemmeno con link diretto)</label>
@@ -475,7 +483,15 @@
           <div class="admin-panel" id="pannello-modifica-pacchetto" hidden>
             <h3>Modifica pacchetto</h3>
             <div class="form-row"><label for="mod-pac-nome">Nome (quello che vede il pubblico)</label><input type="text" id="mod-pac-nome" maxlength="200"></div>
+            <div class="form-row">
+              <label for="mod-pac-sottotitolo">Sottotitolo (facoltativo, massimo 81 caratteri, una riga breve sotto il titolo nella card)</label>
+              <input type="text" id="mod-pac-sottotitolo" maxlength="81">
+            </div>
             <div class="form-row"><label>Descrizione breve (per la card)</label><div id="mod-pac-descrizione-editor" class="quill-editor" style="min-height:90px;"></div></div>
+            <div class="form-row">
+              <label for="mod-pac-nota">Nota aggiuntiva (facoltativa, mostrata con un'icona nella card)</label>
+              <input type="text" id="mod-pac-nota" maxlength="200" placeholder="es. Percorso a piedi di circa 4 km, Evento online, Porta scarpe comode...">
+            </div>
             <div class="form-row"><label>Testo esteso (per la pagina dettaglio, facoltativo)</label><div id="mod-pac-testo-dettaglio-editor" class="quill-editor" style="min-height:150px;"></div></div>
             <div class="form-row form-row--checkbox">
               <label><input type="checkbox" id="mod-pac-dettagli-attivi"> Pagina dettaglio attiva sul sito (se disattivata, "Dettagli" non è raggiungibile nemmeno con link diretto)</label>

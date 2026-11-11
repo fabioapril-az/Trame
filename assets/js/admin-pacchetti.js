@@ -286,6 +286,8 @@
 
   document.getElementById("btn-mostra-nuovo-pacchetto").addEventListener("click", function () {
     document.getElementById("pac-nome").value = "";
+    document.getElementById("pac-sottotitolo").value = "";
+    document.getElementById("pac-nota").value = "";
     quillEditors["pac-descrizione"].setText("");
     quillEditors["pac-testo-dettaglio"].setText("");
     document.getElementById("pac-dettagli-attivi").checked = true;
@@ -313,7 +315,9 @@
     var scontoVal = document.getElementById("pac-sconto").value;
     var payload = {
       nome: document.getElementById("pac-nome").value.trim(),
+      sottotitolo: document.getElementById("pac-sottotitolo").value.trim() || null,
       descrizione: contenutoQuill(quillEditors["pac-descrizione"]),
+      nota: document.getElementById("pac-nota").value.trim() || null,
       testoDettaglio: contenutoQuill(quillEditors["pac-testo-dettaglio"]),
       dettagliAttivi: document.getElementById("pac-dettagli-attivi").checked,
       sottoEventoIds: sottoEventoIds,
@@ -348,7 +352,9 @@
   function apriModifica(pacchetto) {
     stato.pacchettoCorrenteId = pacchetto.id;
     document.getElementById("mod-pac-nome").value = pacchetto.nome || "";
+    document.getElementById("mod-pac-sottotitolo").value = pacchetto.sottotitolo || "";
     impostaContenutoQuill(quillEditors["mod-pac-descrizione"], pacchetto.descrizione);
+    document.getElementById("mod-pac-nota").value = pacchetto.nota || "";
     impostaContenutoQuill(quillEditors["mod-pac-testo-dettaglio"], pacchetto.testoDettaglio);
     document.getElementById("mod-pac-dettagli-attivi").checked = pacchetto.dettagliAttivi !== false;
     document.getElementById("mod-pac-sconto").value = pacchetto.scontoTutteLeDate != null ? pacchetto.scontoTutteLeDate : "";
@@ -390,7 +396,9 @@
     // toccato in questa modifica — vedi commento nel pannello stesso.
     var payload = {
       nome: document.getElementById("mod-pac-nome").value.trim(),
+      sottotitolo: document.getElementById("mod-pac-sottotitolo").value.trim() || null,
       descrizione: contenutoQuill(quillEditors["mod-pac-descrizione"]),
+      nota: document.getElementById("mod-pac-nota").value.trim() || null,
       testoDettaglio: contenutoQuill(quillEditors["mod-pac-testo-dettaglio"]),
       dettagliAttivi: document.getElementById("mod-pac-dettagli-attivi").checked,
       sottoEventoIds: sottoEventoIds,
