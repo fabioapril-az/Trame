@@ -848,13 +848,15 @@ p {
 /* Una riga sola, mai due: l'admin limita già il testo a 81 caratteri in
    input, questo è solo un margine di sicurezza (es. valori inseriti prima
    del limite) perché non vada comunque oltre una riga sulla card. */
+/* Altezza fissa per 2 righe (24,32px di line-height ciascuna, misurato),
+   come titolo e luogo: stesso spazio su ogni card indipendentemente da
+   quanto testo c'è, su una riga sola o due. */
 .event-card__subtitle {
   color: var(--color-ink-soft);
   font-size: 0.95rem;
+  height: 49px;
   margin-bottom: 10px;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .event-card__meta {

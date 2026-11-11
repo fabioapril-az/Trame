@@ -271,9 +271,11 @@
     eyebrowParts.push(pacchetto.numeroDate + " date");
     var eyebrowHtml = '<span class="event-card__eyebrow">' + eyebrowParts.join(" · ") + "</span>";
 
-    var sottotitoloHtml = pacchetto.sottotitolo
-      ? '<p class="event-card__subtitle">' + escapeHtml(pacchetto.sottotitolo) + "</p>"
-      : "";
+    // Sempre presente, anche vuoto: riserva lo spazio fisso di 2 righe su
+    // ogni card a prescindere dal fatto che questo pacchetto abbia o no un
+    // sottotitolo (richiesto dall'utente).
+    var sottotitoloHtml = '<p class="event-card__subtitle">' +
+      (pacchetto.sottotitolo ? escapeHtml(pacchetto.sottotitolo) : "") + "</p>";
 
     // Righe separate (data/più date, luogo, nota) — stesso principio della
     // card evento, qui con il testo di più date al posto di una sola.
@@ -340,9 +342,11 @@
       ? '<span class="event-card__eyebrow">' + escapeHtml(categoryLabel(event.categoria)) + "</span>"
       : "";
 
-    var sottotitoloHtml = event.sottotitolo
-      ? '<p class="event-card__subtitle">' + escapeHtml(event.sottotitolo) + "</p>"
-      : "";
+    // Sempre presente, anche vuoto: riserva lo spazio fisso di 2 righe su
+    // ogni card a prescindere dal fatto che questo evento abbia o no un
+    // sottotitolo (richiesto dall'utente).
+    var sottotitoloHtml = '<p class="event-card__subtitle">' +
+      (event.sottotitolo ? escapeHtml(event.sottotitolo) : "") + "</p>";
 
     // Righe separate, non raggruppate: data, ora, luogo, nota — ciascuna
     // sulla propria riga, ordine deciso dall'utente.
