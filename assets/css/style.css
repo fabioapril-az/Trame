@@ -866,13 +866,16 @@ p {
   gap: 6px;
 }
 
-/* Spazio sempre riservato per 55 caratteri (il massimo di "Luogo" in
-   admin), anche quando il testo inserito è più corto — stessa riga su
-   ogni card, indipendentemente dalla lunghezza reale, invece di andare a
-   capo su due righe solo per alcune. +3ch per l'icona e lo spazio. */
+/* Stessa larghezza su ogni card (quella della riga, piena, uguale perché
+   le card sono già tutte larghe uguali) indipendentemente da quanto è
+   lungo il testo — mai a capo su due righe, nemmeno al massimo di 55
+   caratteri ammessi in admin: un valore così lungo si taglia con "…"
+   invece di andare a capo. 58ch (tentato prima) era più largo della
+   card stessa e usciva dal bordo — niente di fisso in ch, solo 100%
+   della riga disponibile. */
 .event-card__meta-luogo {
-  display: inline-block;
-  width: 58ch;
+  display: block;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
