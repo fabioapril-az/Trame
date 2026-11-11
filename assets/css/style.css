@@ -854,6 +854,25 @@ p {
   max-height: 230px;
   overflow-y: auto;
   padding-right: 4px;
+  /* Sottile e nei colori del sito, non la barra di scorrimento grigia di
+     default del browser (segnalata dall'utente, troppo invasiva su una
+     card piccola). scrollbar-width/-color per Firefox, ::-webkit-scrollbar
+     per Chrome/Edge/Safari — serve entrambe le sintassi. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-terracotta-light) transparent;
+}
+
+.event-card__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.event-card__scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.event-card__scroll::-webkit-scrollbar-thumb {
+  background: var(--color-terracotta-light);
+  border-radius: 999px;
 }
 
 .event-card__desc {
