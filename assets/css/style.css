@@ -1080,6 +1080,13 @@ p {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 28px;
+  /* Senza questo, CSS grid allunga di default ogni card della riga
+     all'altezza della più alta (es. una card pacchetto con tanto testo) —
+     con l'area scrollabile della card evento che cerca di riempire quello
+     spazio in più, il risultato era un vuoto sotto il testo o uno scroll
+     non necessario (segnalato dall'utente). Con "start" ogni card resta
+     alta quanto il proprio contenuto, a prescindere dalle vicine. */
+  align-items: start;
 }
 
 .events-grid .event-card.is-hidden {
