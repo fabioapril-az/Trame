@@ -845,10 +845,16 @@ p {
   margin-bottom: 6px;
 }
 
+/* Una riga sola, mai due: l'admin limita già il testo a 81 caratteri in
+   input, questo è solo un margine di sicurezza (es. valori inseriti prima
+   del limite) perché non vada comunque oltre una riga sulla card. */
 .event-card__subtitle {
   color: var(--color-ink-soft);
   font-size: 0.95rem;
   margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .event-card__meta {
