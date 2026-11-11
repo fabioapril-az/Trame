@@ -51,30 +51,27 @@
     viaggi: "🧳",
   };
 
-  // Frase fissa, uguale su ogni card pacchetto (non un campo in admin):
-  // per i pacchetti il prezzo è un intervallo su più date ("da X€"), non
-  // un singolo valore come per un evento — niente conteggio prima
-  // partecipazione/tessera qui, solo la frase generica.
-  var NOTA_ISCRIZIONE_HTML = '<p class="event-card__nota-iscrizione">Puoi richiedere l\'associazione a TraMe durante la prenotazione. Eventuali quote associative aggiuntive vanno indicate chiaramente.</p>';
-
   // Quota tessera socio (GET /api/impostazioni, pubblico): usata nel
-  // conteggio "prima partecipazione" sotto il prezzo di un evento — vedi
+  // conteggio "prima partecipazione" sotto il prezzo — vedi
   // notaIscrizioneEvento(). null finché non è ancora arrivata o se manca.
   var quotaIscrizioneSoci = null;
 
   // "Non sei ancora socio...": sempre mostrato. Il conteggio con il totale
-  // (quota evento + tessera) solo se entrambi i valori sono disponibili —
-  // altrimenti la frase resta da sola, senza importi inventati.
-  function notaIscrizioneEvento(quotaEvento) {
+  // (prezzo + tessera) solo se entrambi i valori sono disponibili —
+  // altrimenti la frase resta da sola, senza importi inventati. Usata sia
+  // per un evento (prezzo singolo) sia per un pacchetto (il minimo tra le
+  // date, con "da" davanti al totale — stessa convenzione del prezzo
+  // principale "da X€" mostrato sopra per un pacchetto).
+  function notaIscrizioneEvento(prezzoBase, daPrefix) {
     var domanda = "<p class=\"event-card__nota-iscrizione\">Non sei ancora socio TraMe? Puoi richiedere l'iscrizione durante la prenotazione.</p>";
-    if (quotaEvento == null || quotaIscrizioneSoci == null) {
+    if (prezzoBase == null || quotaIscrizioneSoci == null) {
       return domanda;
     }
-    var totale = formattaPrezzo(Number(quotaEvento) + Number(quotaIscrizioneSoci));
+    var totale = formattaPrezzo(Number(prezzoBase) + Number(quotaIscrizioneSoci));
     return domanda +
       '<p class="event-card__nota-iscrizione event-card__nota-iscrizione--prezzo">' +
       "<span>Prima partecipazione, inclusa tessera da " + formattaPrezzo(quotaIscrizioneSoci) + "</span>" +
-      "<strong>" + totale + "</strong>" +
+      "<strong>" + (daPrefix ? "da " : "") + totale + "</strong>" +
       "</p>";
   }
 
@@ -273,8 +270,10 @@
         ? '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' + etichettaNonPrenotabile + "</span>"
         : '<a href="iscrizione-pacchetto.html?id=' + pacchetto.id + '" class="btn btn--primary btn--small">Prenota →</a>');
 
-    var prezzoHtml = pacchetto.prezzoMinimo.length
-      ? '<span class="event-card__price">da ' + formattaPrezzo(Math.min.apply(null, pacchetto.prezzoMinimo)) + "</span>"
+    var prezzoMinimo = pacchetto.prezzoMinimo.length ? Math.min.apply(null, pacchetto.prezzoMinimo) : null;
+    var prezzoHtml = prezzoMinimo != null
+      ? '<span class="event-card__price-block"><span class="event-card__price">da ' + formattaPrezzo(prezzoMinimo) + "</span>" +
+        '<span class="event-card__price-socio">Prezzo socio</span></span>'
       : "<span></span>";
 
     // dettagliAttivi: interruttore manuale, default true se omesso — stesso
@@ -335,7 +334,7 @@
       azionePrenota +
       "</div>" +
       "</div>" +
-      NOTA_ISCRIZIONE_HTML +
+      notaIscrizioneEvento(prezzoMinimo, true) +
       (pacchetto.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(pacchetto.descrizione) + "</div>" : "") +
       azioneDettagli +
       "</div>";
