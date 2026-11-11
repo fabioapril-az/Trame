@@ -870,7 +870,7 @@ p {
    fissa, Dettagli) è sempre visibile per intero. */
 .event-card__body {
   padding: 22px 26px 26px;
-  height: 430px;
+  height: 580px;
   display: flex;
   flex-direction: column;
 }
@@ -879,12 +879,32 @@ p {
   flex-shrink: 0;
 }
 
+/* overflow-y:auto, non hidden: se la descrizione non ci sta nello spazio
+   rimasto scorre internamente invece di tagliarsi in silenzio (richiesto
+   dall'utente). Scrollbar sottile e nei colori del sito, non quella grigia
+   di default del browser. */
 .event-card__desc {
   color: var(--color-ink-soft);
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-terracotta-light) transparent;
+}
+
+.event-card__desc::-webkit-scrollbar {
+  width: 6px;
+}
+
+.event-card__desc::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.event-card__desc::-webkit-scrollbar-thumb {
+  background: var(--color-terracotta-light);
+  border-radius: 999px;
 }
 
 /* Link "Dettagli" alla fine della descrizione breve, al posto del bottone
