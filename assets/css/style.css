@@ -824,8 +824,14 @@ p {
   background: var(--color-terracotta-dark);
 }
 
+/* Altezza fissa per 2 righe (24px di line-height ciascuna, misurato):
+   stesso spazio per tutte le card, su una riga sola o due, come l'evento
+   "Ortica" preso a esempio dall'utente — un titolo più lungo di 2 righe si
+   taglia invece di spingere in basso ciò che segue. */
 .event-card__title {
   font-size: 1.25rem;
+  height: 48px;
+  overflow: hidden;
   margin-bottom: 0.3em;
 }
 
