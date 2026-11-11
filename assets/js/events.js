@@ -249,11 +249,23 @@
       : "<span></span>";
 
     // dettagliAttivi: interruttore manuale, default true se omesso — stesso
-    // principio della card evento.
+    // principio della card evento. Link testuale alla fine della
+    // descrizione breve, non più un bottone nel footer — stessa posizione
+    // della card evento, per la stessa impaginazione (richiesto
+    // dall'utente dopo aver visto le due card diverse fra loro).
     var dettagliAttivi = pacchetto.dettagliAttivi !== false;
     var azioneDettagli = dettagliAttivi
-      ? '<a href="pacchetto.html?id=' + pacchetto.id + '" class="btn btn--outline btn--small">Dettagli →</a>'
+      ? '<a href="pacchetto.html?id=' + pacchetto.id + '" class="event-card__details-link">Dettagli →</a>'
       : "";
+
+    // Eyebrow sopra il titolo, come la card evento — qui "2 date" al posto
+    // della categoria quando non c'è una categoria comune a tutte le date
+    // (vedi normalizzaPacchetto).
+    var eyebrowParts = [];
+    if (pacchetto.categoria) { eyebrowParts.push(escapeHtml(categoryLabel(pacchetto.categoria))); }
+    eyebrowParts.push(pacchetto.numeroDate + " date");
+    if (pacchetto.luogo) { eyebrowParts.push(escapeHtml(pacchetto.luogo)); }
+    var eyebrowHtml = '<span class="event-card__eyebrow">' + eyebrowParts.join(" · ") + "</span>";
 
     // Ora/luogo: mostrati solo se condivisi da tutte le date (vedi
     // valoreComune) — stessa riga meta di un evento normale, qui con il
@@ -275,13 +287,14 @@
       (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") +
       "</div>" +
       '<div class="event-card__body">' +
-      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
+      eyebrowHtml +
       '<h3 class="event-card__title">' + escapeHtml(pacchetto.titolo) + "</h3>" +
       (pacchetto.descrizione ? '<div class="event-card__desc">' + formattaDescrizioneCard(pacchetto.descrizione) + "</div>" : "") +
+      azioneDettagli +
+      '<p class="event-card__meta">' + metaParts.join("") + "</p>" +
       '<div class="event-card__footer">' +
       prezzoHtml +
       '<div class="event-card__actions">' +
-      azioneDettagli +
       azionePrenota +
       "</div>" +
       "</div>" +
