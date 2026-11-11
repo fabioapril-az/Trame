@@ -866,6 +866,18 @@ p {
   gap: 6px;
 }
 
+/* Spazio sempre riservato per 55 caratteri (il massimo di "Luogo" in
+   admin), anche quando il testo inserito è più corto — stessa riga su
+   ogni card, indipendentemente dalla lunghezza reale, invece di andare a
+   capo su due righe solo per alcune. +3ch per l'icona e lo spazio. */
+.event-card__meta-luogo {
+  display: inline-block;
+  width: 58ch;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Frase fissa sotto prezzo/Prenota, uguale su ogni card. */
 .event-card__nota-iscrizione {
   color: var(--color-ink-soft);

@@ -284,7 +284,7 @@
       metaParts.push("<span>🕐 " + escapeHtml(pacchetto.ora) + "</span>");
     }
     if (pacchetto.luogo) {
-      metaParts.push("<span>📍 " + escapeHtml(pacchetto.luogo) + "</span>");
+      metaParts.push("<span class=\"event-card__meta-luogo\">📍 " + escapeHtml(pacchetto.luogo) + "</span>");
     }
     if (pacchetto.notaEvento) {
       metaParts.push("<span>📝 " + escapeHtml(pacchetto.notaEvento) + "</span>");
@@ -352,7 +352,7 @@
       metaParts.push("<span>🕐 " + escapeHtml(event.ora) + "</span>");
     }
     if (event.luogo) {
-      metaParts.push("<span>📍 " + escapeHtml(event.luogo) + "</span>");
+      metaParts.push("<span class=\"event-card__meta-luogo\">📍 " + escapeHtml(event.luogo) + "</span>");
     }
     // Nota libera (es. "Percorso a piedi di circa 4 km", "Evento online"):
     // icona generica, stesso campo per qualsiasi tipo di informazione
