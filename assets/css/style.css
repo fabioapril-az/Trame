@@ -882,7 +882,7 @@ p {
    fissa, Dettagli) è sempre visibile per intero. */
 .event-card__body {
   padding: 22px 26px 26px;
-  height: 580px;
+  height: 607px;
   display: flex;
   flex-direction: column;
 }
@@ -903,11 +903,12 @@ p {
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-terracotta-light) transparent;
+  /* -dark, non -light: si notava troppo poco (segnalato dall'utente). */
+  scrollbar-color: var(--color-terracotta-dark) transparent;
 }
 
 .event-card__desc::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .event-card__desc::-webkit-scrollbar-track {
@@ -915,7 +916,7 @@ p {
 }
 
 .event-card__desc::-webkit-scrollbar-thumb {
-  background: var(--color-terracotta-light);
+  background: var(--color-terracotta-dark);
   border-radius: 999px;
 }
 
