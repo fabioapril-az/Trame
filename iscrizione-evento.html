@@ -199,7 +199,7 @@
              socio (se spetta) lo calcola il server persona per persona. -->
         <div id="wizard-pagamento" hidden>
           <p class="form-note" id="pagamento-annullato-nota" role="alert" hidden>Pagamento annullato: puoi riprovare qui sotto.</p>
-          <div class="admin-panel">
+          <div class="admin-panel" id="pg-step-dati">
             <h3>Iscrizione con pagamento online</h3>
 
             <!-- Opzioni popolate via JS: dipendono da quali prezzi ha
@@ -234,10 +234,28 @@
             <p class="form-note">Lo sconto socio (dal 2° evento, se spetta) viene applicato automaticamente al pagamento, in base all'email inserita per ciascuna persona.</p>
             <p class="form-note" id="pg-condizioni-cancellazione" hidden></p>
 
-            <div class="admin-form__actions">
+            <div class="admin-form__actions admin-form__actions--end">
               <button type="button" class="btn btn--primary" id="pg-btn-paga">Vai al pagamento</button>
             </div>
             <p class="form-note" id="pg-status" role="alert" hidden></p>
+          </div>
+
+          <!-- Mostrato al posto del pannello sopra solo se, dopo "Vai al
+               pagamento", almeno una persona risulta non socia o con tessera
+               scaduta (GET /api/soci/verifica). Blocchi per persona generati
+               in iscrizione-evento.js; la tessera finisce nello stesso
+               pagamento dell'evento. -->
+          <div class="admin-panel" id="pg-step-associazione" hidden>
+            <h3>Associati a TraMe</h3>
+            <p class="form-note" id="pg-assoc-intro"></p>
+            <p class="form-note" id="pg-assoc-vantaggi" style="white-space:pre-line;" hidden></p>
+            <div id="pg-assoc-blocchi"></div>
+            <p class="form-note" id="pg-assoc-totale" style="font-weight:600;"></p>
+            <div class="admin-form__actions admin-form__actions--split">
+              <button type="button" class="btn btn--outline" id="pg-assoc-indietro">← Indietro</button>
+              <button type="button" class="btn btn--primary" id="pg-assoc-paga">Vai al pagamento</button>
+            </div>
+            <p class="form-note" id="pg-assoc-status" role="alert" hidden></p>
           </div>
         </div>
 

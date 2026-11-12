@@ -602,6 +602,14 @@ p {
   align-items: center;
 }
 
+.admin-form__actions--end {
+  justify-content: flex-end;
+}
+
+.admin-form__actions--split {
+  justify-content: space-between;
+}
+
 .admin-events-list {
   display: flex;
   flex-direction: column;
