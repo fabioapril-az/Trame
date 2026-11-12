@@ -251,16 +251,27 @@
     // principio già usato per gli eventi, dove il totale vero lo decide
     // solo il server al momento del pagamento.
     function aggiornaTotale() {
-      pgTotale.textContent = "Totale (senza eventuale sconto): " + formattaPrezzo(calcolaTotale());
+      pgTotale.textContent = "Totale (senza eventuale sconto socio): " + formattaPrezzo(calcolaTotale());
     }
 
+    // Stessi prezzi che usa il server: "tutte le date" con lo sconto del
+    // pacchetto già incluso (prezzoTutteLeDate*), e il prezzo di gruppo
+    // quando le persone sono più di una. Prima il totale mostrato era la
+    // somma delle date senza sconto (es. 67 € a fronte dei 60 € chiesti da
+    // Stripe), segnalato dall'utente come fonte di confusione.
     function calcolaTotale() {
       var n = parseInt(pgNumeroPersone.value, 10);
-      var scelti = sottoEventiScelti();
+      var gruppo = n > 1;
       var totale = 0;
-      scelti.forEach(function (ev) {
-        totale += (ev.prezzoSingolo || 0) * n;
-      });
+      var prezzoTutte = gruppo ? pacchetto.prezzoTutteLeDateGruppoPersona : pacchetto.prezzoTutteLeDateSingolo;
+      if (pgCombinazione.value === "tutte" && prezzoTutte != null) {
+        totale += prezzoTutte * n;
+      } else {
+        sottoEventiScelti().forEach(function (ev) {
+          var prezzo = gruppo && ev.prezzoGruppoPersona != null ? ev.prezzoGruppoPersona : ev.prezzoSingolo;
+          totale += (prezzo || 0) * n;
+        });
+      }
       leggiPersoneAperitivo().forEach(function (voce) {
         var ev = sottoEventi.filter(function (e) { return e.id === voce.eventoId; })[0];
         if (ev && ev.prezzoAperitivoPersona != null) {
@@ -392,7 +403,7 @@
         : pgAssocBlocchi.querySelectorAll(".pg-assoc-scelta:checked").length;
       var totale = calcolaTotale() + (quotaTessera() || 0) * tessere;
       pgAssocTotale.textContent = "Totale (evento" + (tessere ? " + " + tessere + (tessere === 1 ? " tessera" : " tessere") : "") +
-        ", senza eventuale sconto): " + formattaPrezzo(totale);
+        ", senza eventuale sconto socio): " + formattaPrezzo(totale);
     }
 
     function mostraStepAssociazione(persone, daAssociare) {
