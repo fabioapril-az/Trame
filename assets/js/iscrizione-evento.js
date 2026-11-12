@@ -31,6 +31,14 @@
     return div.innerHTML;
   }
 
+  // Volutamente senza dire a chi appartiene l'email: non va rivelato il
+  // nome del socio a chi ha scritto la sua email.
+  function messaggioNomeDiverso(email) {
+    return "L'email " + email + " è già associata a un altro socio, con un nome diverso. " +
+      "Usa la tua email personale: se non sei ancora socio potrai associarti nello stesso pagamento. " +
+      "Se l'email è tua, scrivi nome e cognome come li hai indicati all'iscrizione, oppure scrivici a info@progettotrame.org.";
+  }
+
   // "32,00 €": stesso formato delle schede in eventi.html.
   function formattaEuro(valore) {
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
@@ -586,8 +594,12 @@
       payload.opzionePartecipazioneId = inputOpzione.value ? parseInt(inputOpzione.value, 10) : null;
     }
 
-    // Nome/cognome solo per chi si iscrive al solo evento senza essere
-    // socio: un socio già noto li ha già in anagrafica.
+    // Per un socio nome/cognome non servono all'anagrafica (li ha già), ma
+    // il server li confronta con quelli registrati per quell'email.
+    if (!soloEvento) {
+      payload.nome = val("sc-nome");
+      payload.cognome = val("sc-cognome");
+    }
     if (soloEvento) {
       payload.nome = inputSoloEventoNome.value.trim();
       payload.cognome = inputSoloEventoCognome.value.trim();
@@ -651,6 +663,9 @@
   }
 
   btnConferma.addEventListener("click", function () {
+    if (!document.getElementById("sc-nome").reportValidity() || !document.getElementById("sc-cognome").reportValidity()) {
+      return;
+    }
     if (stato.opzioniPartecipazione.length && (!inputNumeroPersone.reportValidity() || !inputOpzione.reportValidity())) {
       return;
     }
@@ -1116,7 +1131,8 @@
       pgBtnPaga.disabled = true;
       pgBtnPaga.textContent = "Verifica in corso…";
       var richieste = persone.map(function (p) {
-        return window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(p.email));
+        return window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(p.email) +
+          "&nome=" + encodeURIComponent(p.nome) + "&cognome=" + encodeURIComponent(p.cognome));
       });
       // Quota/vantaggi: di solito già caricati a inizio pagina, ma se quella
       // chiamata non era ancora finita (o era fallita) si riprova qui.
@@ -1129,6 +1145,12 @@
         .then(function (risultati) {
           pgBtnPaga.disabled = false;
           pgBtnPaga.textContent = testoBtnPaga;
+          var nomeDiverso = persone.filter(function (p, i) { return risultati[i].nomeCorrisponde === false; })[0];
+          if (nomeDiverso) {
+            pgStatus.textContent = messaggioNomeDiverso(nomeDiverso.email);
+            pgStatus.hidden = false;
+            return;
+          }
           var daAssociare = [];
           persone.forEach(function (p, i) {
             var v = risultati[i];

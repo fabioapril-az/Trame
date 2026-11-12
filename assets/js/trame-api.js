@@ -18,6 +18,7 @@
     combinazione_non_valida: "Scegli una sola data o tutte le date collegate: una via di mezzo non è ammessa.",
     sconto_non_configurato: "\"Tutte le date\" non è ancora disponibile per questo evento: riprova più tardi o scegli una sola data.",
     pacchetto_non_aperto: "Le iscrizioni a questo evento non sono attualmente aperte.",
+    email_socio_nome_diverso: "Questa email è già associata a un altro socio, con un nome diverso. Usa la tua email personale, oppure scrivi nome e cognome come li hai indicati all'iscrizione. Per aiuto: info@progettotrame.org.",
     evento_riservato_soci: "Questo evento è riservato ai soci: completa anche l'iscrizione all'associazione per procedere.",
     email_gia_socia_attiva: "Questa email risulta già di un socio attivo: torna indietro e riprova, la tessera non serve.",
     rinnovo_non_applicabile: "La tessera di questa persona non risulta da rinnovare: torna indietro e riprova.",

@@ -139,6 +139,11 @@
                esplicito, mai in automatico). -->
           <div id="step-conferma" class="admin-panel" hidden>
             <h3>Conferma iscrizione</h3>
+            <!-- Il server controlla che coincidano con il socio di questa
+                 email: senza, bastava conoscere l'email di un socio per
+                 iscriversi al suo posto (caso reale segnalato dall'utente). -->
+            <div class="form-row"><label for="sc-nome">Nome</label><input type="text" id="sc-nome" maxlength="100" required></div>
+            <div class="form-row"><label for="sc-cognome">Cognome</label><input type="text" id="sc-cognome" maxlength="100" required></div>
             <!-- Solo se GET /api/soci/verifica dice consensoFoto: null,
                  cioè non gli è mai stato chiesto: chi ha già risposto (sì o
                  no) non la rivede. Scelta forzata, non facoltativa:

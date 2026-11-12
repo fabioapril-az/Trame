@@ -497,7 +497,8 @@
       pgBtnPaga.disabled = true;
       pgBtnPaga.textContent = "Verifica in corso…";
       var richieste = persone.map(function (p) {
-        return window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(p.email));
+        return window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(p.email) +
+          "&nome=" + encodeURIComponent(p.nome) + "&cognome=" + encodeURIComponent(p.cognome));
       });
       if (quotaTessera() == null) {
         richieste.push(window.trameFetch("/api/impostazioni")
@@ -508,6 +509,15 @@
         .then(function (risultati) {
           pgBtnPaga.disabled = false;
           pgBtnPaga.textContent = "Vai al pagamento";
+          // Senza dire a chi appartiene l'email (vedi iscrizione-evento.js).
+          var nomeDiverso = persone.filter(function (p, i) { return risultati[i].nomeCorrisponde === false; })[0];
+          if (nomeDiverso) {
+            pgStatus.textContent = "L'email " + nomeDiverso.email + " è già associata a un altro socio, con un nome diverso. " +
+              "Usa la tua email personale: se non sei ancora socio potrai associarti nello stesso pagamento. " +
+              "Se l'email è tua, scrivi nome e cognome come li hai indicati all'iscrizione, oppure scrivici a info@progettotrame.org.";
+            pgStatus.hidden = false;
+            return;
+          }
           var daAssociare = [];
           persone.forEach(function (p, i) {
             var v = risultati[i];
