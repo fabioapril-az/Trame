@@ -1529,6 +1529,31 @@ p {
 }
 
 @media (max-width: 720px) {
+  /* Filtro categorie su una riga sola, scorrevole in orizzontale col
+     dito, invece di andare a capo su 3-4 righe (segnalato dall'utente).
+     Margini negativi + padding: la riga arriva fino ai bordi dello
+     schermo, così si capisce che continua oltre. */
+  .events-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    margin: 0 -24px 24px;
+    padding: 0 24px 6px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .events-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .events-filter .btn {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+  }
+
   /* Prezzo/Prenota e la frase sull'iscrizione subito dopo il sottotitolo,
      prima delle righe data/ora/luogo/nota — da cellulare altrimenti
      restavano fuori dalla prima schermata (segnalato dall'utente). Da
