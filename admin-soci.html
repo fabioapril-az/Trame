@@ -80,6 +80,10 @@
                        secondo evento, vedi capitolo Iscrizione soci): si
                        azzera a ogni rinnovo, non si abbassa mai da qui. -->
                   <th>Eventi (sconto)</th>
+                  <!-- Si'/No/— (mai chiesto): vedi "Modifica" per impostarlo
+                       o correggerlo, es. per registrare una firma gia'
+                       raccolta su carta. -->
+                  <th>Foto</th>
                   <th>Azioni</th>
                 </tr>
               </thead>
@@ -118,6 +122,21 @@
               <label for="mod-codice-fiscale">Codice fiscale (facoltativo, lascia vuoto per non modificarlo)</label>
               <input type="text" id="mod-codice-fiscale" maxlength="16"
                 pattern="^[A-Za-z]{6}\d{2}[A-EHLMPRSTabcdehlmprst]\d{2}([A-Za-z]\d{3}|\d{4})[A-Za-z]$">
+            </div>
+            <!-- A differenza dei due campi sopra, questo valore vero
+                 l'elenco soci LO restituisce: si apre sempre mostrando lo
+                 stato reale (compreso "mai chiesto"), non vuoto per
+                 definizione. Utile per registrare qui una firma gia'
+                 raccolta sul modulo di carta, senza aspettare che la
+                 persona risponda di nuovo online. -->
+            <div class="form-row">
+              <label for="mod-consenso-foto">Consenso foto e video</label>
+              <select id="mod-consenso-foto">
+                <option value="">— non ha ancora risposto —</option>
+                <option value="si">Sì</option>
+                <option value="no">No</option>
+              </select>
+              <p class="form-note">Es. per una firma già raccolta sul modulo di carta: <a href="consenso-foto.html" target="_blank" rel="noopener">vedi il testo del consenso</a>.</p>
             </div>
             <div class="admin-form__actions">
               <button type="button" class="btn btn--primary" id="btn-salva-modifica">Salva modifiche</button>

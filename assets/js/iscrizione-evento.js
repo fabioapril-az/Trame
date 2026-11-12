@@ -91,6 +91,7 @@
   var stepConferma = document.getElementById("step-conferma");
   var campoNewsletterSocio = document.getElementById("campo-newsletter-socio");
   var inputScNewsletter = document.getElementById("sc-newsletter");
+  var campoFotoSocio = document.getElementById("campo-foto-socio");
   var btnConferma = document.getElementById("btn-conferma");
   var confermaStatus = document.getElementById("conferma-status");
   var invioInCorso = document.getElementById("invio-in-corso");
@@ -333,6 +334,7 @@
     stepRinnovo.hidden = true;
     stepConferma.hidden = true;
     campoNewsletterSocio.hidden = true;
+    campoFotoSocio.hidden = true;
     stepInteresse.hidden = true;
     verificaStatus.textContent = "Verifica in corso…";
     verificaStatus.hidden = false;
@@ -364,6 +366,9 @@
         // = ha già risposto (sì o no): non si richiede di nuovo.
         campoNewsletterSocio.hidden = result.consensoNewsletter !== null;
         inputScNewsletter.checked = false;
+        campoFotoSocio.hidden = result.consensoFoto !== null;
+        document.getElementById("sc-foto-si").checked = false;
+        document.getElementById("sc-foto-no").checked = false;
 
         if (stato.richiedeRinnovo) {
           rinnovoTitolo.textContent = "La tua tessera è scaduta";
@@ -524,7 +529,13 @@
         cap: document.getElementById("ia-cap").value.trim() || null,
         consensoAccettato: document.getElementById("ia-consenso").checked,
         consensoVersione: CONSENSO_VERSIONE,
-        consensoNewsletter: document.getElementById("ia-newsletter").checked
+        consensoNewsletter: document.getElementById("ia-newsletter").checked,
+        // Come consensoNewsletter su questo stesso percorso: finisce solo
+        // nel testo dell'email alla segreteria (nessuna colonna dietro,
+        // questa richiesta non crea un socio da sola) — ma la segreteria lo
+        // legge e lo riporta quando registra la persona a mano, invece di
+        // chiederlo una seconda volta.
+        consensoFoto: document.getElementById("ia-foto-si").checked
       })
     })
       .then(function (esito) {
@@ -593,6 +604,9 @@
     if (!soloEvento && !campoNewsletterSocio.hidden) {
       payload.consensoNewsletter = inputScNewsletter.checked;
     }
+    if (!soloEvento && !campoFotoSocio.hidden) {
+      payload.consensoFoto = document.getElementById("sc-foto-si").checked;
+    }
 
     if (!soloEvento && (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo))) {
       payload.rinnovo = {
@@ -633,6 +647,15 @@
 
   btnConferma.addEventListener("click", function () {
     if (stato.opzioniPartecipazione.length && (!inputNumeroPersone.reportValidity() || !inputOpzione.reportValidity())) {
+      return;
+    }
+    // Scelta forzata quando compare (consensoFoto: null): questo bottone
+    // non è il submit di un <form>, quindi "required" sui radio non blocca
+    // nulla da solo — va controllato a mano, come già per il rinnovo/altri
+    // campi di questo passo.
+    if (!campoFotoSocio.hidden && !document.querySelector('input[name="sc-foto-consenso"]:checked')) {
+      confermaStatus.textContent = "Scegli Sì o No alla domanda sulla pubblicazione di foto e video per procedere.";
+      confermaStatus.hidden = false;
       return;
     }
     eseguiIscrizione();
