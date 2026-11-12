@@ -901,10 +901,13 @@ p {
 
 /* Riga "Prima partecipazione...": etichetta a sinistra, importo in
    grassetto a destra, come prezzo/Prenota nel footer sopra. */
+/* last baseline: quando l'etichetta va a capo, l'importo si allinea
+   all'ultima riga ("da 15,00 €"), non alla prima (chiesto dall'utente). */
 .event-card__nota-iscrizione--prezzo {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-end; /* riserva per i browser che ignorano "last baseline" */
+  align-items: last baseline;
   gap: 10px;
   margin-top: 4px;
 }
