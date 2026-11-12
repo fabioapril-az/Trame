@@ -1529,6 +1529,67 @@ p {
 }
 
 @media (max-width: 720px) {
+  /* Prezzo/Prenota e la frase sull'iscrizione subito dopo il sottotitolo,
+     prima delle righe data/ora/luogo/nota — da cellulare altrimenti
+     restavano fuori dalla prima schermata (segnalato dall'utente). Da
+     desktop l'ordine nel markup resta quello scelto in precedenza
+     (meta prima del prezzo), qui è solo una questione visiva via
+     flex/order, non un cambio di contenuto. */
+  #evento-content,
+  #pacchetto-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  #evento-content > .event-detail__media,
+  #pacchetto-content > .event-detail__media {
+    order: 1;
+  }
+
+  #evento-content > .section__eyebrow,
+  #pacchetto-content > .section__eyebrow {
+    order: 2;
+  }
+
+  #evento-content > h1,
+  #pacchetto-content > h1 {
+    order: 3;
+  }
+
+  #evento-content > .event-detail__subtitle,
+  #pacchetto-content > .event-detail__subtitle {
+    order: 4;
+  }
+
+  #evento-content > .event-detail__footer,
+  #pacchetto-content > .event-detail__footer {
+    order: 5;
+  }
+
+  #evento-content > #evento-nota-iscrizione,
+  #pacchetto-content > #pacchetto-nota-iscrizione {
+    order: 6;
+  }
+
+  #evento-content > .event-detail__meta,
+  #pacchetto-content > .event-detail__meta {
+    order: 7;
+  }
+
+  #evento-content > #evento-scadenza,
+  #pacchetto-content > .form-note {
+    order: 8;
+  }
+
+  #evento-content > .event-detail__desc,
+  #pacchetto-content > .event-detail__desc {
+    order: 9;
+  }
+
+  #evento-content > .event-detail__social {
+    order: 10;
+  }
+
   .nav {
     /* .site-header usa backdrop-filter, che genera un containing block per i
        discendenti position:fixed: "bottom" andrebbe quindi calcolato rispetto
