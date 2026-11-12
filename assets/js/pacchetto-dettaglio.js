@@ -117,6 +117,24 @@
     return parsed.map(function (d) { return d.giorno + " " + MESI[d.mese] + " " + d.anno; }).join(" e ");
   }
 
+  // Il titolo deve restare sempre su massimo 2 righe, visibile per intero
+  // (richiesto dall'utente): invece di tagliarlo, riduce il carattere a
+  // passi di 1px finché non ci sta, con un minimo sotto il quale non
+  // scende. Duplicata da evento-dettaglio.js, stesso motivo degli altri
+  // helper di questo file.
+  function adattaTitoloA2Righe(el) {
+    var fontSize = parseFloat(getComputedStyle(el).fontSize);
+    var minFontSize = 18;
+    while (fontSize > minFontSize) {
+      var lineHeight = parseFloat(getComputedStyle(el).lineHeight);
+      if (el.scrollHeight <= lineHeight * 2 + 1) {
+        break;
+      }
+      fontSize -= 1;
+      el.style.fontSize = fontSize + "px";
+    }
+  }
+
   function disabilitaBottone(el, testo) {
     el.textContent = testo;
     el.classList.remove("btn--primary");
@@ -189,7 +207,9 @@
         }
 
         document.getElementById("pacchetto-badge-date").textContent = sottoEventi.length + " date";
-        document.getElementById("pacchetto-titolo").textContent = pacchetto.nome;
+        var titoloEl = document.getElementById("pacchetto-titolo");
+        titoloEl.textContent = pacchetto.nome;
+        adattaTitoloA2Righe(titoloEl);
 
         if (pacchetto.sottotitolo) {
           var sottotitoloEl = document.getElementById("pacchetto-sottotitolo");

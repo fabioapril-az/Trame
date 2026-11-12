@@ -130,6 +130,24 @@
       .join("");
   }
 
+  // Il titolo deve restare sempre su massimo 2 righe, visibile per intero
+  // (richiesto dall'utente): invece di tagliarlo, riduce il carattere a
+  // passi di 1px finché non ci sta, con un minimo sotto il quale non
+  // scende (resterebbe illeggibile). Va chiamata quando l'elemento è già
+  // visibile (contentEl.hidden = false), altrimenti scrollHeight è 0.
+  function adattaTitoloA2Righe(el) {
+    var fontSize = parseFloat(getComputedStyle(el).fontSize);
+    var minFontSize = 18;
+    while (fontSize > minFontSize) {
+      var lineHeight = parseFloat(getComputedStyle(el).lineHeight);
+      if (el.scrollHeight <= lineHeight * 2 + 1) {
+        break;
+      }
+      fontSize -= 1;
+      el.style.fontSize = fontSize + "px";
+    }
+  }
+
   function disabilitaBottone(el, testo) {
     el.textContent = testo;
     el.classList.remove("btn--primary");
@@ -206,7 +224,9 @@
 
         document.getElementById("evento-badge").textContent = categoryLabel(event.categoria);
         document.getElementById("evento-categoria-label").textContent = categoryLabel(event.categoria);
-        document.getElementById("evento-titolo").textContent = event.titolo;
+        var titoloEl = document.getElementById("evento-titolo");
+        titoloEl.textContent = event.titolo;
+        adattaTitoloA2Righe(titoloEl);
 
         if (event.sottotitolo) {
           var sottotitoloEl = document.getElementById("evento-sottotitolo");

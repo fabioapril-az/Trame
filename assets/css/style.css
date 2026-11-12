@@ -1176,7 +1176,7 @@ p {
   gap: 6px;
   font-weight: 700;
   color: var(--color-terracotta-dark);
-  margin-bottom: 28px;
+  margin-bottom: 12px;
 }
 
 .event-detail__media {
