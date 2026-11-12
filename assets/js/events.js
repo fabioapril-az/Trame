@@ -620,6 +620,25 @@
       bottone.addEventListener("click", function () { onScegli(categoria); });
       contenitore.appendChild(bottone);
     });
+
+    // Da cellulare i bottoni andavano a capo su più righe: lì il CSS li
+    // nasconde e mostra questo menu a tendina, stesse voci e stesso filtro.
+    var select = document.createElement("select");
+    select.className = "events-filter__select";
+    select.setAttribute("aria-label", "Filtra per categoria");
+    var opzioneTutti = document.createElement("option");
+    opzioneTutti.value = "";
+    opzioneTutti.textContent = "Tutte le categorie";
+    select.appendChild(opzioneTutti);
+    Object.keys(CATEGORY_LABELS).forEach(function (categoria) {
+      var opzione = document.createElement("option");
+      opzione.value = categoria;
+      opzione.textContent = CATEGORY_LABELS[categoria];
+      select.appendChild(opzione);
+    });
+    select.value = categoriaAttiva || "";
+    select.addEventListener("change", function () { onScegli(select.value || null); });
+    contenitore.appendChild(select);
   }
 
   document.addEventListener("DOMContentLoaded", function () {

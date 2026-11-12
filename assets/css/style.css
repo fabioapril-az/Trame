@@ -1152,6 +1152,30 @@ p {
   margin-bottom: 34px;
 }
 
+/* Visibile solo da cellulare (vedi media query sotto), al posto dei
+   bottoni. Freccia disegnata con un SVG nel colore terracotta del sito,
+   invece di quella di default diversa per ogni browser. */
+.events-filter__select {
+  display: none;
+  width: 100%;
+  padding: 12px 44px 12px 18px;
+  border: 2px solid var(--color-ink);
+  border-radius: 999px;
+  background: var(--color-white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23a9603a' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 18px center;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-ink);
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.events-filter__select:focus-visible {
+  outline: 2px solid var(--color-terracotta);
+  outline-offset: 2px;
+}
+
 .events-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -1529,29 +1553,19 @@ p {
 }
 
 @media (max-width: 720px) {
-  /* Filtro categorie su una riga sola, scorrevole in orizzontale col
-     dito, invece di andare a capo su 3-4 righe (segnalato dall'utente).
-     Margini negativi + padding: la riga arriva fino ai bordi dello
-     schermo, così si capisce che continua oltre. */
+  /* Da cellulare i bottoni andavano a capo su 3-4 righe (segnalato
+     dall'utente): al loro posto il menu a tendina creato insieme ai
+     bottoni in events.js. */
   .events-filter {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 8px;
-    margin: 0 -24px 24px;
-    padding: 0 24px 6px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .events-filter::-webkit-scrollbar {
-    display: none;
+    margin-bottom: 24px;
   }
 
   .events-filter .btn {
-    flex-shrink: 0;
-    white-space: nowrap;
-    padding: 8px 16px;
-    font-size: 0.85rem;
+    display: none;
+  }
+
+  .events-filter__select {
+    display: block;
   }
 
   /* Prezzo/Prenota e la frase sull'iscrizione subito dopo il sottotitolo,
