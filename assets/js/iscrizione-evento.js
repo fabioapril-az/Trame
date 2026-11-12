@@ -31,6 +31,11 @@
     return div.innerHTML;
   }
 
+  // "32,00 €": stesso formato delle schede in eventi.html.
+  function formattaEuro(valore) {
+    return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+  }
+
   // condizioniCancellazione arriva dall'editor Quill di admin.html (HTML),
   // quindi va sanitizzato prima di inserirlo con innerHTML — stesso pattern
   // di events.js/evento-dettaglio.js, duplicato qui per la stessa ragione
@@ -272,7 +277,7 @@
       opzionePrezzoTotale.hidden = true;
       return;
     }
-    opzionePrezzoTotale.textContent = "Totale: " + (opzione.prezzoPersona * persone).toFixed(2) + " €";
+    opzionePrezzoTotale.textContent = "Totale: " + formattaEuro(opzione.prezzoPersona * persone);
     opzionePrezzoTotale.hidden = false;
   }
 
@@ -818,7 +823,7 @@
     }
 
     function aggiornaTotale() {
-      pgTotale.textContent = "Totale (senza eventuale sconto socio): " + calcolaTotaleEvento().toFixed(2) + " €";
+      pgTotale.textContent = "Totale (senza eventuale sconto socio): " + formattaEuro(calcolaTotaleEvento());
     }
 
     function calcolaTotaleEvento() {
@@ -998,13 +1003,13 @@
         : pgAssocBlocchi.querySelectorAll(".admin-panel").length;
       var totale = calcolaTotaleEvento() + quota * tessere;
       pgAssocTotale.textContent = "Totale (evento" + (tessere ? " + " + tessere + (tessere === 1 ? " tessera" : " tessere") : "") +
-        ", senza eventuale sconto socio): " + totale.toFixed(2) + " €";
+        ", senza eventuale sconto socio): " + formattaEuro(totale);
     }
 
     function mostraStepAssociazione(persone, daAssociare) {
       var obbligatoria = !stato.apertoNonSoci;
       var quota = quotaTessera();
-      var testoQuota = quota != null ? " (" + quota.toFixed(2) + " €, valida 12 mesi)" : "";
+      var testoQuota = quota != null ? " (" + formattaEuro(quota) + ", valida 12 mesi)" : "";
       pgAssocIntro.textContent = obbligatoria
         ? "Per partecipare a questo evento serve essere soci di TraMe. Completa i dati qui sotto: la tessera" + testoQuota + " viene aggiunta allo stesso pagamento dell'evento."
         : "Questo evento è aperto anche a chi non è socio. Se vuoi puoi associarti ora: la tessera" + testoQuota + " viene aggiunta allo stesso pagamento dell'evento.";
