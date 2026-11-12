@@ -254,9 +254,6 @@
           scadenzaEl.hidden = false;
         }
 
-        if (!event.apertoNonSoci) {
-          document.getElementById("evento-riservato").hidden = false;
-        }
 
         if (event.quotaEvento) {
           document.getElementById("evento-prezzo-socio").hidden = false;
