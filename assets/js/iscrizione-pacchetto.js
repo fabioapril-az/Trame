@@ -25,6 +25,12 @@
     return Number(valore).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
   }
 
+  // Quota tessera e testo vantaggi per il passaggio "Associati a TraMe".
+  var impostazioni = null;
+  window.trameFetch("/api/impostazioni")
+    .then(function (valori) { impostazioni = valori; })
+    .catch(function () { /* il passaggio funziona anche senza, solo senza importo */ });
+
   var pacchettoId = new URLSearchParams(window.location.search).get("id");
   var params = new URLSearchParams(window.location.search);
   var pagamentoParam = params.get("pagamento"); // "confermato"|"annullato", solo al ritorno da Stripe
@@ -245,6 +251,10 @@
     // principio già usato per gli eventi, dove il totale vero lo decide
     // solo il server al momento del pagamento.
     function aggiornaTotale() {
+      pgTotale.textContent = "Totale (senza eventuale sconto): " + formattaPrezzo(calcolaTotale());
+    }
+
+    function calcolaTotale() {
       var n = parseInt(pgNumeroPersone.value, 10);
       var scelti = sottoEventiScelti();
       var totale = 0;
@@ -257,7 +267,7 @@
           totale += ev.prezzoAperitivoPersona * voce.numero;
         }
       });
-      pgTotale.textContent = "Totale (senza eventuale sconto): " + totale.toFixed(2) + " €";
+      return totale;
     }
 
     function aggiornaCampi() {
@@ -274,12 +284,7 @@
       return (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : (Date.now() + "-" + Math.random());
     }
 
-    pgBtnPaga.addEventListener("click", function () {
-      pgStatus.hidden = true;
-      var persone = leggiPersoneDaBlocchi(true);
-      if (!persone) {
-        return;
-      }
+    function inviaCheckout(persone, btn, statusEl) {
       var dateScelte = sottoEventiScelti().map(function (ev) { return ev.id; });
       var payload = {
         richiestaId: nuovoRichiestaId(),
@@ -289,8 +294,8 @@
         dateScelte: dateScelte,
         personeAperitivo: leggiPersoneAperitivo()
       };
-      pgBtnPaga.disabled = true;
-      pgBtnPaga.textContent = "Reindirizzamento a Stripe…";
+      btn.disabled = true;
+      btn.textContent = "Reindirizzamento a Stripe…";
       window.trameFetch("/api/pacchetti-eventi/" + encodeURIComponent(pacchettoId) + "/checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -304,6 +309,219 @@
           esitoEl.hidden = false;
           wizardEl.hidden = true;
           esitoEl.innerHTML = "<h3>Iscrizione registrata!</h3><p>Ti contatteremo a breve per completare il pagamento.</p>";
+        })
+        .catch(function (err) {
+          btn.disabled = false;
+          btn.textContent = "Vai al pagamento";
+          statusEl.textContent = err.message;
+          statusEl.hidden = false;
+        });
+    }
+
+    // ---------- Passaggio "Associati a TraMe" ----------
+    // Stessa logica di iscrizione-evento.js (duplicata: nessun modulo
+    // condiviso in questo sito). Un pacchetto non ha un proprio "aperto ai
+    // non soci": associarsi è obbligatorio se almeno una delle date scelte è
+    // riservata ai soci, facoltativo se lo sono tutte. Se il dato manca
+    // (apertoNonSoci assente) la data conta come riservata.
+    var pgStepDati = document.getElementById("pg-step-dati");
+    var pgStepAssoc = document.getElementById("pg-step-associazione");
+    var pgAssocIntro = document.getElementById("pg-assoc-intro");
+    var pgAssocVantaggi = document.getElementById("pg-assoc-vantaggi");
+    var pgAssocBlocchi = document.getElementById("pg-assoc-blocchi");
+    var pgAssocTotale = document.getElementById("pg-assoc-totale");
+    var pgAssocPaga = document.getElementById("pg-assoc-paga");
+    var pgAssocStatus = document.getElementById("pg-assoc-status");
+
+    var CF_PATTERN = "^[A-Za-z]{6}\\d{2}[A-EHLMPRSTabcdehlmprst]\\d{2}([A-Za-z]\\d{3}|\\d{4})[A-Za-z]$";
+    var personeInAttesa = null;
+    var associazioneObbligatoria = true;
+
+    function quotaTessera() {
+      var quota = impostazioni && impostazioni.quotaIscrizioneSoci;
+      return quota != null ? Number(quota) : null;
+    }
+
+    function etaInAnni(isoDate) {
+      var nascita = new Date(isoDate + "T00:00:00");
+      var oggi = new Date();
+      var eta = oggi.getFullYear() - nascita.getFullYear();
+      var m = oggi.getMonth() - nascita.getMonth();
+      if (m < 0 || (m === 0 && oggi.getDate() < nascita.getDate())) {
+        eta--;
+      }
+      return eta;
+    }
+
+    function bloccoAssociazioneHtml(persona, indice, tipo, obbligatoria) {
+      var html = "<h4 style=\"margin:0 0 10px; font-size:1.05rem; color:var(--color-terracotta-dark);\">" +
+        escapeHtml(persona.nome + " " + persona.cognome) +
+        " <span style=\"font-weight:400; font-size:0.85rem; color:var(--color-ink-soft);\">(" +
+        escapeHtml(persona.email) + ")</span></h4>";
+      if (!obbligatoria) {
+        html += "<div class=\"form-row form-row--checkbox\"><label><input type=\"checkbox\" class=\"pg-assoc-scelta\"> <span>" +
+          (tipo === "rinnovo" ? "Rinnova anche la tessera di questa persona" : "Associa anche questa persona a TraMe") +
+          "</span></label></div>";
+      }
+      html += "<div class=\"pg-assoc-campi\"" + (obbligatoria ? "" : " hidden") + ">";
+      if (tipo === "rinnovo") {
+        html += "<p class=\"form-note\">La tessera di questa persona è scaduta: viene rinnovata per altri 12 mesi.</p>";
+      } else {
+        var fotoName = "pg-assoc-foto-" + indice;
+        html +=
+          "<div class=\"form-row\"><label>Data di nascita</label><input type=\"date\" class=\"pg-assoc-nascita\" required></div>" +
+          "<div class=\"form-row\"><label>Codice fiscale</label><input type=\"text\" class=\"pg-assoc-cf\" maxlength=\"16\" required pattern=\"" + CF_PATTERN + "\" title=\"Formato codice fiscale non valido\"></div>" +
+          "<div class=\"form-row\"><label>Telefono (facoltativo)</label><input type=\"tel\" class=\"pg-assoc-telefono\" maxlength=\"20\"></div>" +
+          "<div class=\"form-row\"><label>Indirizzo (facoltativo)</label><input type=\"text\" class=\"pg-assoc-indirizzo\" maxlength=\"255\"></div>" +
+          "<div class=\"form-row\"><label>Città (facoltativo)</label><input type=\"text\" class=\"pg-assoc-citta\" maxlength=\"100\"></div>" +
+          "<div class=\"form-row\"><label>CAP (facoltativo)</label><input type=\"text\" class=\"pg-assoc-cap\" maxlength=\"10\"></div>" +
+          "<div class=\"form-row\"><label>Autorizzi Progetto TraMe, i suoi amministratori e i talenti che conducono gli eventi a pubblicare, sui propri canali social e nel materiale promozionale, foto e video in cui compari? " +
+          "<a href=\"consenso-foto.html\" target=\"_blank\" rel=\"noopener\" class=\"link-documentazione\">(documentazione)</a></label>" +
+          "<div class=\"form-row--radio-pair\">" +
+          "<label><input type=\"radio\" name=\"" + fotoName + "\" class=\"pg-assoc-foto\" value=\"si\" required> Sì</label>" +
+          "<label><input type=\"radio\" name=\"" + fotoName + "\" class=\"pg-assoc-foto\" value=\"no\" required> No</label>" +
+          "</div></div>";
+      }
+      html += "</div>";
+      return html;
+    }
+
+    function aggiornaTotaleAssociazione() {
+      var tessere = associazioneObbligatoria
+        ? pgAssocBlocchi.querySelectorAll(".admin-panel").length
+        : pgAssocBlocchi.querySelectorAll(".pg-assoc-scelta:checked").length;
+      var totale = calcolaTotale() + (quotaTessera() || 0) * tessere;
+      pgAssocTotale.textContent = "Totale (evento" + (tessere ? " + " + tessere + (tessere === 1 ? " tessera" : " tessere") : "") +
+        ", senza eventuale sconto): " + formattaPrezzo(totale);
+    }
+
+    function mostraStepAssociazione(persone, daAssociare) {
+      associazioneObbligatoria = sottoEventiScelti().some(function (ev) { return ev.apertoNonSoci !== true; });
+      var quota = quotaTessera();
+      var testoQuota = quota != null ? " (" + formattaPrezzo(quota) + ", valida 12 mesi)" : "";
+      pgAssocIntro.textContent = associazioneObbligatoria
+        ? "Per partecipare a questo evento serve essere soci di TraMe. Completa i dati qui sotto: la tessera" + testoQuota + " viene aggiunta allo stesso pagamento dell'evento."
+        : "Questo evento è aperto anche a chi non è socio. Se vuoi puoi associarti ora: la tessera" + testoQuota + " viene aggiunta allo stesso pagamento dell'evento.";
+      var vantaggi = impostazioni && impostazioni.testoVantaggiIscrizione;
+      pgAssocVantaggi.textContent = vantaggi || "";
+      pgAssocVantaggi.hidden = !vantaggi;
+
+      pgAssocBlocchi.innerHTML = "";
+      daAssociare.forEach(function (voce) {
+        var blocco = document.createElement("div");
+        blocco.className = "admin-panel";
+        blocco.style.cssText = "margin:16px 0; padding:16px; border:1px solid var(--color-line); " +
+          "border-radius:10px; background:var(--color-cream-alt);";
+        blocco.setAttribute("data-indice", voce.indice);
+        blocco.setAttribute("data-tipo", voce.tipo);
+        blocco.innerHTML = bloccoAssociazioneHtml(persone[voce.indice], voce.indice, voce.tipo, associazioneObbligatoria);
+        var scelta = blocco.querySelector(".pg-assoc-scelta");
+        if (scelta) {
+          scelta.addEventListener("change", function () {
+            blocco.querySelector(".pg-assoc-campi").hidden = !scelta.checked;
+            aggiornaTotaleAssociazione();
+          });
+        }
+        pgAssocBlocchi.appendChild(blocco);
+      });
+
+      personeInAttesa = persone;
+      pgAssocStatus.hidden = true;
+      aggiornaTotaleAssociazione();
+      pgStepDati.hidden = true;
+      pgStepAssoc.hidden = false;
+      pgStepAssoc.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    document.getElementById("pg-assoc-indietro").addEventListener("click", function () {
+      pgStepAssoc.hidden = true;
+      pgStepDati.hidden = false;
+      personeInAttesa = null;
+    });
+
+    pgAssocPaga.addEventListener("click", function () {
+      pgAssocStatus.hidden = true;
+      var persone = personeInAttesa.map(function (p) {
+        var copia = {};
+        Object.keys(p).forEach(function (k) { copia[k] = p[k]; });
+        return copia;
+      });
+      var blocchi = pgAssocBlocchi.querySelectorAll(".admin-panel");
+      for (var i = 0; i < blocchi.length; i++) {
+        var blocco = blocchi[i];
+        var scelta = blocco.querySelector(".pg-assoc-scelta");
+        if (!associazioneObbligatoria && !scelta.checked) {
+          continue;
+        }
+        var indice = parseInt(blocco.getAttribute("data-indice"), 10);
+        if (blocco.getAttribute("data-tipo") === "rinnovo") {
+          persone[indice].tessera = { tipo: "rinnovo" };
+          continue;
+        }
+        var campi = blocco.querySelectorAll(".pg-assoc-campi input");
+        for (var c = 0; c < campi.length; c++) {
+          if (!campi[c].reportValidity()) {
+            return;
+          }
+        }
+        var dataNascita = blocco.querySelector(".pg-assoc-nascita").value;
+        if (etaInAnni(dataNascita) < 18) {
+          pgAssocStatus.textContent = persone[indice].nome + " risulta minorenne: per i minorenni l'iscrizione all'associazione richiede il consenso di un genitore. Scrivici a info@progettotrame.org e ti aiutiamo noi.";
+          pgAssocStatus.hidden = false;
+          return;
+        }
+        var valoreOpzionale = function (cls) {
+          var v = blocco.querySelector(cls).value.trim();
+          return v || null;
+        };
+        persone[indice].tessera = {
+          tipo: "nuova",
+          dataNascita: dataNascita,
+          codiceFiscale: blocco.querySelector(".pg-assoc-cf").value.trim().toUpperCase(),
+          telefono: valoreOpzionale(".pg-assoc-telefono"),
+          indirizzo: valoreOpzionale(".pg-assoc-indirizzo"),
+          citta: valoreOpzionale(".pg-assoc-citta"),
+          cap: valoreOpzionale(".pg-assoc-cap"),
+          consensoFoto: blocco.querySelector(".pg-assoc-foto:checked").value === "si"
+        };
+      }
+      inviaCheckout(persone, pgAssocPaga, pgAssocStatus);
+    });
+
+    pgBtnPaga.addEventListener("click", function () {
+      pgStatus.hidden = true;
+      var persone = leggiPersoneDaBlocchi(true);
+      if (!persone) {
+        return;
+      }
+      pgBtnPaga.disabled = true;
+      pgBtnPaga.textContent = "Verifica in corso…";
+      var richieste = persone.map(function (p) {
+        return window.trameFetch("/api/soci/verifica?email=" + encodeURIComponent(p.email));
+      });
+      if (quotaTessera() == null) {
+        richieste.push(window.trameFetch("/api/impostazioni")
+          .then(function (valori) { impostazioni = valori; })
+          .catch(function () { /* il passaggio funziona anche senza, solo senza importo */ }));
+      }
+      Promise.all(richieste)
+        .then(function (risultati) {
+          pgBtnPaga.disabled = false;
+          pgBtnPaga.textContent = "Vai al pagamento";
+          var daAssociare = [];
+          persone.forEach(function (p, i) {
+            var v = risultati[i];
+            if (!v.trovato) {
+              daAssociare.push({ indice: i, tipo: "nuova" });
+            } else if (v.richiedeRinnovoObbligatorio) {
+              daAssociare.push({ indice: i, tipo: "rinnovo" });
+            }
+          });
+          if (!daAssociare.length) {
+            inviaCheckout(persone, pgBtnPaga, pgStatus);
+            return;
+          }
+          mostraStepAssociazione(persone, daAssociare);
         })
         .catch(function (err) {
           pgBtnPaga.disabled = false;
