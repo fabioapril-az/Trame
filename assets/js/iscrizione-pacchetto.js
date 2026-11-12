@@ -186,7 +186,7 @@
           "<div class=\"form-row form-row--checkbox\"><label><input type=\"checkbox\" class=\"pg-persona-newsletter\"> " +
           "Vuole ricevere anche la nostra newsletter, con gli altri eventi e novità di TraMe?</label></div>" +
           "<div class=\"form-row form-row--checkbox\"><label><input type=\"checkbox\" class=\"pg-persona-consenso\" required> " +
-          "Ho letto e accetto <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\">l'informativa privacy</a> per questa persona.</label></div>";
+          "<span>Ho letto e accetto <a href=\"privacy.html\" target=\"_blank\" rel=\"noopener\" class=\"link-documentazione\">l'informativa privacy</a> per questa persona.</span></label></div>";
         if (precedenti[i]) {
           blocco.querySelector(".pg-persona-nome").value = precedenti[i].nome;
           blocco.querySelector(".pg-persona-cognome").value = precedenti[i].cognome;
