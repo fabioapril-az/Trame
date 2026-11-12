@@ -18,6 +18,12 @@
     combinazione_non_valida: "Scegli una sola data o tutte le date collegate: una via di mezzo non è ammessa.",
     sconto_non_configurato: "\"Tutte le date\" non è ancora disponibile per questo evento: riprova più tardi o scegli una sola data.",
     pacchetto_non_aperto: "Le iscrizioni a questo evento non sono attualmente aperte.",
+    evento_riservato_soci: "Questo evento è riservato ai soci: completa anche l'iscrizione all'associazione per procedere.",
+    email_gia_socia_attiva: "Questa email risulta già di un socio attivo: torna indietro e riprova, la tessera non serve.",
+    rinnovo_non_applicabile: "La tessera di questa persona non risulta da rinnovare: torna indietro e riprova.",
+    tessera_richiede_maggiorenne: "L'iscrizione online all'associazione è riservata ai maggiorenni: per i minorenni scrivici a info@progettotrame.org.",
+    consenso_foto_richiesto: "Scegli Sì o No per il consenso a foto e video di ogni persona da associare.",
+    dati_tessera_incompleti: "Completa data di nascita e codice fiscale di ogni persona da associare.",
     validation_error: "Controlla i dati inseriti.",
     internal_error: "Si è verificato un errore imprevisto. Riprova più tardi."
   };
