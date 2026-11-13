@@ -1816,3 +1816,180 @@ p {
   display: block;
   margin-bottom: 12px;
 }
+
+/* ---------- TraMe Analytics (admin-analytics.html) ---------- */
+.an-filtri {
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.an-filtro {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.an-avviso {
+  padding: 12px 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 10px;
+  background: var(--color-cream-alt);
+}
+
+.an-pannello {
+  margin-top: 20px;
+}
+
+.an-kpi {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.an-kpi__tile {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: var(--color-white);
+}
+
+.an-kpi__etichetta {
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.an-kpi__valore {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.1;
+}
+
+.an-kpi__nota {
+  font-size: 0.78rem;
+  color: var(--color-ink-soft);
+}
+
+/* Funnel: barre orizzontali di un solo colore, max 24px, estremità
+   arrotondata, base squadrata. */
+.an-funnel__riga {
+  display: grid;
+  grid-template-columns: 170px 1fr 190px;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 0;
+}
+
+.an-funnel__nome {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.an-funnel__barra {
+  height: 18px;
+  background: var(--color-cream-alt);
+  border-radius: 0 4px 4px 0;
+  overflow: hidden;
+}
+
+.an-funnel__barra span {
+  display: block;
+  height: 100%;
+  background: #a9603a;
+  border-radius: 0 4px 4px 0;
+}
+
+.an-funnel__valore {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.an-funnel__rapporto {
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+}
+
+.an-intestazione {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.an-intestazione h3 {
+  margin: 0;
+}
+
+.an-intestazione__azioni {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.an-grafico {
+  position: relative;
+  margin-top: 14px;
+}
+
+.an-grafico__svg {
+  display: block;
+  max-width: 100%;
+}
+
+.an-grafico__griglia {
+  stroke: var(--color-line);
+  stroke-width: 1;
+}
+
+.an-grafico__asse {
+  font-size: 11px;
+  fill: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.an-grafico__mirino {
+  stroke: var(--color-ink-soft);
+  stroke-width: 1;
+}
+
+.an-grafico__tooltip {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  background: var(--color-white);
+  box-shadow: 0 4px 14px rgba(46, 42, 38, 0.12);
+  font-size: 0.85rem;
+  color: var(--color-ink);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .an-kpi {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .an-funnel__riga {
+    grid-template-columns: 1fr auto;
+  }
+
+  .an-funnel__barra {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}

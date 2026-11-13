@@ -22,12 +22,20 @@
     });
   }
 
+  // PUT /api/impostazioni sovrascrive TUTTI i campi: qui si tengono quelli
+  // gestiti altrove (quota, vantaggi e sconto socio in admin-soci.html) e
+  // si rimandano invariati. Prima venivano mandati solo i link social, e
+  // salvare questa pagina azzerava gli altri.
+  var impostazioniCorrenti = null;
+
   function loadSettings() {
     window.trameFetch("/api/impostazioni")
       .then(function (settings) {
+        impostazioniCorrenti = settings;
         document.getElementById("settings-instagram").value = (settings && settings.instagramUrl) || "";
         document.getElementById("settings-facebook").value = (settings && settings.facebookUrl) || "";
         document.getElementById("settings-gallery").value = (settings && settings.galleryUrl) || "";
+        document.getElementById("settings-analytics").checked = Boolean(settings && settings.analyticsAttivo);
       })
       .catch(function () {
         // Campi vuoti: si può comunque compilare e salvare da zero.
@@ -37,18 +45,28 @@
   settingsForm.addEventListener("submit", function (e) {
     e.preventDefault();
     settingsStatus.hidden = true;
-    var payload = {
+    if (!impostazioniCorrenti) {
+      // Senza i valori attuali si rischierebbe di azzerare quota e sconto.
+      settingsStatus.textContent = "Impostazioni non ancora caricate: ricarica la pagina e riprova.";
+      settingsStatus.hidden = false;
+      return;
+    }
+    var payload = Object.assign({}, impostazioniCorrenti, {
       instagramUrl: document.getElementById("settings-instagram").value.trim() || null,
       facebookUrl: document.getElementById("settings-facebook").value.trim() || null,
-      galleryUrl: document.getElementById("settings-gallery").value.trim() || null
-    };
+      galleryUrl: document.getElementById("settings-gallery").value.trim() || null,
+      analyticsAttivo: document.getElementById("settings-analytics").checked
+    });
 
     apiFetchAuth("/api/impostazioni", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     })
-      .then(function () {
+      .then(function (aggiornate) {
+        if (aggiornate) {
+          impostazioniCorrenti = aggiornate;
+        }
         settingsStatus.textContent = "Impostazioni salvate.";
         settingsStatus.hidden = false;
       })

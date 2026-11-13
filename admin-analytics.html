@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics — Progetto TraMe</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" href="assets/img/logo.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500&family=Caveat:wght@500;600;700&family=Work+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container admin-header">
+      <a href="index.html" class="logo">
+        <img src="assets/img/logo-icon.png" alt="" class="logo__icon logo__icon--header">
+        <span class="logo__text">
+          <span class="logo__word">TraMe</span>
+          <span class="logo__tagline">analytics</span>
+        </span>
+      </a>
+      <div class="admin-header__user">
+        <span id="auth-user-label">Non collegato</span>
+        <button type="button" class="btn btn--primary btn--small" id="btn-login">Accedi</button>
+        <button type="button" class="btn btn--outline btn--small" id="btn-logout" hidden>Esci</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-hero">
+      <div class="container">
+        <span class="page-hero__eyebrow">Area riservata</span>
+        <h1>Analytics</h1>
+        <p class="page-hero__subtitle">Visite agli eventi, clic su Prenota, avvii di pagamento e prenotazioni confermate,
+          per evento e per provenienza. Stessi accessi della pagina Pagamenti.</p>
+        <p class="page-hero__subtitle">
+          <a href="admin.html">vai a Impostazioni ed eventi →</a> ·
+          <a href="admin-soci.html">vai a Libro Soci →</a> ·
+          <a href="admin-pagamenti.html">vai a Pagamenti →</a>
+        </p>
+      </div>
+    </section>
+
+    <div class="container">
+      <p class="form-note" id="auth-gate-note">Accedi con il tuo account Microsoft per continuare.</p>
+    </div>
+
+    <div id="area-riservata" hidden>
+      <section class="section" style="padding-top:30px;">
+        <div class="container">
+
+          <!-- Filtri: una riga sopra tutti i grafici, valgono per l'intera pagina. -->
+          <div class="admin-toolbar an-filtri">
+            <label class="an-filtro">Periodo
+              <select id="an-periodo">
+                <option value="7">Ultimi 7 giorni</option>
+                <option value="30" selected>Ultimi 30 giorni</option>
+                <option value="90">Ultimi 90 giorni</option>
+                <option value="365">Ultimi 12 mesi</option>
+                <option value="personalizzato">Personalizzato</option>
+              </select>
+            </label>
+            <label class="an-filtro" id="an-campo-da" hidden>Dal <input type="date" id="an-da"></label>
+            <label class="an-filtro" id="an-campo-a" hidden>Al <input type="date" id="an-a"></label>
+            <label class="an-filtro">Evento
+              <select id="an-risorsa">
+                <option value="">Tutti gli eventi e pacchetti</option>
+              </select>
+            </label>
+            <label class="an-filtro">Dati
+              <select id="an-ambiente">
+                <option value="prod">Reali</option>
+                <option value="anteprima">Prove in anteprima</option>
+              </select>
+            </label>
+            <button type="button" class="btn btn--primary btn--small" id="an-aggiorna">Aggiorna</button>
+          </div>
+
+          <p class="form-note an-avviso" id="an-spento" role="status" hidden>Analytics è spento: in questo momento il sito non
+            registra visite, clic e provenienza. Si accende da <a href="admin.html">Impostazioni</a>. Acquisti e partecipanti
+            vengono comunque dal gestionale.</p>
+          <p class="form-note" id="an-status" role="status" hidden></p>
+
+          <div id="an-contenuto" hidden>
+            <div class="an-kpi" id="an-kpi"></div>
+
+            <div class="admin-panel an-pannello">
+              <h3>Dalla visita alla prenotazione</h3>
+              <p class="form-note">Rapporti tra azioni registrate, non tra persone: una persona può visitare più volte da
+                schede diverse, o prenotare dalla scheda senza aprire il dettaglio.</p>
+              <div class="an-funnel" id="an-funnel"></div>
+            </div>
+
+            <div class="admin-panel an-pannello">
+              <div class="an-intestazione">
+                <h3 id="an-andamento-titolo">Andamento giornaliero</h3>
+                <div class="an-intestazione__azioni">
+                  <label class="an-filtro">Mostra
+                    <select id="an-metrica">
+                      <option value="visite">Visite</option>
+                      <option value="clic">Clic su Prenota</option>
+                      <option value="avvii">Avvii di pagamento</option>
+                      <option value="acquisti">Acquisti</option>
+                      <option value="partecipanti">Partecipanti</option>
+                    </select>
+                  </label>
+                  <button type="button" class="btn btn--outline btn--small" id="an-tabella-toggle" aria-expanded="false">Vedi tabella</button>
+                </div>
+              </div>
+              <div class="an-grafico" id="an-grafico"></div>
+              <div id="an-tabella-giorni" hidden style="overflow-x:auto;"></div>
+            </div>
+
+            <div class="admin-panel an-pannello">
+              <h3>Provenienza</h3>
+              <div style="overflow-x:auto;" id="an-sorgenti"></div>
+              <p class="form-note">"Diretto o non identificato" comprende chi scrive l'indirizzo e chi arriva da app che non
+                dicono la provenienza (es. Instagram e WhatsApp). "Non registrata" sono le prenotazioni precedenti agli Analytics.
+                Le inserzioni Facebook e Instagram si riconoscono solo se il link della campagna ha i parametri UTM.</p>
+            </div>
+
+            <div class="admin-panel an-pannello" id="an-pannello-campagne" hidden>
+              <h3>Campagne (UTM)</h3>
+              <div style="overflow-x:auto;" id="an-campagne"></div>
+            </div>
+
+            <div class="admin-panel an-pannello" id="an-pannello-risorse" hidden>
+              <h3>Per evento</h3>
+              <div class="form-row form-row--checkbox">
+                <label><input type="checkbox" id="an-mostra-annullati"> <span>Mostra anche eventi annullati e bozze</span></label>
+              </div>
+              <div style="overflow-x:auto;" id="an-risorse"></div>
+            </div>
+
+            <p class="form-note" id="an-altri-percorsi" hidden></p>
+            <p class="form-note">Sono escluse le partecipazioni pagate in contanti all'evento senza prenotazione dal sito.
+              Giorni in ora italiana. Gli importi sono nella pagina <a href="admin-pagamenti.html">Pagamenti</a>.</p>
+          </div>
+
+          <div class="admin-panel an-pannello">
+            <h3>Questo dispositivo</h3>
+            <p class="form-note" id="an-esclusione-stato"></p>
+            <button type="button" class="btn btn--outline btn--small" id="an-esclusione-btn"></button>
+            <p class="form-note">Le visite e i clic fatti da questo browser non vengono contati: utile per non falsare i numeri
+              mentre controlli il sito. I pagamenti veri restano sempre conteggiati. L'impostazione resta salvata in questo browser
+              finché non la togli.</p>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer__bottom">
+        <span>© <span id="year">2026</span> Progetto TraMe — Associazione culturale</span>
+        <span>TraMe, insieme ♥</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@5.19.0/lib/msal-browser.min.js"></script>
+  <script src="assets/js/trame-config.js"></script>
+  <script src="assets/js/trame-analytics.js"></script>
+  <script src="assets/js/trame-api.js"></script>
+  <script src="assets/js/msal-auth.js"></script>
+  <script src="assets/js/admin-analytics.js"></script>
+</body>
+</html>

@@ -41,7 +41,8 @@
           <a href="admin-soci.html">vai a Gestione soci →</a> (richiede un accesso separato, riservato a
           Segretario/Presidente/Tesoriere/Admin).</p>
         <p class="page-hero__subtitle">Per vedere tutti i pagamenti (eventi + tessere) in un unico elenco filtrabile:
-          <a href="admin-pagamenti.html">vai a Pagamenti →</a></p>
+          <a href="admin-pagamenti.html">vai a Pagamenti →</a> ·
+          <a href="admin-analytics.html">vai a Analytics →</a></p>
         <p class="form-note" id="admin-auth-gate-note">Accedi con il tuo account Microsoft (ruolo Presidente/Admin) per gestire impostazioni ed eventi.</p>
       </div>
     </section>
@@ -84,6 +85,11 @@
             <label for="settings-gallery">Link galleria fotografica (facoltativo)</label>
             <input type="url" id="settings-gallery" placeholder="https://...">
             <p class="form-note">Lascialo vuoto finché la galleria non esiste: il link resterà nascosto sul sito.</p>
+          </div>
+          <div class="form-row form-row--checkbox">
+            <label><input type="checkbox" id="settings-analytics"> <span>Analytics attivo: registra visite, clic su
+              Prenota e provenienza delle prenotazioni (statistiche interne e aggregate, vedi
+              <a href="admin-analytics.html">Analytics</a>). Spegnendolo, il sito smette di registrarle entro un minuto.</span></label>
           </div>
           <button type="submit" class="btn btn--primary">Salva impostazioni</button>
           <p class="form-note" id="settings-form-status" role="status" hidden></p>
