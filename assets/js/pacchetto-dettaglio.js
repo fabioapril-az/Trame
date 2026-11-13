@@ -285,6 +285,16 @@
         } else {
           prenotaEl.href = "iscrizione-pacchetto.html?id=" + pacchetto.id;
         }
+
+        // Statistiche: visita al dettaglio e clic sul vero "Prenota".
+        if (window.TrameAnalytics) {
+          window.TrameAnalytics.visita("pacchetto", pacchetto.id);
+          prenotaEl.addEventListener("click", function () {
+            if (/^iscrizione-pacchetto\.html/.test(prenotaEl.getAttribute("href") || "")) {
+              window.TrameAnalytics.clicPrenota("pacchetto", pacchetto.id, "dettaglio");
+            }
+          });
+        }
       })
       .catch(function (err) {
         mostraErrore(err && err.message);

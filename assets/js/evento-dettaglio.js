@@ -314,6 +314,17 @@
         } else {
           prenotaEl.href = "iscrizione-evento.html?id=" + event.id;
         }
+
+        // Statistiche: visita al dettaglio e clic sul vero "Prenota" (non su
+        // "Informami" né sui bottoni disattivati).
+        if (window.TrameAnalytics) {
+          window.TrameAnalytics.visita("evento", event.id);
+          prenotaEl.addEventListener("click", function () {
+            if (/^iscrizione-evento\.html/.test(prenotaEl.getAttribute("href") || "")) {
+              window.TrameAnalytics.clicPrenota("evento", event.id, "dettaglio");
+            }
+          });
+        }
       })
       .catch(function (err) {
         mostraErrore(err && err.message);

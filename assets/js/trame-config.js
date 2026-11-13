@@ -7,4 +7,8 @@ window.TRAME_CONFIG = {
   msalClientId: "4cae2c16-f533-403f-98db-8f677e00a652",
   msalAuthority: "https://login.microsoftonline.com/78002a77-30b5-49ba-951b-cc82340aa805",
   apiScope: "api://4cae2c16-f533-403f-98db-8f677e00a652/user_impersonation",
+  // Interruttore di riserva delle statistiche (TraMe Analytics): false = il
+  // sito smette di inviare visite, clic e provenienza. Quello principale è
+  // "Analytics attivo" in admin (Impostazioni), che agisce sul backend.
+  analytics: { attivo: true },
 };

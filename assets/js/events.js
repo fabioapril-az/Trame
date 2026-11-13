@@ -648,6 +648,22 @@
     var categoriaFiltro = leggiCategoriaFiltro();
     aggiornaIntestazionePerCategoria(categoriaFiltro);
 
+    // Statistiche: clic su "Prenota" dalla scheda (le schede vengono
+    // ricreate a ogni filtro, quindi un solo ascoltatore sul documento).
+    // Solo i veri link di prenotazione, non "Informami" né i bottoni
+    // disattivati.
+    document.addEventListener("click", function (e) {
+      var link = e.target.closest && e.target.closest(".event-card a[href]");
+      if (!link || !window.TrameAnalytics) {
+        return;
+      }
+      var href = link.getAttribute("href");
+      var match = /^iscrizione-(evento|pacchetto)\.html\?id=(\d+)/.exec(href);
+      if (match) {
+        window.TrameAnalytics.clicPrenota(match[1], match[2], "scheda");
+      }
+    });
+
     // Il messaggio "coming soon" resta visibile di default nell'HTML solo
     // come fallback per JS disabilitato — con JS attivo va nascosto SUBITO,
     // prima ancora che la chiamata all'API risponda: altrimenti per la

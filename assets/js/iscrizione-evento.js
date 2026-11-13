@@ -897,6 +897,11 @@
         personeAperitivo: pgCampoAperitivo.hidden ? 0 : parseInt(pgAperitivo.value, 10),
         allergieNote: pgCampoAllergie.hidden ? null : pgAllergie.value.trim()
       };
+      // Statistiche: provenienza dell'acquisto, facoltativa (il backend la
+      // ignora se manca o non è valida).
+      if (window.TrameAnalytics) {
+        Object.assign(payload, window.TrameAnalytics.datiCheckout());
+      }
       btn.disabled = true;
       btn.textContent = pagamentoOnlineAttivo ? "Reindirizzamento a Stripe…" : "Invio in corso…";
       window.trameFetch("/api/eventi/" + encodeURIComponent(eventoId) + "/checkout-session", {

@@ -305,6 +305,11 @@
         dateScelte: dateScelte,
         personeAperitivo: leggiPersoneAperitivo()
       };
+      // Statistiche: provenienza dell'acquisto, facoltativa (il backend la
+      // ignora se manca o non è valida).
+      if (window.TrameAnalytics) {
+        Object.assign(payload, window.TrameAnalytics.datiCheckout());
+      }
       btn.disabled = true;
       btn.textContent = "Reindirizzamento a Stripe…";
       window.trameFetch("/api/pacchetti-eventi/" + encodeURIComponent(pacchettoId) + "/checkout-session", {
