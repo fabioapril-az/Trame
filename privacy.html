@@ -17,7 +17,11 @@
     (oggi "1.0", la stessa registrata con i consensi: CONSENSO_VERSIONE
     nei moduli) e il registro dei trattamenti;
   - l'impostazione "escludi questo dispositivo" (localStorage) è usata solo
-    dallo staff, che la sceglie esplicitamente: non riguarda i visitatori.
+    dallo staff, che la sceglie esplicitamente: non riguarda i visitatori;
+  - servizi esterni già caricati dal sito, estranei agli Analytics: i
+    caratteri da Google Fonts (tutte le pagine) e librerie da jsDelivr
+    (alcune pagine) ricevono l'indirizzo IP del visitatore. Valutare se
+    citarli nell'informativa o ospitare i caratteri sul sito stesso.
 -->
 <!DOCTYPE html>
 <html lang="it">
@@ -75,20 +79,39 @@
           qualsiasi momento (vedi sotto).</p>
 
         <h3>Statistiche di visita</h3>
-        <p>Per capire quali eventi interessano e come le persone arrivano al nostro sito, contiamo in forma aggregata
-          le visite alle pagine degli eventi, i clic su "Prenota", gli avvii di pagamento e le prenotazioni confermate,
-          insieme alla provenienza della visita: ad esempio una nostra campagna su Instagram o Facebook, Google, un altro
-          sito, oppure un accesso diretto.</p>
-        <p>Lo facciamo con uno strumento nostro, senza servizi esterni di statistica e senza cookie. Non conserviamo il
-          tuo indirizzo IP né il tipo di dispositivo o di browser, e non creiamo profili: i numeri sono solo totali
-          giornalieri. Per non contare due volte la stessa visita, il browser ricorda la provenienza e le pagine già
-          contate solo finché resta aperta la scheda del sito (memoria di sessione), e le cancella alla sua chiusura.</p>
-        <p>Se prenoti un evento, la provenienza della visita (ad esempio "campagna Instagram") viene salvata insieme alla
-          prenotazione, per sapere quali canali portano partecipanti. Questo dato è trattato insieme agli altri dati della
-          prenotazione, sulla base del nostro legittimo interesse a valutare l'efficacia delle nostre comunicazioni; non è
-          usato per altri scopi né comunicato a terzi.</p>
-        <p>Non usiamo strumenti di pubblicità o tracciamento di terze parti, come i pixel dei social network. Se in futuro
-          volessimo farlo, te lo chiederemo prima.</p>
+        <p>Per capire quali eventi suscitano maggiore interesse e come le persone arrivano sul nostro sito, TraMe
+          raccoglie statistiche sulle visualizzazioni delle pagine degli eventi, sui clic sul pulsante "Prenota", sugli
+          avvii di pagamento e sulle prenotazioni confermate.</p>
+        <p>Rileviamo inoltre la provenienza delle visite, ad esempio da campagne Facebook o Instagram, motori di ricerca,
+          altri siti web oppure accessi diretti o non identificati.</p>
+
+        <p><strong>Come raccogliamo i dati</strong></p>
+        <p>Utilizziamo un sistema di statistiche sviluppato e gestito direttamente da TraMe, senza piattaforme esterne di
+          Analytics.</p>
+        <p>Il sistema non utilizza cookie per le statistiche, non crea profili dei visitatori e non memorizza indirizzi IP,
+          informazioni sul dispositivo o dati di navigazione individuali nel database statistico. I risultati sono raccolti
+          sotto forma di conteggi giornalieri aggregati.</p>
+        <p>Per evitare conteggi ripetuti e mantenere la provenienza della visita durante la navigazione, utilizziamo la
+          memoria di sessione del browser (<code>sessionStorage</code>). Le informazioni vengono conservate per la durata
+          della sessione della scheda e normalmente eliminate alla sua chiusura, salvo eventuali meccanismi di ripristino
+          del browser.</p>
+
+        <p><strong>Statistiche sulle prenotazioni</strong></p>
+        <p>Quando avvii una prenotazione, anche se il pagamento non viene poi completato, possiamo conservare la
+          provenienza della visita, ad esempio "campagna Instagram", insieme ai dati della richiesta di prenotazione.</p>
+        <p>Questa informazione ci permette di valutare quali canali di comunicazione contribuiscono maggiormente alla
+          partecipazione alle nostre iniziative.</p>
+        <p>La provenienza associata a una prenotazione viene trattata insieme ai dati della prenotazione stessa, senza
+          essere utilizzata per creare profili pubblicitari o ricostruire le abitudini di navigazione.</p>
+        <p>Il trattamento per la valutazione dell'efficacia delle nostre comunicazioni si basa sul legittimo interesse
+          dell'associazione, nel rispetto della normativa applicabile.</p>
+
+        <p><strong>Strumenti pubblicitari di terze parti</strong></p>
+        <p>Attualmente il nostro sistema di statistiche non utilizza pixel pubblicitari o altri strumenti di tracciamento
+          di Meta, Google o di altre piattaforme pubblicitarie.</p>
+        <p>Non trasmettiamo a tali piattaforme i dati delle prenotazioni per finalità di misurazione pubblicitaria.</p>
+        <p>Qualora in futuro decidessimo di introdurre questi strumenti, aggiorneremo l'informativa e richiederemo
+          preventivamente il consenso nei casi previsti dalla normativa.</p>
 
         <h3>I tuoi diritti</h3>
         <p>Puoi chiedere in qualsiasi momento accesso, rettifica, cancellazione o esportazione dei tuoi dati
