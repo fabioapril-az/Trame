@@ -67,7 +67,10 @@
             </select>
             <button type="button" class="btn btn--outline btn--small" id="btn-cerca-soci">Cerca</button>
             <button type="button" class="btn btn--outline btn--small" id="btn-export-csv">Esporta CSV</button>
-            <a href="diventa-socio.html?admin=1" class="btn btn--outline btn--small" target="_blank" rel="noopener">+ Registra nuovo socio</a>
+            <!-- Stessa scheda, non una nuova: il login Microsoft vive nella
+                 memoria della scheda, quindi così il modulo lo ritrova già
+                 fatto invece di chiederlo di nuovo. -->
+            <a href="diventa-socio.html?admin=1" class="btn btn--outline btn--small">+ Registra nuovo socio</a>
           </div>
 
           <div style="overflow-x:auto;">

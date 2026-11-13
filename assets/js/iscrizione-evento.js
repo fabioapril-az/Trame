@@ -383,25 +383,23 @@
         document.getElementById("sc-foto-si").checked = false;
         document.getElementById("sc-foto-no").checked = false;
 
+        // Qui non si rinnova più: questo modulo non ha un pagamento online, e
+        // un rinnovo senza pagamento non è ammesso (regola dell'utente). Chi
+        // ha la tessera scaduta la rinnova pagando, prenotando un evento con
+        // pagamento online o tramite la segreteria.
         if (stato.richiedeRinnovo) {
           rinnovoTitolo.textContent = "La tua tessera è scaduta";
-          rinnovoNota.textContent = "Per iscriverti devi prima rinnovare la tessera (scaduta il " +
-            formattaData(result.dataScadenza) + ").";
+          rinnovoNota.textContent = "La tua tessera è scaduta il " + formattaData(result.dataScadenza) +
+            ": per iscriverti a questo evento va prima rinnovata. Scrivici a info@progettotrame.org e ti aiutiamo a rinnovarla.";
           rinnovoAzioniFacoltative.hidden = true;
+          document.getElementById("rinnovo-campi-pagamento").hidden = true;
           stepRinnovo.hidden = false;
-          stepConferma.hidden = false;
           return;
         }
 
-        if (stato.suggerisceRinnovo) {
-          rinnovoTitolo.textContent = "La tua tessera scade presto";
-          rinnovoNota.textContent = "Scade il " + formattaData(result.dataScadenza) +
-            ": puoi rinnovarla ora insieme all'iscrizione, oppure procedere senza rinnovare.";
-          rinnovoAzioniFacoltative.hidden = false;
-          stepRinnovo.hidden = false;
-          stepConferma.hidden = false;
-          return;
-        }
+        // In scadenza ma ancora valida: ci si iscrive normalmente, senza
+        // proporre un rinnovo qui.
+        stato.suggerisceRinnovo = false;
 
         // Socio già attivo, nessun rinnovo necessario: non c'è altro da
         // compilare, ma serve comunque un click esplicito su "Conferma
@@ -625,15 +623,6 @@
       payload.consensoFoto = document.getElementById("sc-foto-si").checked;
     }
 
-    if (!soloEvento && (stato.richiedeRinnovo || (stato.suggerisceRinnovo && !stato.saltaRinnovo))) {
-      payload.rinnovo = {
-        dataRinnovo: new Date().toISOString().slice(0, 10),
-        importo: parseImporto(document.getElementById("rn-importo").value),
-        metodoPagamento: val("rn-metodo") || null,
-        riferimentoPagamento: null
-      };
-    }
-
     impostaCaricamento(pulsante, true);
     invioInCorso.hidden = false;
 
@@ -683,14 +672,6 @@
 
   function val(id) {
     return document.getElementById(id).value.trim();
-  }
-
-  function parseImporto(value) {
-    if (!value) {
-      return null;
-    }
-    var n = parseFloat(value);
-    return isNaN(n) ? null : n;
   }
 
   function formattaData(isoDate) {

@@ -1,5 +1,8 @@
-// Modulo iscrizione socio (diventa-socio.html) → POST /api/soci sull'API
-// del gestionale soci. Pagina pubblica, nessun login richiesto.
+// Modulo iscrizione socio (diventa-socio.html). Il pubblico si iscrive solo
+// con pagamento online (checkout Stripe). La registrazione diretta
+// (POST /api/soci, senza pagamento online) è riservata alla segreteria:
+// ?admin=1 con login Microsoft — regola dell'utente: nessun socio senza
+// pagamento.
 
 (function () {
   var CONSENSO_VERSIONE = "1.0"; // versione dell'informativa privacy corrente (privacy.html)
@@ -98,11 +101,23 @@
     submitBtn.disabled = true;
     submitBtn.textContent = "Invio in corso…";
 
-    window.trameFetch("/api/soci", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    })
+    // La registrazione diretta di un socio (senza pagamento online) è
+    // riservata alla segreteria: il backend la accetta solo con il token del
+    // login Microsoft, che qui c'è solo in modalità admin.
+    var richiestaHeaders = modalitaAdmin
+      ? window.trameAuth.getToken().then(function (token) {
+          return { "Content-Type": "application/json", Authorization: "Bearer " + token };
+        })
+      : Promise.resolve({ "Content-Type": "application/json" });
+
+    richiestaHeaders
+      .then(function (headers) {
+        return window.trameFetch("/api/soci", {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(payload)
+        });
+      })
       .then(function (result) {
         form.reset();
         minorenneNote.hidden = true;
@@ -126,6 +141,48 @@
   function formattaData(isoDate) {
     var parti = isoDate.split("-");
     return parti[2] + "/" + parti[1] + "/" + parti[0];
+  }
+
+  // Login caricato solo in modalità segreteria: la pagina pubblica non ne ha
+  // bisogno e non deve scaricare la libreria di Microsoft.
+  function caricaScript(src) {
+    return new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = function () { reject(new Error("Impossibile caricare " + src)); };
+      document.head.appendChild(s);
+    });
+  }
+
+  function attivaLoginSegreteria() {
+    var gate = document.getElementById("admin-login-gate");
+    var nota = document.getElementById("admin-login-nota");
+    var btnLogin = document.getElementById("admin-btn-login");
+    gate.hidden = false;
+    btnLogin.disabled = true;
+
+    caricaScript("https://cdn.jsdelivr.net/npm/@azure/msal-browser@5.19.0/lib/msal-browser.min.js")
+      .then(function () { return caricaScript("assets/js/msal-auth.js"); })
+      .then(function () { return window.trameAuth.ready; })
+      .then(function () {
+        if (window.trameAuth.getAccount()) {
+          gate.hidden = true;
+          form.hidden = false;
+          return;
+        }
+        btnLogin.disabled = false;
+        btnLogin.addEventListener("click", function () {
+          btnLogin.disabled = true;
+          window.trameAuth.login().catch(function (err) {
+            btnLogin.disabled = false;
+            nota.textContent = "Accesso non riuscito: " + err.message;
+          });
+        });
+      })
+      .catch(function (err) {
+        nota.textContent = "Il login non è disponibile in questo momento (" + err.message + "). Riprova più tardi.";
+      });
   }
 
   // ================= Iscrizione socio con pagamento online (Stripe) =======
@@ -179,8 +236,10 @@
   } else if (modalitaAdmin) {
     // Segreteria da admin-soci.html: solo il modulo diretto (registra a
     // mano chi ha già pagato offline, adulto o minorenne) — niente Stripe,
-    // vedi sopra.
+    // vedi sopra. Il modulo resta nascosto finché non c'è il login.
     mostraTab("singolo");
+    form.hidden = true;
+    attivaLoginSegreteria();
     document.getElementById("campo-evento-gia-fatto").hidden = false;
     // Facoltative solo qui, entrambe: la segreteria spesso non le conosce al
     // momento della registrazione (es. ha solo il contante e i dati

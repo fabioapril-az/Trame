@@ -118,7 +118,7 @@
       return msalInstance.loginRedirect({
         scopes: [window.TRAME_CONFIG.apiScope],
         redirectUri: window.location.origin + "/auth-blank.html",
-        state: window.location.pathname
+        state: window.location.pathname + window.location.search
       });
     });
   }
@@ -161,7 +161,7 @@
           scopes: [window.TRAME_CONFIG.apiScope],
           account: account,
           redirectUri: window.location.origin + "/auth-blank.html",
-          state: window.location.pathname
+          state: window.location.pathname + window.location.search
         });
       });
   }

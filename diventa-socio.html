@@ -76,6 +76,18 @@
              sparirebbe insieme al contenitore (bug reale, trovato in test). -->
         <p class="form-note" id="pagamento-esito-status" role="status" hidden></p>
 
+        <!-- Solo con ?admin=1: la registrazione manuale di un socio è
+             riservata alla segreteria, quindi chiede il login Microsoft
+             (lo stesso di admin-soci.html) prima di mostrare il modulo. -->
+        <div class="admin-panel" id="admin-login-gate" hidden style="margin-top:20px;">
+          <h3>Registrazione manuale di un socio</h3>
+          <p class="form-note" id="admin-login-nota">Questa funzione è riservata alla segreteria: accedi con il tuo account per continuare.</p>
+          <div class="admin-form__actions">
+            <button type="button" class="btn btn--primary" id="admin-btn-login">Accedi</button>
+            <a href="admin-soci.html" class="btn btn--outline">← Torna a Gestione soci</a>
+          </div>
+        </div>
+
         <form class="contact-form" id="socio-form" style="margin-top:20px;">
           <div class="form-row">
             <label for="nome">Nome</label>

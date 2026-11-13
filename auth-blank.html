@@ -39,8 +39,11 @@
         }
       });
 
+      // Solo percorsi di questo sito: "/..." sì, "//altro-sito" e "/\altro" no
+      // (il browser li tratterebbe come indirizzi esterni).
       function tornaAllaPagina(percorso) {
-        window.location.replace(percorso && percorso.indexOf("/") === 0 ? percorso : "/admin.html");
+        var valido = percorso && percorso.charAt(0) === "/" && percorso.charAt(1) !== "/" && percorso.charAt(1) !== "\\";
+        window.location.replace(valido ? percorso : "/admin.html");
       }
 
       msalInstance.initialize()
