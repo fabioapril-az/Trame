@@ -72,7 +72,9 @@
       loadingEl.hidden = true;
       titoloEl.textContent = evento.titolo;
       stato.apertoNonSoci = Boolean(evento.apertoNonSoci);
-      var dettagli = formattaData(evento.dataEvento) + (evento.luogo ? " · " + evento.luogo : "");
+      // Un evento annunciato può non avere ancora la data.
+      var dettagli = [evento.dataEvento ? formattaData(evento.dataEvento) : null, evento.luogo || null]
+        .filter(Boolean).join(" · ");
       if (evento.quotaEvento) {
         dettagli += " · quota: " + evento.quotaEvento + " €";
       }
