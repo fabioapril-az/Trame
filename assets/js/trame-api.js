@@ -31,6 +31,9 @@
     tessera_richiede_maggiorenne: "L'iscrizione online all'associazione è riservata ai maggiorenni: per i minorenni scrivici a info@progettotrame.org.",
     consenso_foto_richiesto: "Scegli Sì o No per il consenso a foto e video di ogni persona da associare.",
     dati_tessera_incompleti: "Completa data di nascita e codice fiscale di ogni persona da associare.",
+    prezzo_richiesto: "Per aprire le iscrizioni inserisci almeno un prezzo tra Singolo, Gruppo e Aperitivo.",
+    opzioni_non_piu_supportate: "Le modalità di partecipazione non sono più supportate: usa i prezzi Singolo, Gruppo e Aperitivo.",
+    funzione_non_disponibile: "Questa funzione non è più disponibile. Per informazioni scrivici a info@progettotrame.org.",
     validation_error: "Controlla i dati inseriti.",
     internal_error: "Si è verificato un errore imprevisto. Riprova più tardi."
   };

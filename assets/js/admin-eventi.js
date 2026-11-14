@@ -222,9 +222,9 @@
 
   document.getElementById("btn-crea-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("ev-");
-    if (opzioniEPrezziIncompatibili(payload)) {
+    if (mancaPrezzo(payload)) {
       mostraMessaggio(document.getElementById("crea-evento-status"),
-        "Non puoi usare insieme \"Modalità di partecipazione\" e i prezzi Singolo/Gruppo/Aperitivo: scegline uno dei due.", true);
+        "Per aprire le iscrizioni inserisci almeno un prezzo tra Singolo, Gruppo e Aperitivo.", true);
       return;
     }
     apiFetchAuth("/api/eventi", {
@@ -266,7 +266,9 @@
       stato: document.getElementById(prefix + "stato").value,
       apertoNonSoci: document.getElementById(prefix + "aperto-non-soci").checked,
       dettagliAttivi: document.getElementById(prefix + "dettagli-attivi").checked,
-      opzioniPartecipazione: leggiOpzioni(prefix + "opzioni-lista"),
+      // Le vecchie "modalità di partecipazione" non si usano più (tolte con
+      // il modulo di iscrizione senza pagamento, 2026-11-14).
+      opzioniPartecipazione: [],
       prezzoSingolo: prezzoSingolo ? parseFloat(prezzoSingolo) : null,
       prezzoGruppoPersona: prezzoGruppo ? parseFloat(prezzoGruppo) : null,
       prezzoAperitivoPersona: prezzoAperitivo ? parseFloat(prezzoAperitivo) : null,
@@ -275,61 +277,13 @@
     };
   }
 
-  // "Modalità di partecipazione" e i 3 prezzi Singolo/Gruppo/Aperitivo sono
-  // alternativi (l'API .NET rifiuta con 422 se entrambi sono impostati sullo
-  // stesso evento) — controllato qui prima di inviare, per un messaggio
-  // chiaro invece del solo errore grezzo del backend.
-  function opzioniEPrezziIncompatibili(payload) {
-    var haOpzioni = payload.opzioniPartecipazione && payload.opzioniPartecipazione.length > 0;
+  // Ci si iscrive solo pagando con i prezzi Singolo/Gruppo/Aperitivo (il
+  // vecchio modulo senza prezzi è stato tolto il 2026-11-14): un evento
+  // aperto alle iscrizioni deve averne almeno uno. Bozze e annunciati no.
+  function mancaPrezzo(payload) {
     var haPrezzi = payload.prezzoSingolo != null || payload.prezzoGruppoPersona != null || payload.prezzoAperitivoPersona != null;
-    return haOpzioni && haPrezzi;
+    return payload.stato === "aperto" && !haPrezzi;
   }
-
-  // --- Modalità di partecipazione (facoltative, per evento) ---
-  // Prezzo sempre a persona, nessuno sconto di gruppo (deciso con l'utente):
-  // un evento senza nessuna modalità definita si comporta esattamente come
-  // prima (quota unica, iscrizione-evento.html non mostra alcun selettore).
-  function creaRigaOpzione(container, nome, prezzoPersona) {
-    var riga = document.createElement("div");
-    riga.className = "admin-opzione-riga";
-    riga.style.cssText = "display:flex; gap:10px; align-items:center; margin-bottom:8px;";
-    riga.innerHTML =
-      '<input type="text" placeholder="Nome (es. Evento completo)" class="opzione-nome" style="flex:2;">' +
-      '<input type="number" placeholder="Prezzo a persona (€)" min="0" step="0.01" class="opzione-prezzo" style="flex:1;">' +
-      '<button type="button" class="btn btn--outline btn--small">Rimuovi</button>';
-    riga.querySelector(".opzione-nome").value = nome || "";
-    riga.querySelector(".opzione-prezzo").value = prezzoPersona != null ? prezzoPersona : "";
-    riga.querySelector("button").addEventListener("click", function () { riga.remove(); });
-    container.appendChild(riga);
-  }
-
-  function leggiOpzioni(containerId) {
-    var righe = document.querySelectorAll("#" + containerId + " .admin-opzione-riga");
-    var opzioni = [];
-    righe.forEach(function (riga) {
-      var nome = riga.querySelector(".opzione-nome").value.trim();
-      var prezzo = riga.querySelector(".opzione-prezzo").value;
-      // Righe aggiunte ma lasciate incomplete (nome o prezzo mancante)
-      // vengono ignorate invece di essere salvate a metà.
-      if (nome && prezzo !== "") {
-        opzioni.push({ nome: nome, prezzoPersona: parseFloat(prezzo) });
-      }
-    });
-    return opzioni;
-  }
-
-  function impostaOpzioni(containerId, opzioni) {
-    var container = document.getElementById(containerId);
-    container.innerHTML = "";
-    (opzioni || []).forEach(function (o) { creaRigaOpzione(container, o.nome, o.prezzoPersona); });
-  }
-
-  document.getElementById("ev-opzioni-aggiungi").addEventListener("click", function () {
-    creaRigaOpzione(document.getElementById("ev-opzioni-lista"));
-  });
-  document.getElementById("mod-ev-opzioni-aggiungi").addEventListener("click", function () {
-    creaRigaOpzione(document.getElementById("mod-ev-opzioni-lista"));
-  });
 
   var STATO_EVENTO_LABELS = {
     bozza: "Bozza", annunciato: "Annunciato", aperto: "Aperto", chiuso: "Chiuso", annullato: "Annullato"
@@ -414,7 +368,6 @@
     document.getElementById("mod-ev-galleria").value = evento.galleryUrl || "";
     document.getElementById("mod-ev-aperto-non-soci").checked = Boolean(evento.apertoNonSoci);
     document.getElementById("mod-ev-dettagli-attivi").checked = Boolean(evento.dettagliAttivi);
-    impostaOpzioni("mod-ev-opzioni-lista", evento.opzioniPartecipazione);
     document.getElementById("mod-ev-prezzo-singolo").value = evento.prezzoSingolo != null ? evento.prezzoSingolo : "";
     document.getElementById("mod-ev-prezzo-gruppo").value = evento.prezzoGruppoPersona != null ? evento.prezzoGruppoPersona : "";
     document.getElementById("mod-ev-prezzo-aperitivo").value = evento.prezzoAperitivoPersona != null ? evento.prezzoAperitivoPersona : "";
@@ -456,9 +409,9 @@
 
   document.getElementById("btn-salva-evento").addEventListener("click", function () {
     var payload = leggiCampiEvento("mod-ev-");
-    if (opzioniEPrezziIncompatibili(payload)) {
+    if (mancaPrezzo(payload)) {
       mostraMessaggio(document.getElementById("modifica-evento-status"),
-        "Non puoi usare insieme \"Modalità di partecipazione\" e i prezzi Singolo/Gruppo/Aperitivo: scegline uno dei due.", true);
+        "Per aprire le iscrizioni inserisci almeno un prezzo tra Singolo, Gruppo e Aperitivo.", true);
       return;
     }
     apiFetchAuth("/api/eventi/" + stato.eventoCorrenteId, {

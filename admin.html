@@ -150,17 +150,11 @@
               <p class="form-note">Se la Quota evento sopra include già il costo della tessera associativa, indica qui quanto ne rappresenta (es. evento che include l'iscrizione all'associazione). Campo solo informativo qui in admin: non è ancora mostrato sul sito pubblico.</p>
             </div>
             <div class="form-row">
-              <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
+              <label>Prezzi Singolo / Gruppo / Aperitivo (almeno uno obbligatorio per aprire le iscrizioni)</label>
               <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti più di un'opzione (incluso Aperitivo), chi si iscrive sceglie tra quelle disponibili; se ne imposti solo una, si usa direttamente quella. L'aperitivo può essere scelto anche da solo (senza partecipare all'evento), oppure aggiunto a Singolo/Gruppo — mai scontato in nessuno dei due casi.</p>
               <div class="form-row"><label for="ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="ev-prezzo-singolo" min="0" step="0.01"></div>
               <div class="form-row"><label for="ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="ev-prezzo-gruppo" min="0" step="0.01"></div>
               <div class="form-row"><label for="ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="ev-prezzo-aperitivo" min="0" step="0.01"></div>
-            </div>
-            <div class="form-row">
-              <label>Modalità di partecipazione (facoltative)</label>
-              <p class="form-note">Usa questa sezione <strong>solo se i 3 prezzi qui sopra non bastano</strong> (es. più di due modi di partecipare a prezzi diversi). Più opzioni a scelta singola con prezzo a persona, nessuno sconto per chi si iscrive in più persone, nessun pagamento online — è il sistema più vecchio, alternativo ai prezzi Singolo/Gruppo/Aperitivo: non compilare entrambi sullo stesso evento. Se non aggiungi nessuna modalità, l'evento resta a quota unica come sopra.</p>
-              <div id="ev-opzioni-lista"></div>
-              <button type="button" class="btn btn--outline btn--small" id="ev-opzioni-aggiungi">+ Aggiungi modalità</button>
             </div>
             <div class="form-row">
               <label>Condizioni di cancellazione (facoltativo)</label>
@@ -261,17 +255,11 @@
                 <p class="form-note">Se la Quota evento sopra include già il costo della tessera associativa, indica qui quanto ne rappresenta (es. evento che include l'iscrizione all'associazione). Campo solo informativo qui in admin: non è ancora mostrato sul sito pubblico.</p>
               </div>
               <div class="form-row">
-                <label>Prezzi Singolo / Gruppo / Aperitivo (facoltativi, per il pagamento online)</label>
+                <label>Prezzi Singolo / Gruppo / Aperitivo (almeno uno obbligatorio per aprire le iscrizioni)</label>
                 <p class="form-note">Usati dal form pubblico di iscrizione con pagamento Stripe. Lascia vuoto un campo per non offrire quell'opzione. Se imposti più di un'opzione (incluso Aperitivo), chi si iscrive sceglie tra quelle disponibili; se ne imposti solo una, si usa direttamente quella. L'aperitivo può essere scelto anche da solo (senza partecipare all'evento), oppure aggiunto a Singolo/Gruppo — mai scontato in nessuno dei due casi.</p>
                 <div class="form-row"><label for="mod-ev-prezzo-singolo">Prezzo Singolo (€, a persona)</label><input type="number" id="mod-ev-prezzo-singolo" min="0" step="0.01"></div>
                 <div class="form-row"><label for="mod-ev-prezzo-gruppo">Prezzo Gruppo (€, a persona, 2-6 persone)</label><input type="number" id="mod-ev-prezzo-gruppo" min="0" step="0.01"></div>
                 <div class="form-row"><label for="mod-ev-prezzo-aperitivo">Prezzo Aperitivo (€, a persona, 0-6 persone)</label><input type="number" id="mod-ev-prezzo-aperitivo" min="0" step="0.01"></div>
-              </div>
-              <div class="form-row">
-                <label>Modalità di partecipazione (facoltative)</label>
-                <p class="form-note">Usa questa sezione <strong>solo se i 3 prezzi qui sopra non bastano</strong> (es. più di due modi di partecipare a prezzi diversi). Più opzioni a scelta singola con prezzo a persona, nessuno sconto per chi si iscrive in più persone, nessun pagamento online — è il sistema più vecchio, alternativo ai prezzi Singolo/Gruppo/Aperitivo: non compilare entrambi sullo stesso evento. Se non c'è nessuna modalità, l'evento resta a quota unica come sopra.</p>
-                <div id="mod-ev-opzioni-lista"></div>
-                <button type="button" class="btn btn--outline btn--small" id="mod-ev-opzioni-aggiungi">+ Aggiungi modalità</button>
               </div>
               <div class="form-row">
                 <label>Condizioni di cancellazione (facoltativo)</label>
