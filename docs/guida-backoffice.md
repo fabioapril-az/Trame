@@ -15,7 +15,7 @@ Le pagine riservate sono quattro, e si aprono direttamente dal browser:
 | Impostazioni ed eventi | progettotrame.org/admin.html | Eventi, pacchetti, talenti, link social, interruttore delle statistiche |
 | Libro Soci | progettotrame.org/admin-soci.html | Soci, tessere, rinnovi, scadenze, quota e sconto socio |
 | Pagamenti | progettotrame.org/admin-pagamenti.html | Tutti gli incassi in un unico elenco, con export |
-| Analytics | progettotrame.org/admin-analytics.html | Visite agli eventi, clic su Prenota, prenotazioni e provenienza |
+| Analytics | progettotrame.org/admin-analytics.html | Visite alla pagina eventi e agli eventi, clic su Prenota, prenotazioni e provenienza |
 
 Da ciascuna si passa alle altre con i link in alto.
 
@@ -412,8 +412,9 @@ Una pagina che mostra quanto vengono visti gli eventi e quanto portano a prenota
 ### Cosa trovi
 
 - **Filtri** in alto: periodo (ultimi 7/30/90 giorni, 12 mesi o date a scelta), un evento o pacchetto specifico, e **Dati**: *Reali* (quelli veri) o *Prove in anteprima* (solo per i test tecnici).
-- **Cinque numeri**: visite (aperture della pagina di dettaglio), clic su Prenota (dalla scheda e dal dettaglio), avvii di pagamento, acquisti e partecipanti. Acquisti e partecipanti sono **al netto dei rimborsi**.
-- **Dalla visita alla prenotazione**: barre con i passaggi e le percentuali tra un passaggio e l'altro.
+- **Sei numeri**: visite alla **pagina eventi** (l'elenco, dal 15/11/2026), visite (aperture della pagina di dettaglio), clic su Prenota (dalla scheda e dal dettaglio), avvii di pagamento, acquisti e partecipanti. Acquisti e partecipanti sono **al netto dei rimborsi**.
+- **Dalla visita alla prenotazione**: barre con i passaggi, dalla pagina eventi fino agli acquisti, e le percentuali tra un passaggio e l'altro.
+- La **home** e le altre pagine generali non vengono contate: ricordano solo da dove è arrivata la persona, così le sue azioni successive hanno la provenienza giusta.
 - **Andamento giornaliero**: grafico di una misura a scelta; passando il mouse si legge il valore del giorno. *Vedi tabella* mostra tutti i numeri giorno per giorno.
 - **Provenienza**, **Campagne (UTM)** e **Per evento**: gli stessi numeri divisi per canale, per campagna e per evento.
 
