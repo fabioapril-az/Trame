@@ -7,8 +7,7 @@
   "routes": [
     {
       "route": "/api/*",
-      "statusCode": 404,
-      "rewrite": "/404-api.json"
+      "statusCode": 404
     }
   ]
 }
