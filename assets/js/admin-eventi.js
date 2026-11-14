@@ -521,7 +521,12 @@
             "<td>" + (i.numeroPersone || 1) + "</td>" +
             "<td>" + escapeHtml(i.opzionePartecipazioneNome || "—") + "</td>" +
             "<td>" + escapeHtml(STATO_ISCRIZIONE_LABELS[i.stato] || i.stato) + "</td>" +
-            "<td>" + (i.importoPagato != null ? i.importoPagato + " €" : "—") + "</td>" +
+            // importoDovuto (backend migrazione 041): quanto deve chi si è
+            // iscritto senza pagamento online. Non è un incasso: diventa
+            // importoPagato solo con "Registra pagamento".
+            "<td>" + (i.importoPagato != null
+              ? i.importoPagato + " €"
+              : (i.importoDovuto != null ? "<small>da pagare " + i.importoDovuto + " €</small>" : "—")) + "</td>" +
             "<td>" + escapeHtml(METODO_PAGAMENTO_LABELS[i.metodoPagamento] || i.metodoPagamento || "—") + "</td>" +
             "<td>" + escapeHtml(i.allergieNote || "—") + "</td>" +
             "<td>" + formattaData(i.dataIscrizione) + "</td>" +
@@ -696,12 +701,16 @@
     document.getElementById("pag-isc-label").textContent =
       "Iscrizione di " + (nomeCompleto || iscrizione.emailIscrizione) +
       " — " + (iscrizione.numeroPersone || 1) + (iscrizione.numeroPersone > 1 ? " persone" : " persona") +
-      (iscrizione.importoPagato != null ? " — importo attuale " + iscrizione.importoPagato + " €" : " — nessun importo registrato");
+      (iscrizione.importoPagato != null
+        ? " — importo attuale " + iscrizione.importoPagato + " €"
+        : (iscrizione.importoDovuto != null ? " — da pagare " + iscrizione.importoDovuto + " €" : " — nessun importo registrato"));
     document.getElementById("pag-isc-data").value = new Date().toISOString().slice(0, 10);
     document.getElementById("pag-isc-metodo").value =
       METODI_MANUALI.indexOf(iscrizione.metodoPagamento) !== -1 ? iscrizione.metodoPagamento : "";
+    // Precompilato con quanto dovuto, se non c'è ancora un importo pagato.
     document.getElementById("pag-isc-importo").value =
-      iscrizione.importoPagato != null ? iscrizione.importoPagato : "";
+      iscrizione.importoPagato != null ? iscrizione.importoPagato
+        : (iscrizione.importoDovuto != null ? iscrizione.importoDovuto : "");
     document.getElementById("pag-isc-riferimento").value = "";
     document.getElementById("pagamento-iscrizione-status").hidden = true;
     document.getElementById("pannello-pagamento-iscrizione").hidden = false;
