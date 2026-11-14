@@ -312,7 +312,7 @@
         } else if (postiEsauriti) {
           // postiInPagamento > 0: posti riservati da chi è sulla pagina
           // Stripe (30 minuti), possono tornare liberi a breve.
-          disabilitaBottone(prenotaEl, event.postiInPagamento > 0 ? "In pagamento, riprova tra poco" : "Posti esauriti");
+          disabilitaBottone(prenotaEl, event.postiInPagamento > 0 ? "In prenotazione, riprova tra 30 minuti" : "Posti esauriti");
         } else {
           prenotaEl.href = "iscrizione-evento.html?id=" + event.id;
         }

@@ -246,7 +246,7 @@
   // Posti a zero solo perché qualcuno è sulla pagina Stripe (riserva di 30
   // minuti, backend migrazione 040): non è "esaurito", può liberarsi a breve.
   function etichettaPostiFiniti(postiInPagamento) {
-    return postiInPagamento > 0 ? "In pagamento, riprova tra poco" : "Posti esauriti";
+    return postiInPagamento > 0 ? "In prenotazione, riprova tra 30 minuti" : "Posti esauriti";
   }
 
   function renderPackageCard(pacchetto) {
