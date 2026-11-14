@@ -310,7 +310,9 @@
         } else if (event.stato !== "aperto") {
           disabilitaBottone(prenotaEl, "Iscrizioni chiuse");
         } else if (postiEsauriti) {
-          disabilitaBottone(prenotaEl, "Posti esauriti");
+          // postiInPagamento > 0: posti riservati da chi è sulla pagina
+          // Stripe (30 minuti), possono tornare liberi a breve.
+          disabilitaBottone(prenotaEl, event.postiInPagamento > 0 ? "In pagamento, riprova tra poco" : "Posti esauriti");
         } else {
           prenotaEl.href = "iscrizione-evento.html?id=" + event.id;
         }

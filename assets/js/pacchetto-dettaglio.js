@@ -281,7 +281,8 @@
         } else if (pacchetto.stato !== "aperto") {
           disabilitaBottone(prenotaEl, "Iscrizioni chiuse");
         } else if (tutteEsaurite) {
-          disabilitaBottone(prenotaEl, "Posti esauriti");
+          var inPagamento = sottoEventi.some(function (ev) { return ev.postiInPagamento > 0; });
+          disabilitaBottone(prenotaEl, inPagamento ? "In pagamento, riprova tra poco" : "Posti esauriti");
         } else {
           prenotaEl.href = "iscrizione-pacchetto.html?id=" + pacchetto.id;
         }
