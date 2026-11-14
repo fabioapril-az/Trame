@@ -134,25 +134,27 @@ Ogni scheda ha la stessa altezza e lo stesso ordine: foto, categoria, titolo, so
 - La **descrizione breve** sta in uno spazio fisso: se è lunga, nella scheda scorre. Il testo completo resta nella pagina di dettaglio.
 - Nella pagina di dettaglio il titolo si rimpicciolisce da solo per stare in due righe.
 
-### I prezzi: due sistemi, e non si mescolano
+### I prezzi: almeno uno è obbligatorio
 
-**Sistema consigliato: i tre prezzi.** Compila uno o più di questi campi:
+Ci si iscrive a un evento solo pagando online, e il pagamento usa questi tre prezzi. Compilane uno o più:
 
 - **Prezzo Singolo**: per chi si iscrive da solo, a persona.
 - **Prezzo Gruppo**: prezzo a persona per chi si iscrive in 2-6 persone, tipicamente più basso.
 - **Prezzo Aperitivo**: prezzo a persona del solo aperitivo. Si può scegliere da solo oppure aggiungere a Singolo o Gruppo, e non è mai scontato.
 
-Lasciando vuoto un campo, quella possibilità non viene offerta. Questo è il sistema che funziona con il pagamento online.
+Lasciando vuoto un campo, quella possibilità non viene offerta.
 
-**Sistema vecchio: "Modalità di partecipazione".** Serve solo se i tre prezzi non bastano, per esempio con più di due modi di partecipare a prezzi diversi. Si aggiungono righe con nome e prezzo a persona, nessuno sconto di gruppo, **nessun pagamento online**.
+> Per mettere un evento in stato **Aperto** serve **almeno uno dei tre prezzi**: senza, il salvataggio si blocca con il messaggio "Per aprire le iscrizioni inserisci almeno un prezzo". Bozze ed eventi annunciati si possono salvare anche senza prezzi.
 
-> I due sistemi sono **alternativi**: non compilarli entrambi sullo stesso evento. Se lo fai, al salvataggio compare un messaggio che te lo dice e l'evento non viene salvato.
+Le vecchie "Modalità di partecipazione" e il modulo di iscrizione senza pagamento sono stati tolti a novembre 2026. Un evento **gratuito** oggi non si può gestire dal sito: se servirà, va progettato a parte.
 
 **Quota evento** è il campo da usare quando l'evento ha un prezzo unico e non serve distinguere nulla. **Quota iscrizione associativa inclusa** serve solo se il prezzo che hai messo comprende già la tessera, e indica quanta parte ne rappresenta: per ora è un promemoria interno, non compare sul sito.
 
 ### Posti e chiusura delle iscrizioni
 
 - **Posti massimi**: quando sono esauriti, il sito non accetta altre iscrizioni. Se lo lasci vuoto, i posti sono illimitati. Nell'elenco eventi la colonna Posti mostra quanti sono ancora liberi su quanti.
+- **Posti in pagamento**: chi arriva sulla pagina di pagamento Stripe si tiene il posto per **30 minuti**. In quel tempo il posto risulta occupato. Se gli ultimi posti sono tutti in pagamento, sul sito il pulsante dice "In prenotazione, riprova tra 30 minuti" invece di "Posti esauriti". Se la persona non paga, il posto si libera da solo. Così lo stesso posto non può essere venduto due volte.
+- **Ridurre i posti**: non puoi scendere sotto i posti già prenotati o in pagamento. Il salvataggio si blocca con un messaggio.
 - **Iscrizioni entro il**: dopo quella data il sito non accetta più iscrizioni, anche se lo stato è *Aperto*.
 
 ### Le tre caselle in fondo
@@ -194,6 +196,8 @@ Su ogni riga:
 ### L'elenco iscritti, riga per riga
 
 Per ogni iscritto vedi nome ed email, se è socio o no, quante persone, la modalità scelta, lo stato, l'importo, il metodo di pagamento, eventuali allergie segnalate e la data.
+
+Nella colonna Importo, "**da pagare X €**" indica una cifra dovuta e non ancora incassata. Non conta negli incassi finché non la confermi con **Registra pagamento**, che la propone già compilata.
 
 I pulsanti disponibili:
 
@@ -386,17 +390,16 @@ Se qualcuno scrive l'email di un socio ma con un **nome e cognome diversi** da q
 
 Se a fermarsi è un socio vero, quasi sempre è perché il suo nome è registrato in modo diverso: correggilo da **Modifica** nel Libro Soci.
 
-### Il vecchio modulo senza pagamento online
+### Eventi senza prezzi
 
-Gli eventi senza i tre prezzi usano un modulo più semplice. Lì il socio conferma inserendo email, nome e cognome. **Chi ha la tessera scaduta non può rinnovarla da lì**: viene invitato a scrivere a info@progettotrame.org, e il rinnovo lo registri tu con **Rinnova** dopo aver incassato.
+Il vecchio modulo di iscrizione senza pagamento è stato tolto a novembre 2026. Se un evento aperto risultasse comunque senza prezzi, la pagina di iscrizione mostra solo "L'iscrizione online a questo evento non è disponibile" con l'email della segreteria. La richiesta di associazione via email, che partiva da quel modulo, non esiste più: si diventa soci da "Diventa socio" o nella prenotazione.
 
 ### Consenso foto e video
 
 Si chiede, con scelta obbligatoria Sì o No:
 
 - a chi si iscrive come socio, online o registrato da te;
-- a chi si associa durante una prenotazione;
-- ai soci che non hanno mai risposto, la prima volta che si iscrivono a un evento dal modulo senza pagamento online.
+- a chi si associa durante una prenotazione.
 
 La risposta si vede nella colonna Foto del Libro Soci e si cambia da Modifica.
 
