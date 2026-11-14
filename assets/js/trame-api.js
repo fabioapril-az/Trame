@@ -11,6 +11,11 @@
     evento_non_trovato: "Evento non trovato.",
     evento_non_aperto: "Le iscrizioni a questo evento non sono aperte.",
     posti_esauriti: "I posti disponibili per questo evento sono esauriti.",
+    posti_insufficienti: "Non ci sono abbastanza posti disponibili per tutte le persone indicate.",
+    // Posto bloccato per 30 minuti da chi ha già aperto la pagina di
+    // pagamento: se non paga, il posto torna libero da solo.
+    posti_in_pagamento: "Gli ultimi posti sono in fase di pagamento da parte di altre persone. Riprova tra qualche minuto.",
+    posti_max_sotto_prenotato: "Non puoi ridurre i posti sotto quelli già prenotati o in fase di pagamento.",
     richiede_nuovo_socio: "Email non trovata: completa anche i dati di iscrizione all'associazione.",
     richiede_rinnovo: "La tessera risulta scaduta: è necessario rinnovarla per procedere.",
     richiede_consenso: "Devi accettare l'informativa sul trattamento dei dati personali per procedere.",

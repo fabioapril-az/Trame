@@ -239,7 +239,14 @@
       // anche una sola data ha ancora posti, si può comunque prenotare
       // quella — la pagina di iscrizione fa i conti veri per combinazione.
       postiDisponibili: postiNoti.length === sottoEventi.length && postiNoti.every(function (p) { return p <= 0; }) ? 0 : null,
+      postiInPagamento: sottoEventi.reduce(function (tot, ev) { return tot + (ev.postiInPagamento || 0); }, 0),
     };
+  }
+
+  // Posti a zero solo perché qualcuno è sulla pagina Stripe (riserva di 30
+  // minuti, backend migrazione 040): non è "esaurito", può liberarsi a breve.
+  function etichettaPostiFiniti(postiInPagamento) {
+    return postiInPagamento > 0 ? "In prenotazione, riprova tra 30 minuti" : "Posti esauriti";
   }
 
   function renderPackageCard(pacchetto) {
@@ -256,7 +263,7 @@
     var annunciato = pacchetto.stato === "annunciato";
     var postiEsauriti = pacchetto.postiDisponibili === 0;
     var nonPrenotabile = pacchetto.stato !== "aperto" || postiEsauriti;
-    var etichettaNonPrenotabile = pacchetto.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
+    var etichettaNonPrenotabile = pacchetto.stato !== "aperto" ? "Iscrizioni chiuse" : etichettaPostiFiniti(pacchetto.postiInPagamento);
 
     // "Informami quando parte" non esiste per un pacchetto: quella pagina
     // chiama POST /api/eventi/{id}/interesse-notifica, che si aspetta un id
@@ -399,7 +406,7 @@
     var annunciato = event.stato === "annunciato";
     var postiEsauriti = event.postiDisponibili != null && event.postiDisponibili <= 0;
     var nonPrenotabile = event.stato !== "aperto" || postiEsauriti;
-    var etichettaNonPrenotabile = event.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti";
+    var etichettaNonPrenotabile = event.stato !== "aperto" ? "Iscrizioni chiuse" : etichettaPostiFiniti(event.postiInPagamento);
 
     var azionePrenota = annunciato
       ? '<a href="interesse-evento.html?id=' + event.id + '" class="btn btn--primary btn--small">Informami quando parte →</a>'
