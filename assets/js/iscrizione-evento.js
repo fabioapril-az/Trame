@@ -128,7 +128,6 @@
   // Attivo solo per eventi con prezzoSingolo/prezzoGruppoPersona/
   // prezzoAperitivoPersona (vedi sopra) — nessuna verifica socio qui, lo
   // sconto (se spetta) lo calcola il server persona per persona al submit.
-  // Stessa logica già validata in Fase 1 (test-pagamento.html/js).
   function inizializzaWizardPagamento(evento) {
     var pgModalita = document.getElementById("pg-modalita");
     var pgCampoModalita = document.getElementById("pg-campo-modalita");
