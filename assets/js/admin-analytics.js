@@ -17,7 +17,7 @@
     non_registrata: "Non registrata"
   };
   var NOMI_METRICHE = {
-    visite: "Visite", clic: "Clic su Prenota", avvii: "Avvii di pagamento",
+    visitePaginaEventi: "Visite pagina eventi", visite: "Visite ai dettagli", clic: "Clic su Prenota", avvii: "Avvii di pagamento",
     acquisti: "Acquisti", partecipanti: "Partecipanti"
   };
   var COLORE_SERIE = "#a9603a";
@@ -195,6 +195,7 @@
     var avvii = (t.avviiOnline || 0) + (t.avviiManuali || 0);
 
     disegnaKpi([
+      { etichetta: "Pagina eventi", valore: t.visitePaginaEventi, nota: "visite all'elenco" },
       { etichetta: "Visite", valore: t.visite, nota: "aperture del dettaglio" },
       { etichetta: "Clic su Prenota", valore: clic, nota: "scheda " + numero(t.clicScheda) + " · dettaglio " + numero(t.clicDettaglio) },
       { etichetta: "Avvii di pagamento", valore: avvii, nota: t.avviiManuali ? "di cui manuali " + numero(t.avviiManuali) : "" },
@@ -203,7 +204,8 @@
     ]);
 
     disegnaFunnel([
-      { etichetta: "Visite", valore: t.visite || 0, rapporto: "" },
+      { etichetta: "Pagina eventi", valore: t.visitePaginaEventi || 0, rapporto: "" },
+      { etichetta: "Visite ai dettagli", valore: t.visite || 0, rapporto: rapporto(t.visite, t.visitePaginaEventi) + " della pagina eventi" },
       { etichetta: "Clic su Prenota", valore: clic, rapporto: rapporto(clic, t.visite) + " delle visite" },
       { etichetta: "Avvii di pagamento", valore: avvii, rapporto: rapporto(avvii, clic) + " dei clic" },
       { etichetta: "Acquisti", valore: t.acquisti || 0, rapporto: rapporto(t.acquisti, avvii) + " degli avvii" }
@@ -342,15 +344,15 @@
     contenitore.innerHTML = svg;
     agganciaMirino(contenitore, punti, x, y, L, metrica);
 
-    tabellaGiorni.innerHTML = "<table class=\"admin-table\"><thead><tr><th>Giorno</th><th>Visite</th><th>Clic</th><th>Avvii</th><th>Acquisti</th><th>Partecipanti</th></tr></thead><tbody>" +
-      ["visite", "clic", "avvii", "acquisti", "partecipanti"].reduce(function (righe, m) {
+    tabellaGiorni.innerHTML = "<table class=\"admin-table\"><thead><tr><th>Giorno</th><th>Pagina eventi</th><th>Visite</th><th>Clic</th><th>Avvii</th><th>Acquisti</th><th>Partecipanti</th></tr></thead><tbody>" +
+      ["visitePaginaEventi", "visite", "clic", "avvii", "acquisti", "partecipanti"].reduce(function (righe, m) {
         serieGiornaliera(ultimoRiepilogo.perGiorno || [], m).forEach(function (p, i) {
           righe[i] = righe[i] || { giorno: p.giorno };
           righe[i][m] = p.valore;
         });
         return righe;
       }, []).reverse().map(function (r) {
-        return "<tr><td>" + formattaGiorno(r.giorno) + "</td><td>" + numero(r.visite) + "</td><td>" + numero(r.clic) + "</td><td>" +
+        return "<tr><td>" + formattaGiorno(r.giorno) + "</td><td>" + numero(r.visitePaginaEventi) + "</td><td>" + numero(r.visite) + "</td><td>" + numero(r.clic) + "</td><td>" +
           numero(r.avvii) + "</td><td>" + numero(r.acquisti) + "</td><td>" + numero(r.partecipanti) + "</td></tr>";
       }).join("") + "</tbody></table>";
   }
@@ -399,9 +401,9 @@
   function disegnaTabellaSorgenti(lista) {
     var ordinata = lista.slice().sort(function (a, b) { return (b.visite || 0) - (a.visite || 0) || (b.acquisti || 0) - (a.acquisti || 0); });
     document.getElementById("an-sorgenti").innerHTML = ordinata.length ? tabella(
-      ["Provenienza", "Visite", "Clic scheda", "Clic dettaglio", "Avvii", "Acquisti", "Partecipanti", "Acquisti / visite"],
+      ["Provenienza", "Pagina eventi", "Visite", "Clic scheda", "Clic dettaglio", "Avvii", "Acquisti", "Partecipanti", "Acquisti / visite"],
       ordinata.map(function (s) {
-        return "<tr><td>" + escapeHtml(NOMI_SORGENTI[s.sorgente] || s.sorgente) + "</td><td>" + numero(s.visite) + "</td><td>" +
+        return "<tr><td>" + escapeHtml(NOMI_SORGENTI[s.sorgente] || s.sorgente) + "</td><td>" + numero(s.visitePaginaEventi) + "</td><td>" + numero(s.visite) + "</td><td>" +
           numero(s.clicScheda) + "</td><td>" + numero(s.clicDettaglio) + "</td><td>" + numero(s.avvii) + "</td><td>" +
           numero(s.acquisti) + "</td><td>" + numero(s.partecipanti) + "</td><td>" + rapporto(s.acquisti, s.visite) + "</td></tr>";
       })) : "<p class=\"form-note\">Nessun dato nel periodo.</p>";
@@ -412,11 +414,11 @@
     pannello.hidden = !lista.length;
     if (!lista.length) return;
     document.getElementById("an-campagne").innerHTML = tabella(
-      ["Campagna", "Provenienza", "Visite", "Clic", "Avvii", "Acquisti", "Partecipanti"],
+      ["Campagna", "Provenienza", "Pagina eventi", "Visite", "Clic", "Avvii", "Acquisti", "Partecipanti"],
       lista.slice().sort(function (a, b) { return (b.acquisti || 0) - (a.acquisti || 0) || (b.visite || 0) - (a.visite || 0); })
         .map(function (c) {
           return "<tr><td>" + escapeHtml(c.campagna) + "</td><td>" + escapeHtml(NOMI_SORGENTI[c.sorgente] || c.sorgente) + "</td><td>" +
-            numero(c.visite) + "</td><td>" + numero(c.clic) + "</td><td>" + numero(c.avvii) + "</td><td>" +
+            numero(c.visitePaginaEventi) + "</td><td>" + numero(c.visite) + "</td><td>" + numero(c.clic) + "</td><td>" + numero(c.avvii) + "</td><td>" +
             numero(c.acquisti) + "</td><td>" + numero(c.partecipanti) + "</td></tr>";
         }));
   }

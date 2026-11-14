@@ -655,6 +655,12 @@
     var categoriaFiltro = leggiCategoriaFiltro();
     aggiornaIntestazionePerCategoria(categoriaFiltro);
 
+    // Statistiche: visita alla pagina eventi (solo eventi.html, non le
+    // altre pagine che riusano questo script).
+    if (window.TrameAnalytics && /\/eventi(\.html)?$/.test(window.location.pathname)) {
+      window.TrameAnalytics.visitaPaginaEventi();
+    }
+
     // Statistiche: clic su "Prenota" dalla scheda (le schede vengono
     // ricreate a ogni filtro, quindi un solo ascoltatore sul documento).
     // Solo i veri link di prenotazione, non "Informami" né i bottoni

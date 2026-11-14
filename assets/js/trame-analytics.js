@@ -170,7 +170,9 @@
       return;
     }
     var id = parseInt(risorsaId, 10);
-    if (!id || (risorsaTipo !== "evento" && risorsaTipo !== "pacchetto")) {
+    // "pagina": pagine generali con un codice chiuso concordato col backend
+    // (oggi solo 1 = elenco eventi, variante "eventi").
+    if (!id || (risorsaTipo !== "evento" && risorsaTipo !== "pacchetto" && risorsaTipo !== "pagina")) {
       return;
     }
     var chiave = azione + ":" + risorsaTipo + ":" + id;
@@ -190,6 +192,10 @@
   }
 
   window.TrameAnalytics = {
+    // Visita alla pagina elenco eventi (eventi.html), una volta per scheda.
+    visitaPaginaEventi: function () {
+      quandoVisibile(function () { traccia("page_view", "pagina", 1, "eventi"); });
+    },
     visita: function (risorsaTipo, risorsaId) {
       quandoVisibile(function () { traccia("event_view", risorsaTipo, risorsaId, ""); });
     },
