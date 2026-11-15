@@ -74,6 +74,13 @@
       }
 
       inizializzaWizard(pacchetto, sottoEventi);
+      // Statistiche: chi arriva qui direttamente (link in un'inserzione o in
+      // un messaggio) conta come clic su Prenota "diretto". Se nella stessa
+      // scheda aveva già premuto Prenota dalla scheda o dal dettaglio, il
+      // clic è già contato e questo viene ignorato (una volta per scheda).
+      if (window.TrameAnalytics) {
+        window.TrameAnalytics.clicPrenota("pacchetto", pacchetto.id, "diretto");
+      }
       wizardEl.hidden = false;
     })
     .catch(function (err) {
