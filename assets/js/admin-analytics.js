@@ -191,13 +191,13 @@
     contenutoEl.hidden = false;
     document.getElementById("an-spento").hidden = r.analyticsAttivo !== false;
     var t = r.totali || {};
-    var clic = (t.clicScheda || 0) + (t.clicDettaglio || 0);
+    var clic = (t.clicScheda || 0) + (t.clicDettaglio || 0) + (t.clicDiretto || 0);
     var avvii = (t.avviiOnline || 0) + (t.avviiManuali || 0);
 
     disegnaKpi([
       { etichetta: "Pagina eventi", valore: t.visitePaginaEventi, nota: "visite all'elenco" },
       { etichetta: "Visite", valore: t.visite, nota: "aperture del dettaglio" },
-      { etichetta: "Clic su Prenota", valore: clic, nota: "scheda " + numero(t.clicScheda) + " · dettaglio " + numero(t.clicDettaglio) },
+      { etichetta: "Clic su Prenota", valore: clic, nota: "scheda " + numero(t.clicScheda) + " · dettaglio " + numero(t.clicDettaglio) + " · link diretto " + numero(t.clicDiretto) },
       { etichetta: "Avvii di pagamento", valore: avvii, nota: t.avviiManuali ? "di cui manuali " + numero(t.avviiManuali) : "" },
       { etichetta: "Acquisti", valore: t.acquisti, nota: t.acquistiRimborsatiInteramente ? "rimborsati interamente " + numero(t.acquistiRimborsatiInteramente) : "netti dai rimborsi" },
       { etichetta: "Partecipanti", valore: t.partecipanti, nota: t.partecipantiRimborsati ? "rimborsati " + numero(t.partecipantiRimborsati) : "netti dai rimborsi" }
@@ -401,10 +401,10 @@
   function disegnaTabellaSorgenti(lista) {
     var ordinata = lista.slice().sort(function (a, b) { return (b.visite || 0) - (a.visite || 0) || (b.acquisti || 0) - (a.acquisti || 0); });
     document.getElementById("an-sorgenti").innerHTML = ordinata.length ? tabella(
-      ["Provenienza", "Pagina eventi", "Visite", "Clic scheda", "Clic dettaglio", "Avvii", "Acquisti", "Partecipanti", "Acquisti / visite"],
+      ["Provenienza", "Pagina eventi", "Visite", "Clic scheda", "Clic dettaglio", "Clic link diretto", "Avvii", "Acquisti", "Partecipanti", "Acquisti / visite"],
       ordinata.map(function (s) {
         return "<tr><td>" + escapeHtml(NOMI_SORGENTI[s.sorgente] || s.sorgente) + "</td><td>" + numero(s.visitePaginaEventi) + "</td><td>" + numero(s.visite) + "</td><td>" +
-          numero(s.clicScheda) + "</td><td>" + numero(s.clicDettaglio) + "</td><td>" + numero(s.avvii) + "</td><td>" +
+          numero(s.clicScheda) + "</td><td>" + numero(s.clicDettaglio) + "</td><td>" + numero(s.clicDiretto) + "</td><td>" + numero(s.avvii) + "</td><td>" +
           numero(s.acquisti) + "</td><td>" + numero(s.partecipanti) + "</td><td>" + rapporto(s.acquisti, s.visite) + "</td></tr>";
       })) : "<p class=\"form-note\">Nessun dato nel periodo.</p>";
   }
@@ -436,10 +436,10 @@
       return chkAnnullati.checked || (r.stato !== "annullato" && r.stato !== "bozza");
     }).sort(function (a, b) { return (b.visite || 0) - (a.visite || 0); });
     document.getElementById("an-risorse").innerHTML = visibili.length ? tabella(
-      ["Evento", "Visite", "Clic scheda", "Clic dettaglio", "Avvii", "Acquisti", "Partecipanti"],
+      ["Evento", "Visite", "Clic scheda", "Clic dettaglio", "Clic link diretto", "Avvii", "Acquisti", "Partecipanti"],
       visibili.map(function (r) {
         return "<tr><td>" + escapeHtml(r.titolo) + (r.risorsaTipo === "pacchetto" ? " <span class=\"form-note\">(più date)</span>" : "") +
-          "</td><td>" + numero(r.visite) + "</td><td>" + numero(r.clicScheda) + "</td><td>" + numero(r.clicDettaglio) + "</td><td>" +
+          "</td><td>" + numero(r.visite) + "</td><td>" + numero(r.clicScheda) + "</td><td>" + numero(r.clicDettaglio) + "</td><td>" + numero(r.clicDiretto) + "</td><td>" +
           numero(r.avvii) + "</td><td>" + numero(r.acquisti) + "</td><td>" + numero(r.partecipanti) + "</td></tr>";
       })) : "<p class=\"form-note\">Nessun evento con dati nel periodo.</p>";
   }
