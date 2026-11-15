@@ -43,7 +43,7 @@
    * @param {RequestInit} [options]
    * @returns {Promise<any>} il body JSON della risposta se ok, altrimenti lancia un Error con .message leggibile
    */
-  function trameFetch(path, options) {
+  function eseguiFetch(path, options) {
     var url = window.TRAME_CONFIG.apiBaseUrl + path;
     return fetch(url, options).then(function (res) {
       if (res.ok) {
@@ -60,7 +60,9 @@
         // con status 200 durante un cold-start (bug reale trovato in test:
         // veniva trattata come una risposta valida, mascherando l'errore
         // invece di mostrare il fallback previsto).
-        throw new Error("Il server ha risposto in modo imprevisto. Riprova tra qualche istante.");
+        var errImprevisto = new Error("Il server ha risposto in modo imprevisto. Riprova tra qualche istante.");
+        errImprevisto.ritentabile = true;
+        throw errImprevisto;
       }
       return res.json().catch(function () { return null; }).then(function (body) {
         var messaggio;
@@ -79,8 +81,28 @@
         err.status = res.status;
         err.codice = body && body.error;
         err.body = body;
+        err.ritentabile = res.status >= 500;
         throw err;
       });
+    }, function (errRete) {
+      // fetch rifiutata: rete assente o connessione caduta.
+      errRete.ritentabile = true;
+      throw errRete;
+    });
+  }
+
+  // Le letture (GET) si ritentano una volta, dopo 2 secondi, se il server
+  // risponde 5xx o la rete cade: al risveglio a freddo il backend può dare
+  // un errore alla primissima richiesta e rispondere subito dopo. Mai per
+  // scritture (iscrizioni, pagamenti), che non vanno ripetute da sole.
+  function trameFetch(path, options) {
+    var metodo = ((options && options.method) || "GET").toUpperCase();
+    return eseguiFetch(path, options).catch(function (err) {
+      if (metodo !== "GET" || !err.ritentabile) {
+        throw err;
+      }
+      return new Promise(function (resolve) { setTimeout(resolve, 2000); })
+        .then(function () { return eseguiFetch(path, options); });
     });
   }
 
