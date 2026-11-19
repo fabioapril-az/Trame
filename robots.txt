@@ -3,3 +3,5 @@ Allow: /
 Disallow: /admin.html
 Disallow: /admin-soci.html
 Disallow: /admin-pagamenti.html
+
+Sitemap: https://progettotrame.org/sitemap.xml

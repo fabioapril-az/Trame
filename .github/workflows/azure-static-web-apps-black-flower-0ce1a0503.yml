@@ -8,10 +8,26 @@ on:
     types: [opened, synchronize, reopened, closed]
     branches:
       - master
+  # Rigenerazione delle pagine statiche degli eventi (scripts/genera-pagine.mjs):
+  # subito dopo un salvataggio in admin (la chiama il backend) e ogni ora.
+  # L'orario di GitHub non è puntuale: va bene, i dati vivi li carica la pagina.
+  workflow_dispatch:
+    inputs:
+      motivo:
+        description: "Perché si rigenera (es. evento-33-modificato)"
+        required: false
+        default: "manuale"
+  schedule:
+    - cron: "17 * * * *"
+
+# Una pubblicazione di produzione alla volta; le anteprime delle PR a parte.
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('anteprima-{0}', github.event.number) || 'produzione' }}
+  cancel-in-progress: false
 
 jobs:
   build_and_deploy_job:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
@@ -19,8 +35,34 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Genera le pagine statiche degli eventi
+        id: genera
+        run: |
+          set +e
+          node scripts/genera-pagine.mjs | tee genera.log
+          esito=${PIPESTATUS[0]}
+          firma=$(grep '^FIRMA=' genera.log | cut -d= -f2)
+          pubblicata=$(curl -s --max-time 20 https://progettotrame.org/firma-pagine.txt | tr -d '[:space:]')
+          rm -f genera.log
+          pubblica=true
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Rigenerazione: si ripubblica solo se il contenuto è cambiato.
+            if [ "$esito" != "0" ]; then
+              echo "::warning::Generazione non riuscita: nessuna pubblicazione"
+              pubblica=false
+            elif [ -n "$firma" ] && [ "$firma" = "$pubblicata" ]; then
+              echo "Nessun cambiamento rispetto al sito pubblicato"
+              pubblica=false
+            fi
+          elif [ "$esito" != "0" ]; then
+            # Push o PR: il sito si pubblica comunque, senza pagine generate.
+            echo "::warning::Generazione non riuscita: pubblico il sito senza le pagine generate"
+            git checkout -- . && git clean -fdq -- eventi sitemap.xml llms.txt firma-pagine.txt
+          fi
+          echo "pubblica=$pubblica" >> "$GITHUB_OUTPUT"
       - name: Build And Deploy
         id: builddeploy
+        if: steps.genera.outputs.pubblica == 'true'
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_FLOWER_0CE1A0503 }}
