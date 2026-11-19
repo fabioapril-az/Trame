@@ -116,7 +116,9 @@ function pulisciHtml(html) {
       const tipo = /data-list\s*=\s*"(bullet|ordered)"/i.exec(attributi);
       return tipo ? '<li data-list="' + tipo[1] + '">' : "<li>";
     }
-    return "<" + nome + ">";
+    // Allineamento del testo dall'editor (es. ql-align-center): solo classi ql-*.
+    const classe = /class\s*=\s*"(ql-[a-z0-9-]+(?:\s+ql-[a-z0-9-]+)*)"/i.exec(attributi);
+    return "<" + nome + (classe && (nome === "p" || nome === "li" || nome === "span") ? ' class="' + classe[1] + '"' : "") + ">";
   });
   // Quill scrive sempre <ol>: quelli con voci "bullet" sono elenchi puntati.
   return pulito.replace(/<ol>([\s\S]*?)<\/ol>/g, (blocco, interno) => {
@@ -369,7 +371,19 @@ function paginaEvento(modello, e, impostazioni) {
   return html;
 }
 
-function llmsTxt(eventi, impostazioni) {
+// Schede dei talenti per fili.html: stessa struttura di renderCard in fili.js.
+function schedaTalento(t) {
+  const media = t.immagineUrl
+    ? '<img src="' + esc(t.immagineUrl) + '" alt="' + esc(t.nome) + '" class="event-card__image" loading="lazy">'
+    : '<span class="event-card__media-icon" aria-hidden="true">🧵</span>';
+  return '<article class="event-card"><div class="event-card__media">' + media +
+    (t.ambito ? '<span class="event-card__badge">' + esc(t.ambito) + "</span>" : "") + "</div>" +
+    '<div class="event-card__body"><h3 class="event-card__title">' + esc(t.nome) + "</h3>" +
+    (t.descrizione ? '<div class="event-card__desc">' + pulisciHtml(t.descrizione) + "</div>" : "") +
+    "</div></article>";
+}
+
+function llmsTxt(eventi, impostazioni, talenti) {
   const riga = (e) => {
     const parti = [formattaData(e.dataEvento), e.ora, e.luogo, e.quotaEvento ? formattaPrezzo(e.quotaEvento) : null].filter(Boolean).join(" · ");
     const link = e.dettagliAttivi !== false ? SITO + urlEvento(e) : SITO + "/eventi.html";
@@ -400,6 +414,11 @@ function llmsTxt(eventi, impostazioni) {
     "- [Diventa socio](" + SITO + "/diventa-socio.html): iscrizione all'associazione",
     "- [Contatti](" + SITO + "/contatti.html)",
     "",
+    "## I Fili di TraMe (chi conduce gli eventi)",
+    talenti.length
+      ? talenti.map((t) => "- " + t.nome + (t.ambito ? " (" + t.ambito + ")" : "") + ": " + riassunto(testoSemplice(t.descrizione), 220)).join("\n")
+      : "In arrivo.",
+    "",
     "## Eventi passati",
     passati.length ? passati.map(riga).join("\n") : "Nessuno.",
     "",
@@ -409,7 +428,13 @@ function llmsTxt(eventi, impostazioni) {
 // --- principale --------------------------------------------------------------
 
 async function principale() {
-  const [eventi, impostazioni] = await Promise.all([leggiJson("/api/eventi"), leggiJson("/api/impostazioni").catch(() => null)]);
+  const [eventi, impostazioni, talentiTutti] = await Promise.all([
+    leggiJson("/api/eventi"),
+    leggiJson("/api/impostazioni").catch(() => null),
+    leggiJson("/api/talenti").catch(() => []),
+  ]);
+  const talenti = (talentiTutti || []).filter((t) => !t.stato || t.stato === "pubblicato")
+    .sort((a, b) => (a.nome || "").localeCompare(b.nome || "", "it"));
   const pubblici = eventi.filter((e) => ["aperto", "annunciato", "chiuso"].includes(e.stato));
   const conPagina = pubblici.filter((e) => e.dettagliAttivi !== false);
   const mappaPagine = Object.fromEntries(conPagina.map((e) => [e.id, urlEvento(e)]));
@@ -452,6 +477,11 @@ async function principale() {
         html = sostituisci(html, '<section class="section section--alt" id="eventi-passati-section" hidden>', '<section class="section section--alt" id="eventi-passati-section">', "passati");
       }
     }
+    if (nome === "fili.html" && talenti.length) {
+      html = sostituisci(html, '<div class="events-grid" id="fili-grid" hidden></div>',
+        '<div class="events-grid" id="fili-grid">' + talenti.map(schedaTalento).join("") + "</div>", "fili-grid");
+      html = sostituisci(html, '<div class="coming-soon" id="fili-vuoto">', '<div class="coming-soon" id="fili-vuoto" hidden>', "fili-vuoto");
+    }
     if (nome === "index.html") {
       const aperti = ordina(pubblici.filter((e) => e.stato === "aperto"));
       html = riempiMount(html, "aperto", aperti, mappaPagine, quota, 3);
@@ -472,7 +502,7 @@ async function principale() {
       .concat(conPagina.map((e) => SITO + urlEvento(e)))
       .map((u) => "  <url><loc>" + esc(u) + "</loc></url>").join("\n") + "\n</urlset>\n";
 
-  scritti["llms.txt"] = llmsTxt(pubblici, impostazioni);
+  scritti["llms.txt"] = llmsTxt(pubblici, impostazioni, talenti);
 
   // Firma: cambia solo se cambia il contenuto generato.
   const firma = createHash("sha256");
