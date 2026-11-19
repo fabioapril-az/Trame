@@ -74,6 +74,11 @@ jobs:
           api_location: "" # nessuna API qui: il backend è il .NET su app-trame-prod (le vecchie Functions di test sono state dismesse il 2026-11-14)
           output_location: "/" # Built app content directory - optional
           ###### End of Repository/Build Configurations ######
+      - name: Avvisa Bing e gli altri motori (IndexNow)
+        # Solo pubblicazioni di produzione: le anteprime delle PR non vanno segnalate.
+        if: steps.genera.outputs.pubblica == 'true' && github.event_name != 'pull_request'
+        continue-on-error: true
+        run: node scripts/indexnow.mjs
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'

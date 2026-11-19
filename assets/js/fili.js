@@ -79,7 +79,7 @@
     article.className = "event-card";
 
     var mediaHtml = talento.immagineUrl
-      ? '<img src="' + escapeHtml(talento.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
+      ? '<img src="' + escapeHtml(talento.immagineUrl) + '" alt="' + escapeHtml(talento.nome) + '" class="event-card__image" loading="lazy">'
       : '<span class="event-card__media-icon" aria-hidden="true">🧵</span>';
 
     article.innerHTML =
