@@ -419,7 +419,7 @@
     // non è pronta, indipendentemente dallo stato dell'evento.
     var dettagliAttivi = event.dettagliAttivi !== false;
     var azioneDettagli = dettagliAttivi
-      ? '<a href="evento.html?id=' + event.id + '" class="event-card__details-link">Dettagli →</a>'
+      ? '<a href="' + paginaEvento(event.id) + '" class="event-card__details-link">Dettagli →</a>'
       : "";
 
     article.innerHTML =
@@ -480,6 +480,14 @@
       }
       return (a.id || 0) - (b.id || 0);
     });
+  }
+
+  // Pagina statica dell'evento (generata alla pubblicazione, indirizzo
+  // leggibile e indicizzabile) se esiste, altrimenti la pagina dinamica.
+  // La mappa la scrive scripts/genera-pagine.mjs in pagine-eventi.js.
+  function paginaEvento(id) {
+    var mappa = window.TRAME_PAGINE_EVENTI || {};
+    return mappa[id] || "evento.html?id=" + id;
   }
 
   function fillMount(mount, allEvents, categoriaFiltro) {
@@ -693,8 +701,11 @@
         el.hidden = true;
       }
     });
+    // Schede già scritte nell'HTML dal generatore (data-prerender): niente
+    // "Caricamento…", si vedono subito e vengono sostituite dai dati vivi.
+    var preRenderizzato = mounts.some(function (m) { return m.hasAttribute("data-prerender"); });
     var loadingEl = null;
-    if (comingSoonEls.length) {
+    if (comingSoonEls.length && !preRenderizzato) {
       loadingEl = document.createElement("p");
       loadingEl.className = "form-note";
       loadingEl.textContent = "Caricamento eventi…";
@@ -752,7 +763,11 @@
         if (loadingEl) {
           loadingEl.remove();
         }
-        comingSoonEls.forEach(function (el) { el.hidden = false; });
+        // Con le schede già scritte nell'HTML restano quelle, invece del
+        // messaggio di riserva.
+        if (!preRenderizzato) {
+          comingSoonEls.forEach(function (el) { el.hidden = false; });
+        }
       });
   });
 })();

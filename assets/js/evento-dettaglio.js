@@ -159,7 +159,10 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    var id = new URLSearchParams(window.location.search).get("id");
+    // evento.html?id=N, oppure la pagina statica generata
+    // (/eventi/<slug>-N/) che porta l'id su <body data-evento-id>.
+    var id = new URLSearchParams(window.location.search).get("id") || document.body.getAttribute("data-evento-id");
+    var preRenderizzata = document.body.hasAttribute("data-prerender");
     var loadingEl = document.getElementById("evento-loading");
     var erroreEl = document.getElementById("evento-errore");
     var erroreIconaEl = document.getElementById("evento-errore-icona");
@@ -329,6 +332,11 @@
         }
       })
       .catch(function (err) {
+        // Pagina statica: se il backend non risponde resta il contenuto
+        // già scritto, invece di un errore.
+        if (preRenderizzata && !(err && err.status === 404)) {
+          return;
+        }
         mostraErrore(err && err.message);
       });
   });
