@@ -102,7 +102,7 @@ function pulisciHtml(html) {
     return sorgente.split(/\n+/).map((r) => r.trim()).filter(Boolean).map((r) => "<p>" + esc(r) + "</p>").join("");
   }
   const senzaBlocchi = sorgente.replace(/<(script|style|iframe|object|embed)[\s\S]*?<\/\1>/gi, "");
-  return senzaBlocchi.replace(/<\/?([a-z0-9]+)([^>]*)>/gi, (tag, nome, attributi) => {
+  const pulito = senzaBlocchi.replace(/<\/?([a-z0-9]+)([^>]*)>/gi, (tag, nome, attributi) => {
     nome = nome.toLowerCase();
     if (!TAG_AMMESSI.has(nome)) return "";
     if (tag.startsWith("</")) return "</" + nome + ">";
@@ -117,6 +117,11 @@ function pulisciHtml(html) {
       return tipo ? '<li data-list="' + tipo[1] + '">' : "<li>";
     }
     return "<" + nome + ">";
+  });
+  // Quill scrive sempre <ol>: quelli con voci "bullet" sono elenchi puntati.
+  return pulito.replace(/<ol>([\s\S]*?)<\/ol>/g, (blocco, interno) => {
+    const voci = interno.replace(/ data-list="(bullet|ordered)"/g, "");
+    return /<li data-list="bullet">/.test(interno) ? "<ul>" + voci + "</ul>" : "<ol>" + voci + "</ol>";
   });
 }
 
@@ -236,7 +241,18 @@ function datiEvento(e, descrizione) {
 
 // --- schede statiche (eventi.html e home) -----------------------------------
 
-function schedaStatica(e, mappaPagine) {
+// Stessa struttura (e quindi stesse altezze fisse) di renderEventCard in
+// events.js, che la sostituisce con i dati vivi appena il backend risponde:
+// se cambia una, va cambiata anche l'altra.
+function notaIscrizione(prezzoBase, quotaTessera) {
+  const domanda = "<p class=\"event-card__nota-iscrizione\">Non sei ancora socio TraMe? Puoi richiedere l'iscrizione durante la prenotazione.</p>";
+  if (prezzoBase == null || quotaTessera == null) return domanda;
+  return domanda + '<p class="event-card__nota-iscrizione event-card__nota-iscrizione--prezzo">' +
+    "<span>Prima partecipazione, inclusa tessera da " + formattaPrezzo(quotaTessera) + "</span>" +
+    "<strong>" + formattaPrezzo(Number(prezzoBase) + Number(quotaTessera)) + "</strong></p>";
+}
+
+function schedaStatica(e, mappaPagine, quotaTessera) {
   const annunciato = e.stato === "annunciato";
   const pagina = mappaPagine[e.id];
   const media = e.immagineUrl
@@ -244,24 +260,32 @@ function schedaStatica(e, mappaPagine) {
     : '<span class="event-card__media-icon" aria-hidden="true">' + (ICONE[e.categoria] || "🗓️") + "</span>";
   const meta = ["<span>🗓️ " + esc(formattaData(e.dataEvento)) + "</span>"];
   if (e.ora) meta.push("<span>🕐 " + esc(e.ora) + "</span>");
-  if (e.luogo) meta.push("<span>📍 " + esc(e.luogo) + "</span>");
-  const prezzo = e.quotaEvento ? '<span class="event-card__price-block"><span class="event-card__price">' + formattaPrezzo(e.quotaEvento) + "</span></span>" : "<span></span>";
+  if (e.luogo) meta.push('<span class="event-card__meta-luogo">📍 ' + esc(e.luogo) + "</span>");
+  if (e.notaEvento) meta.push("<span>📝 " + esc(e.notaEvento) + "</span>");
+  const prezzo = e.quotaEvento
+    ? '<span class="event-card__price-block"><span class="event-card__price">' + formattaPrezzo(e.quotaEvento) + "</span>" +
+      '<span class="event-card__price-socio">Prezzo socio</span></span>'
+    : "<span></span>";
+  const esaurito = e.postiDisponibili != null && e.postiDisponibili <= 0;
   const azione = annunciato
     ? '<a href="interesse-evento.html?id=' + e.id + '" class="btn btn--primary btn--small">Informami quando parte →</a>'
-    : (e.stato === "aperto"
+    : (e.stato === "aperto" && !esaurito
       ? '<a href="iscrizione-evento.html?id=' + e.id + '" class="btn btn--primary btn--small">Prenota →</a>'
-      : '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">Iscrizioni chiuse</span>');
+      : '<span class="btn btn--outline btn--small" aria-disabled="true" style="opacity:.6; pointer-events:none;">' +
+        (e.stato !== "aperto" ? "Iscrizioni chiuse" : "Posti esauriti") + "</span>");
   return '<article class="event-card"' + (e.categoria ? ' data-category="' + esc(e.categoria) + '"' : "") + ">" +
     '<div class="event-card__media">' + media +
     (e.categoria ? '<span class="event-card__badge">' + esc(CATEGORIE[e.categoria] || e.categoria) + "</span>" : "") +
     (annunciato ? '<span class="event-card__badge event-card__badge--stato">Prossimamente</span>' : "") + "</div>" +
     '<div class="event-card__body">' +
+    (e.categoria ? '<span class="event-card__eyebrow">' + esc(CATEGORIE[e.categoria] || e.categoria) + "</span>" : "") +
     '<h3 class="event-card__title">' + esc(e.titolo) + "</h3>" +
-    (e.sottotitolo ? '<p class="event-card__subtitle">' + esc(e.sottotitolo) + "</p>" : "") +
+    '<p class="event-card__subtitle">' + esc(e.sottotitolo || "") + "</p>" +
     '<p class="event-card__meta">' + meta.join("") + "</p>" +
-    '<div class="event-card__footer">' + prezzo + azione + "</div>" +
-    '<div class="event-card__desc">' + pulisciHtml(e.descrizione) +
-    (pagina ? '<a href="' + pagina + '" class="event-card__details-link">Dettagli →</a>' : "") + "</div>" +
+    '<div class="event-card__footer">' + prezzo + '<div class="event-card__actions">' + azione + "</div></div>" +
+    notaIscrizione(e.quotaEvento, quotaTessera) +
+    (e.descrizione ? '<div class="event-card__desc">' + pulisciHtml(e.descrizione) + "</div>" : "") +
+    (pagina ? '<a href="' + pagina + '" class="event-card__details-link">Dettagli →</a>' : "") +
     "</div></article>";
 }
 
@@ -275,12 +299,12 @@ function ordina(eventi, decrescente) {
 // Riempie un contenitore data-events-mount con le schede statiche e lo
 // marca data-prerender: events.js lo sostituisce con i dati vivi, e se il
 // backend non risponde lascia queste al posto del messaggio di riserva.
-function riempiMount(html, selettoreStato, eventi, mappaPagine, max) {
+function riempiMount(html, selettoreStato, eventi, mappaPagine, quotaTessera, max) {
   const re = new RegExp('(<div class="[^"]*" data-events-mount data-status="' + selettoreStato + '"[^>]*?)( hidden)?(></div>)');
   const trovato = re.exec(html);
   if (!trovato) throw new Error("Contenitore eventi non trovato: " + selettoreStato);
   if (!eventi.length) return html;
-  const schede = (max ? eventi.slice(0, max) : eventi).map((e) => schedaStatica(e, mappaPagine)).join("");
+  const schede = (max ? eventi.slice(0, max) : eventi).map((e) => schedaStatica(e, mappaPagine, quotaTessera)).join("");
   return html.replace(re, "$1 data-prerender>" + schede + "</div>");
 }
 
@@ -338,6 +362,8 @@ function paginaEvento(modello, e, impostazioni) {
   html = sostituisci(html, '<a id="evento-prenota" href="#" class="btn btn--primary">Prenota →</a>',
     prenota[0] ? '<a id="evento-prenota" href="' + prenota[0] + '" class="btn btn--primary">' + prenota[1] + "</a>"
       : '<a id="evento-prenota" class="btn btn--outline" aria-disabled="true" style="pointer-events:none; opacity:.6;">' + prenota[1] + "</a>", "prenota");
+  html = sostituisci(html, '<div id="evento-nota-iscrizione"></div>',
+    '<div id="evento-nota-iscrizione">' + notaIscrizione(e.quotaEvento, impostazioni && impostazioni.quotaIscrizioneSoci) + "</div>", "nota-iscrizione");
   html = sostituisci(html, '<div class="event-detail__desc" id="evento-descrizione"></div>',
     '<div class="event-detail__desc" id="evento-descrizione">' + pulisciHtml(e.testoDettaglio || e.descrizione) + "</div>", "descrizione");
   return html;
@@ -388,6 +414,7 @@ async function principale() {
   const conPagina = pubblici.filter((e) => e.dettagliAttivi !== false);
   const mappaPagine = Object.fromEntries(conPagina.map((e) => [e.id, urlEvento(e)]));
   const scritti = {};
+  const quota = (impostazioni && impostazioni.quotaIscrizioneSoci) || null;
 
   // Pagine evento
   // A capo normalizzati: i segnaposto usano "\n" (su Windows la copia di
@@ -416,8 +443,8 @@ async function principale() {
     html = sostituisci(html, '  <link rel="icon"', testa + '  <link rel="icon"', nome + " testa");
     if (nome === "eventi.html") {
       const prossimi = ordina(pubblici.filter((e) => e.stato === "aperto")).concat(pubblici.filter((e) => e.stato === "annunciato"));
-      html = riempiMount(html, "aperto,annunciato", prossimi, mappaPagine);
-      html = riempiMount(html, "chiuso", ordina(pubblici.filter((e) => e.stato === "chiuso"), true), mappaPagine);
+      html = riempiMount(html, "aperto,annunciato", prossimi, mappaPagine, quota);
+      html = riempiMount(html, "chiuso", ordina(pubblici.filter((e) => e.stato === "chiuso"), true), mappaPagine, quota);
       if (prossimi.length) {
         html = sostituisci(html, '<div class="coming-soon" id="eventi-coming-soon">', '<div class="coming-soon" id="eventi-coming-soon" hidden>', "coming-soon");
       }
@@ -427,7 +454,7 @@ async function principale() {
     }
     if (nome === "index.html") {
       const aperti = ordina(pubblici.filter((e) => e.stato === "aperto"));
-      html = riempiMount(html, "aperto", aperti, mappaPagine, 3);
+      html = riempiMount(html, "aperto", aperti, mappaPagine, quota, 3);
       if (aperti.length) {
         html = html.replace('id="home-coming-soon"', 'id="home-coming-soon" hidden');
       }
