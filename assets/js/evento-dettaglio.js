@@ -219,6 +219,7 @@
         var mediaIconEl = document.getElementById("evento-media-icon");
         if (event.immagineUrl) {
           immagineEl.src = event.immagineUrl;
+          immagineEl.alt = event.titolo;
           immagineEl.hidden = false;
         } else {
           mediaIconEl.textContent = categoryIcon(event.categoria);

@@ -257,7 +257,7 @@
     }
 
     var mediaHtml = pacchetto.immagineUrl
-      ? '<img src="' + escapeHtml(pacchetto.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
+      ? '<img src="' + escapeHtml(pacchetto.immagineUrl) + '" alt="' + escapeHtml(pacchetto.titolo) + '" class="event-card__image" loading="lazy">'
       : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(pacchetto.categoria) + "</span>";
 
     var annunciato = pacchetto.stato === "annunciato";
@@ -397,7 +397,7 @@
     // Se manca immagineUrl, un riquadro con l'icona della categoria al
     // posto della foto, così la card resta ben composta comunque.
     var mediaHtml = event.immagineUrl
-      ? '<img src="' + escapeHtml(event.immagineUrl) + '" alt="" class="event-card__image" loading="lazy">'
+      ? '<img src="' + escapeHtml(event.immagineUrl) + '" alt="' + escapeHtml(event.titolo) + '" class="event-card__image" loading="lazy">'
       : '<span class="event-card__media-icon" aria-hidden="true">' + categoryIcon(event.categoria) + "</span>";
 
     // "annunciato": pubblicato in anteprima, niente iscrizioni ancora aperte
