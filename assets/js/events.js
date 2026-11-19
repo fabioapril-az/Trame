@@ -703,7 +703,7 @@
     });
     // Schede già scritte nell'HTML dal generatore (data-prerender): niente
     // "Caricamento…", si vedono subito e vengono sostituite dai dati vivi.
-    var preRenderizzato = mounts.some(function (m) { return m.hasAttribute("data-prerender"); });
+    var preRenderizzato = Array.prototype.some.call(mounts, function (m) { return m.hasAttribute("data-prerender"); });
     var loadingEl = null;
     if (comingSoonEls.length && !preRenderizzato) {
       loadingEl = document.createElement("p");
