@@ -8,6 +8,14 @@
     {
       "route": "/api/*",
       "statusCode": 404
+    },
+    {
+      "route": "/docs/*",
+      "statusCode": 404
+    },
+    {
+      "route": "/scripts/*",
+      "statusCode": 404
     }
   ]
 }
