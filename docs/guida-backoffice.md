@@ -435,7 +435,7 @@ Facebook e Instagram non dicono da soli se un visitatore arriva da un'inserzione
   `utm_source={{site_source_name}}&utm_medium=paid&utm_campaign={{campaign.name}}`
 
   Meta sostituisce da solo il canale e il nome della campagna. Nella dashboard compariranno come "Facebook Ads" o "Instagram Ads", con il nome della campagna.
-- **Altri canali** (newsletter, volantini con QR code, link in bio): aggiungi al link dell'evento qualcosa come `?utm_source=newsletter&utm_medium=email&utm_campaign=dicembre`. Compariranno in "Altre campagne". Se il link ha già un `?`, usa `&` al posto del `?`.
+- **Post e storie Instagram/Facebook, WhatsApp, newsletter, QR code:** ogni canale ha i suoi parametri da aggiungere in fondo al link dell'evento. Tabella completa, esempi e regole per i nomi delle campagne in **[docs/guida-link-social.md](guida-link-social.md)** (anche in PDF, nella stessa cartella).
 
 ### Interruttore ed esclusione del tuo dispositivo
 
